@@ -2,6 +2,10 @@
 
 [![CI](https://github.com/quioteframework/quiote-mcp-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/quioteframework/quiote-mcp-assistant/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/quioteframework/quiote-mcp-assistant/graph/badge.svg)](https://codecov.io/gh/quioteframework/quiote-mcp-assistant)
+[![Latest release](https://img.shields.io/github/v/release/quioteframework/quiote-mcp-assistant)](https://github.com/quioteframework/quiote-mcp-assistant/releases)
+[![PHP](https://img.shields.io/badge/php-%3E%3D8.5-777bb4)](composer.json)
+[![PHPStan level 9](https://img.shields.io/badge/phpstan-level%209-brightgreen)](phpstan.neon)
+[![License: MIT](https://img.shields.io/github/license/quioteframework/quiote-mcp-assistant)](LICENSE)
 
 An MCP server that gives an AI agent (Claude Code, Cursor, GitHub Copilot, …) authoritative
 knowledge of the [Quiote](https://github.com/quioteframework/quiote) PHP framework, plus
