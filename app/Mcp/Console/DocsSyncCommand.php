@@ -33,6 +33,15 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'mcp:docs:sync', description: 'Sync the Quiote docs site into this app as bundled MCP resources')]
 final class DocsSyncCommand extends Command
 {
+    /**
+     * Top-level source directories to skip entirely -- sibling
+     * quioteframework projects with their own dedicated MCP server (and
+     * their own doc-sync) that happen to share this same Starlight site.
+     *
+     * @var list<string>
+     */
+    private const EXCLUDED_TOP_LEVEL_DIRS = ['propulsion'];
+
     protected function configure(): void
     {
         $this->addOption(
@@ -68,7 +77,13 @@ final class DocsSyncCommand extends Command
 
         /** @var list<string> $files */
         $files = [];
-        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($real, \FilesystemIterator::SKIP_DOTS));
+        $dirIterator = new \RecursiveCallbackFilterIterator(
+            new \RecursiveDirectoryIterator($real, \FilesystemIterator::SKIP_DOTS),
+            static fn (\SplFileInfo $file): bool => !$file->isDir()
+                || !in_array(strtolower($file->getFilename()), self::EXCLUDED_TOP_LEVEL_DIRS, true)
+                || dirname($file->getPathname()) !== $real,
+        );
+        $it = new \RecursiveIteratorIterator($dirIterator);
         foreach ($it as $file) {
             /** @var \SplFileInfo $file */
             if ($file->isFile() && in_array(strtolower($file->getExtension()), ['md', 'mdx'], true)) {
