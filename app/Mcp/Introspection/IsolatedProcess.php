@@ -66,7 +66,10 @@ final class IsolatedProcess
     public static function run(array $command, float $timeoutSeconds = self::DEFAULT_TIMEOUT_SECONDS): array
     {
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-        $process = proc_open($command, $descriptors, $pipes);
+        // Failure here is already anticipated and handled cleanly below -- @
+        // suppresses only the redundant native PHP warning for it (same
+        // reasoning as ScaffoldWriter's mkdir()/file_put_contents() calls).
+        $process = @proc_open($command, $descriptors, $pipes);
         if (!is_resource($process)) {
             return ['stdout' => '', 'stderr' => 'Could not launch process.', 'exitCode' => -1, 'timedOut' => false];
         }

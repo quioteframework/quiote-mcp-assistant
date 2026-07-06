@@ -57,4 +57,62 @@ final class DescribeActionTest extends TestCase
         $this->expectException(\RuntimeException::class);
         DescribeAction::run('web', 'NoSuchModule', 'Contact');
     }
+
+    /**
+     * `safeCall()`/`sanitizeString()` are private, and no real Action ever
+     * exercises their defensive branches (a bare Action always has all four
+     * getters, and none of them throw or return a non-scalar) -- reflection
+     * is the only way to reach an untrusted target app's getter genuinely
+     * missing, throwing, or returning something unstringifiable.
+     */
+    #[Test]
+    public function safeCallReturnsTheDefaultWhenTheMethodDoesNotExist(): void
+    {
+        $result = $this->invokeSafeCall(new class {}, 'noSuchMethod', 'the-default');
+
+        self::assertSame('the-default', $result);
+    }
+
+    #[Test]
+    public function safeCallReturnsTheDefaultWhenTheMethodThrows(): void
+    {
+        $thrower = new class {
+            public function boom(): never
+            {
+                throw new \RuntimeException('an untrusted app method blew up');
+            }
+        };
+
+        $result = $this->invokeSafeCall($thrower, 'boom', 'the-default');
+
+        self::assertSame('the-default', $result);
+    }
+
+    #[Test]
+    public function sanitizeStringStripsControlCharacters(): void
+    {
+        $result = $this->invokeSanitizeString("hello\x00\x1Fworld");
+
+        self::assertSame('helloworld', $result);
+    }
+
+    #[Test]
+    public function sanitizeStringReturnsNullForANonScalarValue(): void
+    {
+        self::assertNull($this->invokeSanitizeString(['not', 'a', 'scalar']));
+    }
+
+    private function invokeSafeCall(object $action, string $method, mixed $default): mixed
+    {
+        $ref = new \ReflectionMethod(DescribeAction::class, 'safeCall');
+        return $ref->invoke(null, $action, $method, $default);
+    }
+
+    private function invokeSanitizeString(mixed $value): ?string
+    {
+        $ref = new \ReflectionMethod(DescribeAction::class, 'sanitizeString');
+        $result = $ref->invoke(null, $value);
+
+        return is_string($result) ? $result : null;
+    }
 }

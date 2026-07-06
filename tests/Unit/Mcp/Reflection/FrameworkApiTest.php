@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Tests\Unit\Mcp\Reflection;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use QuioteMcpAssistant\Mcp\Reflection\FrameworkApi;
@@ -161,5 +162,62 @@ final class FrameworkApiTest extends TestCase
         self::assertSame('getDefaultViewName', $description['name']);
         self::assertSame([], $description['parameters']);
         self::assertSame([], $description['attributes']);
+    }
+
+    #[Test]
+    public function describeMethodReportsANullableParameterTypeAndDefault(): void
+    {
+        $ref = new \ReflectionMethod('Quiote\Action\Action', 'isCacheable');
+        $description = $this->api->describeMethod($ref);
+
+        $param = $description['parameters'][0];
+        self::assertSame('?string', $param['type']);
+        self::assertTrue($param['nullable']);
+        self::assertTrue($param['hasDefault']);
+    }
+
+    #[Test]
+    public function describeMethodReportsAttributesWithTheirArguments(): void
+    {
+        $ref = new \ReflectionMethod('Quiote\Action\Action', 'getContainer');
+        $description = $this->api->describeMethod($ref);
+
+        self::assertSame('Deprecated', $description['attributes'][0]['name']);
+        self::assertArrayHasKey('message', $description['attributes'][0]['arguments']);
+    }
+
+    #[Test]
+    public function describeClassReportsATypedReadonlyProperty(): void
+    {
+        $description = $this->api->describeClass('Quiote\Event\Lifecycle\ActionAfterEvent');
+
+        $property = $description['properties'][0];
+        self::assertSame('descriptor', $property['name']);
+        self::assertSame('Quiote\Execution\ActionDescriptor', $property['type']);
+        self::assertTrue($property['readonly']);
+    }
+
+    #[Test]
+    public function describeClassReportsClassLevelAttributes(): void
+    {
+        $description = $this->api->describeClass('Quiote\Config\ConfigValueHolder');
+
+        self::assertSame('AllowDynamicProperties', $description['attributes'][0]['name']);
+    }
+
+    /** @return iterable<string, array{0: string, 1: string}> */
+    public static function kindsProvider(): iterable
+    {
+        yield 'interface' => ['Quiote\Cache\CacheInterface', 'interface'];
+        yield 'trait' => ['Quiote\Action\SlotCacheableTrait', 'trait'];
+        yield 'enum' => ['Quiote\Execution\SecurityDecision', 'enum'];
+        yield 'class' => ['Quiote\Action\Action', 'class'];
+    }
+
+    #[Test]
+    #[DataProvider('kindsProvider')]
+    public function describeClassReportsTheRightKindForEveryClassLikeShape(string $fqcn, string $expectedKind): void
+    {
+        self::assertSame($expectedKind, $this->api->describeClass($fqcn)['kind']);
     }
 }

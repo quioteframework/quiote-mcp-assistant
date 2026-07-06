@@ -20,6 +20,11 @@
             <directory>app/cache</directory>
             <directory>app/Mcp/Resources/docs</directory>
             <directory>app/pub</directory>
+            <!-- Scaffold-generated placeholder Actions/Views (returns 'Success',
+                 throws a framework exception) that exist only so this app's own
+                 app/ has a real, introspectable website to self-target against,
+                 not product logic worth measuring coverage on. -->
+            <directory>app/Modules</directory>
         </exclude>
     </source>
     <coverage>
