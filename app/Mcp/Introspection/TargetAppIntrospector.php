@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection;
 
-use QuioteMcpAssistant\Mcp\Support\Cfg;
+use Quiote\Config\Config;
 
 /**
  * Runs `probe.php` as an isolated subprocess (via {@see IsolatedProcess})
@@ -19,7 +19,7 @@ final class TargetAppIntrospector
      */
     public function run(string $capability, array $args = []): array
     {
-        $appDir = trim(Cfg::string('assistant.target_app_dir'));
+        $appDir = trim(Config::getNullableString('assistant.target_app_dir') ?? '');
         if ($appDir === '') {
             return ['error' => 'No target app configured. Launch bin/quiote-assistant with --target-app-dir=/path/to/app to enable project-aware tools.'];
         }

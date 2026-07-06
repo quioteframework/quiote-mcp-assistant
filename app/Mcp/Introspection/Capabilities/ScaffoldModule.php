@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
-use QuioteMcpAssistant\Mcp\Support\Cfg;
+use Quiote\Config\Config;
 
 /**
  * `scaffold_module(module)` -- a new module skeleton: one `Index` action
@@ -17,8 +17,8 @@ final class ScaffoldModule
     {
         ScaffoldTemplates::assertValidName($module, 'module');
 
-        $namespacePrefix = trim(Cfg::string('core.namespace_prefix', 'App'), '\\');
-        $moduleDir = rtrim(Cfg::string('core.module_dir'), '/');
+        $namespacePrefix = trim(Config::getString('core.namespace_prefix', 'App'), '\\');
+        $moduleDir = rtrim(Config::getString('core.module_dir'), '/');
 
         $files = [
             [

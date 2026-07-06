@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
+use Quiote\Config\Config;
 use Quiote\Config\OutputTypeConfigHandler;
 use Quiote\Config\XmlConfigParser;
-use QuioteMcpAssistant\Mcp\Support\Cfg;
 
 /**
  * Read-only helper for `scaffold_action`'s `formats` support: which of the
@@ -26,7 +26,7 @@ final class ScaffoldOutputTypes
     /** @return list<string> every output type name already declared, or [] if the config file doesn't exist/parse */
     public static function declared(): array
     {
-        $configDir = rtrim(Cfg::string('core.config_dir'), '/');
+        $configDir = rtrim(Config::getString('core.config_dir'), '/');
         $path = "{$configDir}/output_types.xml";
         if (!is_file($path)) {
             return [];
@@ -38,10 +38,10 @@ final class ScaffoldOutputTypes
             // needs two hops through the same stylesheet to reach the 1.1
             // shape OutputTypeConfigHandler expects -- config_handlers.xml
             // lists this same transformation twice for exactly that reason.
-            $outputTypesXsl = Cfg::string('core.quiote_dir') . '/Config/xsl/output_types.xsl';
+            $outputTypesXsl = Config::getString('core.quiote_dir') . '/Config/xsl/output_types.xsl';
             $document = XmlConfigParser::run(
                 $path,
-                Cfg::string('core.environment'),
+                Config::getString('core.environment'),
                 '',
                 [
                     XmlConfigParser::STAGE_SINGLE => [$outputTypesXsl, $outputTypesXsl],

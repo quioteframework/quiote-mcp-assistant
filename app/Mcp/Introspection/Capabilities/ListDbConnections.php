@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
+use Quiote\Config\Config;
 use Quiote\Config\DatabaseConfigHandler;
 use Quiote\Config\XmlConfigParser;
-use QuioteMcpAssistant\Mcp\Support\Cfg;
 
 /**
  * `list_db_connections` -- parses the target app's `Config/databases.xml`
@@ -25,7 +25,7 @@ final class ListDbConnections
     /** @return array<string, mixed> */
     public static function run(): array
     {
-        $configDir = Cfg::string('core.config_dir');
+        $configDir = Config::getString('core.config_dir');
         $path = rtrim($configDir, '/') . '/databases.xml';
         if (!is_file($path)) {
             return ['found' => false, 'default' => null, 'databases' => []];
@@ -33,10 +33,10 @@ final class ListDbConnections
 
         $document = XmlConfigParser::run(
             $path,
-            Cfg::string('core.environment'),
+            Config::getString('core.environment'),
             '',
             [
-                XmlConfigParser::STAGE_SINGLE => [Cfg::string('core.quiote_dir') . '/Config/xsl/databases.xsl'],
+                XmlConfigParser::STAGE_SINGLE => [Config::getString('core.quiote_dir') . '/Config/xsl/databases.xsl'],
                 XmlConfigParser::STAGE_COMPILATION => [],
             ],
             [

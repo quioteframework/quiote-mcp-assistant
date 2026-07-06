@@ -28,6 +28,11 @@ use Composer\InstalledVersions;
  * hardcoding any of their names. Reading it (rather than
  * `get_declared_classes()`) also means a symbol can be reported before it's
  * autoloaded, without eagerly loading the entire framework.
+ *
+ * @phpstan-type AttributeDescription array{name: string, arguments: array<int|string, mixed>}
+ * @phpstan-type ParameterDescription array{name: string, type: ?string, nullable: bool, variadic: bool, hasDefault: bool, default: mixed}
+ * @phpstan-type PropertyDescription array{name: string, type: ?string, static: bool, readonly: bool, summary: string}
+ * @phpstan-type MethodDescription array{name: string, static: bool, abstract: bool, returnType: ?string, parameters: list<ParameterDescription>, summary: string, attributes: list<AttributeDescription>}
  */
 final class FrameworkApi
 {
@@ -200,7 +205,19 @@ final class FrameworkApi
      * omitted -- reflecting `Action` shouldn't dump every method from every
      * ancestor).
      *
-     * @return array<string, mixed>
+     * @return array{
+     *     fqcn: string,
+     *     kind: string,
+     *     summary: string,
+     *     abstract: bool,
+     *     final: bool,
+     *     parent: ?string,
+     *     interfaces: list<string>,
+     *     attributes: list<AttributeDescription>,
+     *     constructor: MethodDescription|null,
+     *     methods: list<MethodDescription>,
+     *     properties: list<PropertyDescription>,
+     * }
      */
     public function describeClass(string $fqcn): array
     {
@@ -239,7 +256,7 @@ final class FrameworkApi
         ];
     }
 
-    /** @return array<string, mixed> */
+    /** @return MethodDescription */
     public function describeMethod(\ReflectionMethod $method): array
     {
         $params = [];
@@ -258,7 +275,7 @@ final class FrameworkApi
         ];
     }
 
-    /** @return array<string, mixed> */
+    /** @return ParameterDescription */
     private function describeParameter(\ReflectionParameter $param): array
     {
         $default = null;
@@ -281,7 +298,7 @@ final class FrameworkApi
         ];
     }
 
-    /** @return array<string, mixed> */
+    /** @return PropertyDescription */
     private function describeProperty(\ReflectionProperty $property): array
     {
         return [

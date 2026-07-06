@@ -27,7 +27,13 @@ final class ListRoutes
      * "what does the Library module expose" wastes the caller's whole
      * context on routes it's about to discard anyway.
      *
-     * @return array<string, mixed>
+     * @return array{
+     *     context: string,
+     *     module_filter: ?string,
+     *     action_filter: ?string,
+     *     count: int,
+     *     routes: list<array{name: string, path: string, methods: list<string>, defaults: array<string, mixed>, requirements: array<string, mixed>}>,
+     * }
      */
     public static function run(string $contextName, ?string $module = null, ?string $action = null): array
     {
@@ -47,7 +53,7 @@ final class ListRoutes
             $routes[] = [
                 'name' => $name,
                 'path' => $route->getPath(),
-                'methods' => $route->getMethods() ?: ['ANY'],
+                'methods' => array_values($route->getMethods()) ?: ['ANY'],
                 'defaults' => $defaults,
                 'requirements' => $route->getRequirements(),
             ];

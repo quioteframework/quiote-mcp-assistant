@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp;
 
+use Quiote\Config\Config;
 use Quiote\Mcp\McpCatalog;
 use Quiote\Plugin\PluginInterface;
 use Quiote\Plugin\PluginRegistrar;
@@ -11,7 +12,6 @@ use QuioteMcpAssistant\Mcp\Conventions\ConventionCards;
 use QuioteMcpAssistant\Mcp\Prompts\ScaffoldPrompts;
 use QuioteMcpAssistant\Mcp\Recipes\RecipeBook;
 use QuioteMcpAssistant\Mcp\Resources\DocsResource;
-use QuioteMcpAssistant\Mcp\Support\Cfg;
 use QuioteMcpAssistant\Mcp\Tools\DescribeActionTool;
 use QuioteMcpAssistant\Mcp\Tools\DescribeSymbolTool;
 use QuioteMcpAssistant\Mcp\Tools\GetConventionTool;
@@ -242,7 +242,7 @@ final class AssistantPlugin implements PluginInterface
      */
     private function registerProjectTools(): void
     {
-        if (trim(Cfg::string('assistant.target_app_dir')) === '') {
+        if (trim(Config::getNullableString('assistant.target_app_dir') ?? '') === '') {
             return;
         }
 

@@ -9,7 +9,19 @@ use Quiote\Plugin\PluginManager;
 /** `project_info` -- a one-call overview: env, default context, enabled plugins, module list. */
 final class ProjectInfo
 {
-    /** @return array<string, mixed> */
+    /**
+     * @return array{
+     *     _source: string,
+     *     app_name: mixed,
+     *     namespace_prefix: mixed,
+     *     environment: mixed,
+     *     default_context: string,
+     *     use_database: bool,
+     *     use_security: bool,
+     *     plugins: list<string>,
+     *     modules: list<string>,
+     * }
+     */
     public static function run(string $contextName): array
     {
         return [

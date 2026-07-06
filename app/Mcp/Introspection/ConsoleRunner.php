@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection;
 
-use QuioteMcpAssistant\Mcp\Support\Cfg;
+use Quiote\Config\Config;
 
 /**
  * Runs one of `vendor/bin/quiote`'s own whitelisted commands (see
@@ -21,7 +21,7 @@ final class ConsoleRunner
      */
     public function run(string $command, array $args = []): array
     {
-        $appDir = trim(Cfg::string('assistant.target_app_dir'));
+        $appDir = trim(Config::getNullableString('assistant.target_app_dir') ?? '');
         if ($appDir === '') {
             return ['error' => 'No target app configured. Launch bin/quiote-assistant with --target-app-dir=/path/to/app to enable project-aware tools.'];
         }

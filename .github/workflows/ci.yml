@@ -1,0 +1,58 @@
+name: CI
+
+# Runs on every push/PR (unlike release.yml, which only fires on a version
+# tag) so test status + coverage are always current for the README badges.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: pcov
+          # symfony/cache (a transitive dependency) conflicts with the
+          # extension "redis" below 6.1; the runner image's bundled version
+          # is older than that and this app doesn't use Redis at all.
+          # `:redis` (disable prefix) is the correct syntax for a *shared*
+          # extension per setup-php's own docs.
+          extensions: :redis
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon
+
+      - name: Unit + integration tests (with coverage)
+        run: vendor/bin/phpunit
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: build/coverage/clover.xml
+          fail_ci_if_error: true
+
+      - name: Knowledge + project-aware smoke test
+        run: php tools/mcp-smoke-client.php
+
+      - name: HTTP transport smoke test
+        run: php tools/mcp-http-smoke-client.php
+
+      - name: Scaffolding smoke test
+        run: |
+          vendor/bin/quiote new /tmp/ci-scratch-app --no-interaction
+          php tools/mcp-smoke-client-scaffold.php /tmp/ci-scratch-app

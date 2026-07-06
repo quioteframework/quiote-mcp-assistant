@@ -35,7 +35,14 @@ final class ReadConfig
         'plugins',
     ];
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array{
+     *     allowed_keys?: list<string>,
+     *     key?: string,
+     *     error?: string,
+     *     value?: mixed,
+     * }
+     */
     public static function run(string $key): array
     {
         if ($key === '') {

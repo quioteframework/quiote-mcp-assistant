@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
+use Quiote\Config\Config;
 use Quiote\Context;
 use Quiote\Mcp\Compiler\ValidatorSchemaMapper;
 use Quiote\Validator\Compiler\ValidatorCompiler;
 use Quiote\Validator\Compiler\ValidatorSource;
-use QuioteMcpAssistant\Mcp\Support\Cfg;
 
 /**
  * `describe_action("Module.Action")` -- verbs (detected the same way
@@ -26,7 +26,19 @@ final class DescribeAction
 {
     private const VERB_TOKENS = ['read', 'write', 'update', 'remove'];
 
-    /** @return array<string, mixed> */
+    /**
+     * @return array{
+     *     _source: string,
+     *     module: string,
+     *     action: string,
+     *     class: class-string,
+     *     verbs: array<string, array{schema: array<string, mixed>|null}>,
+     *     isSecure: bool,
+     *     credentials: ?string,
+     *     isSimple: bool,
+     *     defaultViewName: ?string,
+     * }
+     */
     public static function run(string $contextName, string $module, string $action): array
     {
         if ($module === '' || $action === '') {
@@ -103,7 +115,7 @@ final class DescribeAction
      */
     private static function schemaFor(string $module, string $action, string $methodToken): ?array
     {
-        $moduleDir = Cfg::string('core.module_dir');
+        $moduleDir = Config::getString('core.module_dir');
         if ($moduleDir === '') {
             return null;
         }

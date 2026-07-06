@@ -1,5 +1,8 @@
 # Quiote Assistant MCP
 
+[![CI](https://github.com/quioteframework/quiote-mcp-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/quioteframework/quiote-mcp-assistant/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/quioteframework/quiote-mcp-assistant/graph/badge.svg)](https://codecov.io/gh/quioteframework/quiote-mcp-assistant)
+
 An MCP server that gives an AI agent (Claude Code, Cursor, GitHub Copilot, …) authoritative
 knowledge of the [Quiote](https://github.com/quioteframework/quiote) PHP framework, plus
 tools to introspect and scaffold code in a real Quiote app. It's built **as a Quiote app**
@@ -203,6 +206,28 @@ Parameterized templates that stitch together the right convention card + recipe:
 | `add-plugin` | Guidance for writing a plugin that contributes via `PluginRegistrar`. |
 | `add-db-connection` | Guidance for declaring a new database connection. |
 | `expose-mcp-tool` | Guidance for exposing an existing `#[Route]` action as an MCP tool. |
+
+## Running tests
+
+```bash
+composer test       # PHPUnit: unit tests (pure logic) + integration tests (self-bootstrapped app)
+composer phpstan     # static analysis, level 9
+```
+
+`tests/Unit/` covers pure logic in isolation (doc search ranking, scaffold code generation --
+every generated file is linted with a real `php -l`, not just string-matched -- the console
+command allowlist, the scaffold-writer's never-overwrite guarantee, framework reflection, and
+the hand-authored convention cards/recipes). `tests/Integration/` bootstraps this app itself
+(the same self-targeting `tools/mcp-smoke-client.php` already relies on) to test the
+introspection capabilities against a real, live `Context` rather than a mock. Both suites
+test failure paths deliberately, not just the happy path -- rejected/malformed input,
+permission failures, unknown symbols, and the security-critical `read_config` allowlist
+refusal are all exercised for real, not just asserted never to happen.
+
+`composer test` requires a coverage driver (PCOV or Xdebug) to also emit a coverage report --
+without one, tests still run, just without the report. Output goes to `build/coverage/`
+(`html/index.html` for a browsable report, `clover.xml` for tooling); a summary also prints
+to the terminal. The release workflow uploads this as a build artifact on every run.
 
 ## Verifying a local build
 

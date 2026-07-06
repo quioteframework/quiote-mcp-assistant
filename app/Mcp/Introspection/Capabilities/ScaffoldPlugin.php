@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
-use QuioteMcpAssistant\Mcp\Support\Cfg;
+use Quiote\Config\Config;
 
 /**
  * `scaffold_plugin(name)` -- a new plugin class only. Never edits the
@@ -19,7 +19,7 @@ final class ScaffoldPlugin
     {
         ScaffoldTemplates::assertValidName($name, 'plugin');
 
-        $namespacePrefix = trim(Cfg::string('core.namespace_prefix', 'App'), '\\');
+        $namespacePrefix = trim(Config::getString('core.namespace_prefix', 'App'), '\\');
         $slug = strtolower((string) preg_replace('/(?<!^)[A-Z]/', '-$0', $name));
 
         $content = <<<PHP
@@ -45,7 +45,7 @@ final class ScaffoldPlugin
 
             PHP;
 
-        $path = rtrim(Cfg::string('core.app_dir'), '/') . "/Plugin/{$name}Plugin.php";
+        $path = rtrim(Config::getString('core.app_dir'), '/') . "/Plugin/{$name}Plugin.php";
 
         $result = ScaffoldWriter::apply($appDir, [['path' => $path, 'content' => $content]], $dryRun);
 

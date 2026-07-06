@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
-use QuioteMcpAssistant\Mcp\Support\Cfg;
+use Quiote\Config\Config;
 
 /**
  * `scaffold_db_connection(name, driver)` -- two outcomes, depending on
@@ -48,7 +48,7 @@ final class ScaffoldDbConnection
             ));
         }
 
-        $configDir = rtrim(Cfg::string('core.config_dir'), '/');
+        $configDir = rtrim(Config::getString('core.config_dir'), '/');
         $path = "{$configDir}/databases.xml";
         $entry = self::entryXml($name, $driver);
 

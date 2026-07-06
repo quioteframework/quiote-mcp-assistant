@@ -42,13 +42,17 @@ final class ScaffoldWriter
                 continue;
             }
 
+            // Both calls' failures are already anticipated and turned into a
+            // clean, structured status below -- @ here suppresses only the
+            // redundant native PHP warning for a failure this code already
+            // checks the return value of and handles explicitly.
             $dir = dirname($path);
-            if (!is_dir($dir) && !mkdir($dir, 0o775, true) && !is_dir($dir)) {
+            if (!is_dir($dir) && !@mkdir($dir, 0o775, true) && !is_dir($dir)) {
                 $results[] = ['path' => $relative, 'status' => 'failed_mkdir'];
                 continue;
             }
 
-            if (file_put_contents($path, $file['content']) === false) {
+            if (@file_put_contents($path, $file['content']) === false) {
                 $results[] = ['path' => $relative, 'status' => 'failed_write'];
                 continue;
             }

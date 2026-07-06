@@ -129,7 +129,6 @@ spl_autoload_register(static function (string $class) use ($assistantAppDir): vo
 use Quiote\Config\Config;
 use Quiote\Context;
 use Quiote\Quiote;
-use QuioteMcpAssistant\Mcp\Support\Cfg;
 
 $env = is_string($options['env'] ?? null) ? $options['env'] : 'development';
 
@@ -144,7 +143,7 @@ try {
 // a `quiote new`-scaffolded app has no composer.json of its own and relies on its front
 // controller to register this mapping; a probe running outside that front controller needs
 // the same fallback to resolve the target app's own action/module classes.
-$namespacePrefix = trim(Cfg::string('core.namespace_prefix', 'App'), '\\');
+$namespacePrefix = trim(Config::getString('core.namespace_prefix', 'App'), '\\');
 spl_autoload_register(static function (string $class) use ($namespacePrefix, $appDir): void {
     $prefix = $namespacePrefix . '\\';
     if (!str_starts_with($class, $prefix)) {
@@ -156,7 +155,7 @@ spl_autoload_register(static function (string $class) use ($namespacePrefix, $ap
     }
 });
 
-$contextName = Cfg::string('core.default_context', 'web');
+$contextName = Config::getString('core.default_context', 'web');
 
 // Only an explicit "0"/"false" turns dry-run off -- missing, "1", or "true"
 // all mean "still a dry run" (dry_run defaults true).

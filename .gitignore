@@ -6,3 +6,5 @@
 /.build/
 /build/
 /internal/
+/.phpunit.cache/
+.phpunit.result.cache
