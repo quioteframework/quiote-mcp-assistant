@@ -1,0 +1,599 @@
+# Databases
+
+> The database layer — PDO plus first-class Eloquent, Doctrine, Cycle, and Propulsion adapters.
+
+Quiote ships one raw driver out of the box — **PDO** — plus first-class adapters that hand back a fully-configured ORM: **Eloquent**, **Doctrine ORM**, **Doctrine DBAL**, **Cycle ORM**, and **Propulsion**. You declare a connection in config, name an adapter, and Quiote instantiates and wires it up; your code just asks for the connection.
+
+The layer is deliberately thin and unopinionated — it manages connection *lifecycle* (open, ping, reconnect, reset across worker requests) and otherwise hands you the real ORM object. No ORM is required; the ones above are opt-in [plugins](/architecture/plugins/).
+
+## Mental model
+
+Each configured connection is a `Quiote\Database\Database` instance — a **lifecycle wrapper**, not the connection itself. You get the underlying object through it:
+
+```php
+$db   = $context->getDatabaseManager()->getDatabase('main'); // the Database wrapper
+$conn = $db->getConnection();                                // the PDO / ORM object
+```
+
+What `getConnection()` returns depends on the adapter:
+
+| Adapter | `getConnection()` returns |
+|---|---|
+| PDO | `PDO` |
+| Eloquent | `Illuminate\Database\Capsule\Manager` |
+| Doctrine ORM | `Doctrine\ORM\EntityManagerInterface` |
+| Doctrine DBAL | `Doctrine\DBAL\Connection` |
+| Cycle ORM | `Cycle\ORM\ORMInterface` |
+| Propulsion | `Propulsion\Connection\PropulsionPDO` |
+
+The wrapper stays in front so the framework can manage the connection across a long-lived worker's requests. Each ORM adapter also exposes **typed accessors** (`getEntityManager()`, `getCapsule()`, `getOrm()`, …) for IDE completion — see each section.
+
+`DatabaseManager` is the DI singleton `databaseManager`; `Context` exposes `getDatabaseManager()` and `getDatabaseConnection($name)`.
+
+## Configuring connections
+
+Connections live in a `databases` config in your app's `Config/` directory. Each `<database>` names an adapter via `class` and passes free-form parameters; `default` selects the one returned by `getDatabase()` with no argument.
+
+#### PHP
+
+```php
+// Config/databases.php
+return [
+    'default'   => 'main',
+    'databases' => [
+        'main' => [
+            'class'      => 'pdo',
+            'parameters' => [
+                'dsn'      => 'pgsql:host=localhost;dbname=app',
+                'username' => 'app',
+                'password' => 'secret',
+            ],
+        ],
+    ],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/databases.yaml
+default: main
+databases:
+  main:
+    class: pdo
+    parameters:
+      dsn: 'pgsql:host=localhost;dbname=app'
+      username: app
+      password: secret
+```
+
+#### XML
+
+```xml
+<!-- Config/databases.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                   xmlns="http://quiote.dev/quiote/config/parts/databases/1.1">
+  <ae:configuration>
+    <databases default="main">
+      <database name="main" class="pdo">
+        <ae:parameter name="dsn">pgsql:host=localhost;dbname=app</ae:parameter>
+        <ae:parameter name="username">app</ae:parameter>
+        <ae:parameter name="password">secret</ae:parameter>
+      </database>
+    </databases>
+  </ae:configuration>
+</ae:configurations>
+```
+
+- Multiple `<database>` children (or array entries) define multiple named connections.
+- Per-environment overrides use `<ae:configuration environment="…">` blocks (see [Configuration](/architecture/configuration/)).
+- In XML, array parameters nest `<ae:parameter>` (named → assoc, unnamed → list).
+
+:::note[Cycle needs PHP config]
+Cycle's parameters include PHP *config objects*, which XML and YAML can't express — configure Cycle in a `databases.php` (see [Cycle ORM](#cycle-orm)). The other adapters work in all three formats.
+:::
+
+## Driver aliases
+
+`class` accepts a fully-qualified adapter class **or** a short alias. Only `pdo` is built in; the ORM aliases are added by their plugins.
+
+| Alias | Adapter class |
+|---|---|
+| `pdo` | `Quiote\Database\PdoDatabase` |
+| `eloquent` | `Quiote\Database\Adapter\Eloquent\EloquentDatabase` |
+| `doctrine` | `Quiote\Database\Adapter\Doctrine\DoctrineDatabase` |
+| `doctrine_dbal` | `Quiote\Database\Adapter\Doctrine\DoctrineDbalDatabase` |
+| `cycle` | `Quiote\Database\Adapter\Cycle\CycleDatabase` |
+| `propulsion` | `Quiote\Database\Adapter\Propulsion\PropulsionDatabase` |
+
+A fully-qualified class name in `class` always works even without the plugin; the plugin just adds the short alias. Aliases must be valid PHP labels — hence `doctrine_dbal`.
+
+## Enabling an ORM adapter
+
+Two steps: install the library (see [Installing the libraries](#installing-the-libraries)), and register the plugin so its alias is available:
+
+#### PHP
+
+```php
+// Config/settings.php
+'plugins' => [
+    \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class,
+    \Quiote\Database\Adapter\Eloquent\EloquentPlugin::class,
+    \Quiote\Database\Adapter\Cycle\CyclePlugin::class,
+    \Quiote\Database\Adapter\Propulsion\PropulsionPlugin::class,
+],
+```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+plugins:
+  - Quiote\Database\Adapter\Doctrine\DoctrinePlugin
+  - Quiote\Database\Adapter\Eloquent\EloquentPlugin
+  - Quiote\Database\Adapter\Cycle\CyclePlugin
+  - Quiote\Database\Adapter\Propulsion\PropulsionPlugin
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml — plugins is a bare key, so prefix="" -->
+<settings prefix="">
+  <setting name="plugins">
+    <ae:parameter>Quiote\Database\Adapter\Doctrine\DoctrinePlugin</ae:parameter>
+    <ae:parameter>Quiote\Database\Adapter\Eloquent\EloquentPlugin</ae:parameter>
+    <ae:parameter>Quiote\Database\Adapter\Cycle\CyclePlugin</ae:parameter>
+    <ae:parameter>Quiote\Database\Adapter\Propulsion\PropulsionPlugin</ae:parameter>
+  </setting>
+</settings>
+```
+
+See [Plugins and extensibility](/architecture/plugins/) for how plugins work.
+
+## PDO
+
+`class="pdo"` → `Quiote\Database\PdoDatabase`. Always available (requires `ext-pdo`).
+
+| Parameter | Default | Description |
+|---|---|---|
+| `dsn` | — | PDO DSN (required) |
+| `username` / `password` | — | Credentials |
+| `options` | `[]` | PDO driver options (constant names as strings allowed) |
+| `attributes` | `[]` | PDO attributes set after connect |
+| `init_queries` | `[]` | Queries executed on connect |
+| `warn_mysql_charset` | `true` | Guards against unsafe `SET NAMES` on MySQL DSNs |
+
+`options`/`attributes` keys or values containing `::` resolve as constants, so you can write `PDO::ATTR_TIMEOUT`. `PDO::ATTR_ERRMODE` defaults to `ERRMODE_EXCEPTION`.
+
+## Eloquent
+
+`class="eloquent"` → `EloquentDatabase`. Requires `illuminate/database` + `EloquentPlugin`. `getConnection()` returns the Capsule Manager.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `connection` | — | Inline config array, or the **name** of another database to borrow a PDO from (layer mode). Omit for flat params. |
+| `driver` | — | `mysql` \| `pgsql` \| `sqlite` \| `sqlsrv` (required unless supplied via `connection`) |
+| `host`, `port` | — | Server address |
+| `database` | — | Database name (`:memory:` for sqlite) |
+| `username`, `password` | — | Credentials |
+| `charset`, `collation`, `prefix` | — | Optional connection options |
+| `connection_name` | `default` | Capsule connection name |
+| `global` | `false` | Call `setAsGlobal()` (needed for the `DB` facade) |
+| `boot_eloquent` | = `global` | Call `bootEloquent()` (needed for `Model` classes) |
+
+#### PHP
+
+```php
+'main' => [
+    'class'      => 'eloquent',
+    'parameters' => [
+        'driver' => 'pgsql', 'host' => 'localhost', 'port' => 5432,
+        'database' => 'app', 'username' => 'app', 'password' => 'secret',
+        'global' => true,
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+main:
+  class: eloquent
+  parameters:
+    driver: pgsql
+    host: localhost
+    port: 5432
+    database: app
+    username: app
+    password: secret
+    global: true
+```
+
+#### XML
+
+```xml
+<database name="main" class="eloquent">
+  <ae:parameter name="driver">pgsql</ae:parameter>
+  <ae:parameter name="host">localhost</ae:parameter>
+  <ae:parameter name="port">5432</ae:parameter>
+  <ae:parameter name="database">app</ae:parameter>
+  <ae:parameter name="username">app</ae:parameter>
+  <ae:parameter name="password">secret</ae:parameter>
+  <ae:parameter name="global">true</ae:parameter>
+</database>
+```
+
+```php
+/** @var Quiote\Database\Adapter\Eloquent\EloquentDatabase $db */
+$db      = $context->getDatabaseManager()->getDatabase('main');
+$capsule = $db->getCapsule();              // Illuminate\Database\Capsule\Manager
+$conn    = $db->getEloquentConnection();   // Illuminate\Database\Connection
+$conn->table('users')->where('active', true)->get();
+```
+
+## Doctrine ORM
+
+`class="doctrine"` → `DoctrineDatabase` (Doctrine ORM 3 / DBAL 4). Requires `doctrine/orm` + `DoctrinePlugin`. `getConnection()` returns the EntityManager.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `connection` | — | Name of a `doctrine_dbal` database to reuse, or an inline DBAL params array. |
+| `url` | — | DBAL DSN URL (alternative to flat params) |
+| `driver` | — | `pdo_mysql` \| `pdo_pgsql` \| `pdo_sqlite` \| … |
+| `host`, `port`, `dbname` | — | Server + database |
+| `user` / `username`, `password` | — | Credentials (`user` preferred) |
+| `path`, `memory`, `charset` | — | sqlite file / `:memory:` / charset |
+| `entity_paths` | `[]` | Directories/files holding mapping metadata |
+| `metadata` | `attribute` | `attribute` \| `xml` |
+| `dev_mode` | = `core.debug` | Proxy auto-generation etc. |
+| `proxy_dir` | system temp | Generated proxy directory |
+| `native_lazy_objects` | `true` (PHP 8.4+) | PHP native lazy objects for proxies |
+
+:::note
+DBAL 4 can't wrap a pre-existing raw PDO, so Doctrine ORM has no layer mode against a plain `pdo` database. To share one connection, point `connection` at a `doctrine_dbal` database.
+:::
+
+#### PHP
+
+```php
+'main' => [
+    'class'      => 'doctrine',
+    'parameters' => [
+        'driver' => 'pdo_pgsql', 'host' => 'localhost', 'dbname' => 'app',
+        'user' => 'app', 'password' => 'secret',
+        'entity_paths' => ['/srv/app/src/Entity'],
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+main:
+  class: doctrine
+  parameters:
+    driver: pdo_pgsql
+    host: localhost
+    dbname: app
+    user: app
+    password: secret
+    entity_paths:
+      - /srv/app/src/Entity
+```
+
+#### XML
+
+```xml
+<database name="main" class="doctrine">
+  <ae:parameter name="driver">pdo_pgsql</ae:parameter>
+  <ae:parameter name="host">localhost</ae:parameter>
+  <ae:parameter name="dbname">app</ae:parameter>
+  <ae:parameter name="user">app</ae:parameter>
+  <ae:parameter name="password">secret</ae:parameter>
+  <ae:parameter name="entity_paths">
+    <ae:parameter>/srv/app/src/Entity</ae:parameter>
+  </ae:parameter>
+</database>
+```
+
+```php
+/** @var Quiote\Database\Adapter\Doctrine\DoctrineDatabase $db */
+$em   = $db->getEntityManager();           // Doctrine\ORM\EntityManagerInterface
+$repo = $db->getRepository(User::class);   // Doctrine\ORM\EntityRepository
+```
+
+## Doctrine DBAL
+
+`class="doctrine_dbal"` → `DoctrineDbalDatabase`. The connection abstraction and query builder **without** the ORM/entity layer. Requires `doctrine/dbal` + `DoctrinePlugin`. `getConnection()` returns the DBAL `Connection`. Parameters are the connection subset of Doctrine ORM (`driver`, `host`, `port`, `dbname`, `user`/`username`, `password`, `path`, `memory`, `charset`, or `url`).
+
+#### PHP
+
+```php
+'reporting' => [
+    'class'      => 'doctrine_dbal',
+    'parameters' => [
+        'driver' => 'pdo_pgsql', 'host' => 'localhost', 'dbname' => 'app',
+        'user' => 'app', 'password' => 'secret',
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+reporting:
+  class: doctrine_dbal
+  parameters:
+    driver: pdo_pgsql
+    host: localhost
+    dbname: app
+    user: app
+    password: secret
+```
+
+#### XML
+
+```xml
+<database name="reporting" class="doctrine_dbal">
+  <ae:parameter name="driver">pdo_pgsql</ae:parameter>
+  <ae:parameter name="host">localhost</ae:parameter>
+  <ae:parameter name="dbname">app</ae:parameter>
+  <ae:parameter name="user">app</ae:parameter>
+  <ae:parameter name="password">secret</ae:parameter>
+</database>
+```
+
+```php
+/** @var Quiote\Database\Adapter\Doctrine\DoctrineDbalDatabase $db */
+$conn = $db->getDbalConnection();          // Doctrine\DBAL\Connection
+$qb   = $db->getQueryBuilder();            // Doctrine\DBAL\Query\QueryBuilder
+```
+
+## Cycle ORM
+
+`class="cycle"` → `CycleDatabase` (Cycle ORM v2 — built for long-running workers). Requires `cycle/orm` + `cycle/database` + `CyclePlugin`. `getConnection()` returns the `ORMInterface`.
+
+Cycle owns its driver configuration via **PHP config objects**, so it's configured in a `databases.php` only — not XML/YAML.
+
+| Parameter | Description |
+|---|---|
+| `cycle` | A native Cycle `DatabaseConfig` array (`default`, `databases`, `connections`). Required. |
+| `schema` | A precompiled Cycle schema array (or `Cycle\ORM\Schema`). |
+| `schema_provider` | A `callable(self): (Schema\|array)` returning the schema. |
+
+Schema **compilation** from annotated entities is an app/console concern — supply a compiled, cached schema here rather than recompiling on every boot.
+
+```php
+<?php
+// Config/databases.php
+use Cycle\Database\Config\PostgresDriverConfig;
+use Cycle\Database\Config\Postgres\TcpConnectionConfig;
+
+return [
+    'default'   => 'main',
+    'databases' => [
+        'main' => [
+            'class'      => 'cycle',
+            'parameters' => [
+                'cycle' => [
+                    'default'     => 'default',
+                    'databases'   => ['default' => ['connection' => 'pg']],
+                    'connections' => [
+                        'pg' => new PostgresDriverConfig(
+                            connection: new TcpConnectionConfig(
+                                database: 'app', host: 'localhost', port: 5432,
+                                user: 'app', password: 'secret',
+                            ),
+                        ),
+                    ],
+                ],
+                'schema' => require __DIR__ . '/cycle-schema.php',
+            ],
+        ],
+    ],
+];
+```
+
+```php
+/** @var Quiote\Database\Adapter\Cycle\CycleDatabase $db */
+$orm  = $db->getOrm();                      // Cycle\ORM\ORMInterface
+$repo = $db->getRepository('user');         // Cycle\ORM\RepositoryInterface
+```
+
+## Propulsion
+
+`class="propulsion"` → `Quiote\Database\Adapter\Propulsion\PropulsionDatabase`. Requires the [`quioteframework/propulsion`](https://github.com/quioteframework/propulsion) runtime + `quioteframework/db-propulsion`'s `PropulsionPlugin`. `getConnection()` returns a `Propulsion\Connection\PropulsionPDO`.
+
+Propulsion is a PHP 8.5, Propel-style ORM: **code-generated**, like Cycle's schema. You author a schema, run `bin/propulsion model:build` to generate Object Model and Query classes ahead of time, autoload them via Composer, and the adapter wires the runtime connection those classes use.
+
+Unlike the other adapters, Propulsion owns its **own connection factory** — there's no inline DSN/credentials and no layer mode. You point it at a Propulsion runtime config file instead:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `config` | — | Path to a Propulsion runtime config file (a PHP file returning an array). **Required.** |
+| `datasource` | resolved from `config` | Which datasource in the config file to use. |
+| `overrides` | `[]` | Key/value pairs applied to the `PropulsionConfiguration` after it loads. |
+| `init_queries` | `[]` | Extra on-connect queries, appended to the datasource's connection settings. |
+| `enable_instance_pooling` | — | Boolean; forces `Propulsion::enableInstancePooling()` / `disableInstancePooling()`. |
+
+#### PHP
+
+```php
+'main' => [
+    'class'      => 'propulsion',
+    'parameters' => [
+        'config'     => __DIR__ . '/propulsion-runtime.php',
+        'datasource' => 'main',
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+main:
+  class: propulsion
+  parameters:
+    config: /path/to/propulsion-runtime.php
+    datasource: main
+```
+
+#### XML
+
+```xml
+<database name="main" class="propulsion">
+  <ae:parameter name="config">/path/to/propulsion-runtime.php</ae:parameter>
+  <ae:parameter name="datasource">main</ae:parameter>
+</database>
+```
+
+The runtime config file is Propulsion's own format — a plain PHP array naming each datasource's adapter and connection:
+
+```php
+<?php
+// propulsion-runtime.php
+return [
+    'datasources' => [
+        'default' => 'main',
+        'main'    => [
+            'adapter'    => 'pgsql',
+            'connection' => [
+                'dsn'      => 'pgsql:host=localhost;dbname=app',
+                'user'     => 'app',
+                'password' => 'secret',
+            ],
+        ],
+    ],
+];
+```
+
+```php
+/** @var Quiote\Database\Adapter\Propulsion\PropulsionDatabase $db */
+$conn = $db->getPropulsionConnection();   // Propulsion\Connection\PropulsionPDO
+$ds   = $db->getDatasource();             // string, e.g. 'main'
+
+// Generated query + model classes (autoloaded via Composer):
+$books = \App\Model\BookQuery::create()->filterByPublished(true)->find();
+```
+
+Propel-style ORMs keep an **instance pool** per model; `reset()` clears it (via `Propulsion::getSession()->reset()`) at the worker request boundary so identity state never leaks between requests, while the connection is kept and recycled like every other adapter. Process-wide state (the service container) and per-request state (the session) are separate — reached via the `Propulsion` facade's own `getServiceContainer()`/`getSession()`, not through the Quiote adapter.
+
+### Generating model classes
+
+Author a schema and run the Propulsion CLI (ships with the `quioteframework/propulsion` runtime, independent of `bin/quiote`) to generate the model:
+
+```bash
+php bin/propulsion model:build schema.xml \
+    --output-dir=src/Model \
+    --target-platform=php84 \
+    --database=pgsql
+```
+
+Treat generated classes like Cycle's compiled schema: commit or cache them, and regenerate deliberately rather than on every boot. PostgreSQL is Propulsion's default/recommended target; MySQL, SQLite, Oracle, and MSSQL are also supported.
+
+## Layer mode vs standalone mode
+
+ORM adapters resolve their connection two ways:
+
+- **Standalone** — the adapter builds its own connection from the parameters you give it.
+- **Layer mode** — set `connection` to the **name** of another configured database; the ORM reuses that connection. Credentials live in one place and the underlying ping/reconnect is shared.
+
+| Adapter | Layer mode |
+|---|---|
+| Eloquent | ✅ borrows the referenced PDO (`driver` still required) |
+| Doctrine DBAL | ✅ via inline params (DBAL 4 can't wrap a raw PDO) |
+| Doctrine ORM | ✅ but only against a `doctrine_dbal` database, not a raw `pdo` |
+| Cycle | Uses its own `cycle` driver config |
+| Propulsion | Uses its own `config` runtime file — no layer mode |
+
+## Using a connection in application code
+
+```php
+// The wrapper (lifecycle):
+$db = $context->getDatabaseManager()->getDatabase('main');
+
+// The underlying PDO / ORM object (generic):
+$conn = $context->getDatabaseConnection('main');
+
+// Typed, per adapter — cast the wrapper, then use its accessor:
+/** @var Quiote\Database\Adapter\Doctrine\DoctrineDatabase $db */
+$em = $db->getEntityManager();
+```
+
+Omit the name to use the default connection. Put query logic in a [service](/architecture/container/) with the connection injected, and keep actions thin.
+
+## Worker mode and connection lifecycle
+
+Quiote runs long-lived workers (FrankenPHP). Connections are opened lazily and **kept across requests**; per-request state is cleared. Each adapter implements:
+
+| Hook | When | Behaviour |
+|---|---|---|
+| `ping()` | connection recycling | Runs a lightweight `SELECT 1`; nulls a dead connection so the next use reconnects. |
+| `reset()` | request boundary | Clears per-request state — Doctrine `EntityManager::clear()`, Cycle `Heap::clean()`, Propel instance pools. |
+| `shutdown()` | teardown | Rolls back any dangling transaction and closes the connection. |
+
+The rule: **expensive, stateless artifacts survive across requests** (connections, compiled metadata/schema); **per-request mutable state is cleared** (identity maps, open transactions). You don't call these — the framework does, via `DatabaseManager::recycleConnections()` and the container's request reset.
+
+## Installing the libraries
+
+Each ORM adapter lives in its own optional [package](/plugins/official-packages/#database-adapters) that carries the underlying library — a bare install pulls none of them. Install the package for the ORM you want (then register its plugin, above):
+
+```bash
+composer require quioteframework/db-eloquent    # Eloquent   (illuminate/database)
+composer require quioteframework/db-doctrine    # Doctrine ORM + DBAL
+composer require quioteframework/db-cycle       # Cycle      (cycle/orm + cycle/database)
+composer require quioteframework/db-propulsion  # Propulsion (quioteframework/propulsion runtime)
+```
+
+You also need the PDO driver for your database compiled into PHP (`pdo_pgsql`, `pdo_mysql`, `pdo_sqlite`, …). The database *servers* aren't needed locally for tests (see below); only the client drivers.
+
+## Integration testing
+
+Real-database integration tests live under `tests/integration/`, tagged `#[Group('integration')]` and excluded from the default `composer test`. They spin up real MySQL and PostgreSQL via Testcontainers and run CRUD round-trips through every adapter:
+
+```bash
+composer test:integration
+```
+
+Requires Docker. Tests skip cleanly when Docker or the relevant PDO driver is unavailable.
+
+## Writing a custom adapter
+
+Extend `Quiote\Database\AbstractOrmDatabase`, build your ORM into `$this->connection` in `connect()`, and expose typed accessors:
+
+```php
+use Quiote\Database\AbstractOrmDatabase;
+
+class MyOrmDatabase extends AbstractOrmDatabase
+{
+    protected function connect()
+    {
+        $this->requireLibrary(\My\Orm::class, 'vendor/my-orm');
+        $pdo = $this->resolveUnderlyingPdo();   // layer mode, if referencing another db
+        $this->connection = new \My\Orm($pdo /* ... */);
+    }
+
+    public function getMyOrm(): \My\Orm { return $this->getConnection(); }
+
+    #[\Override] public function ping(): bool { /* SELECT 1, null on failure */ }
+}
+```
+
+Ship it as a [plugin](/architecture/plugins/) to get a short alias:
+
+```php
+use Quiote\Plugin\{PluginInterface, PluginRegistrar};
+
+final class MyOrmPlugin implements PluginInterface
+{
+    public function name(): string { return 'vendor/my-orm'; }
+
+    public function register(PluginRegistrar $registrar): void
+    {
+        $registrar->databaseDriver('myorm', MyOrmDatabase::class);
+    }
+}
+```
+
+`AbstractOrmDatabase` gives you `resolveUnderlyingConnection()` / `resolveUnderlyingPdo()` (layer/standalone resolution), `requireLibrary()` (a friendly "install this package" guard), and a default worker-safe `shutdown()`.

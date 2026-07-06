@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Builds build/quiote-assistant.phar via Humbug Box.
+#
+# Uses a standalone, downloaded box.phar rather than `composer require --dev
+# humbug/box`: Box's own dependency chain (old symfony/console, an old
+# phpdocumentor/reflection-docblock) conflicts with what this app's runtime
+# dependencies (mcp/sdk et al.) already lock -- forcing that resolution risks
+# silently downgrading a package our own runtime code depends on. Box is
+# explicitly designed to be run standalone against an app's already-installed
+# vendor/ for exactly this reason.
+
+cd "$(dirname "$0")/.."
+
+BOX_VERSION="4.7.0"
+BOX_PHAR=".build/box.phar"
+
+if [ ! -f "$BOX_PHAR" ]; then
+    mkdir -p .build
+    echo "Downloading box.phar ${BOX_VERSION}..."
+    curl -sSL -o "$BOX_PHAR" \
+        "https://github.com/box-project/box/releases/download/${BOX_VERSION}/box.phar"
+    chmod +x "$BOX_PHAR"
+fi
+
+# Pre-warm the config/routing cache so most lookups hit it directly once
+# bundled read-only into the archive (a compiled PHAR's contents can never
+# be written to at runtime). Not a complete substitute for a writable cache
+# dir, though: one entry -- the framework's internal config_handlers.xml
+# fallback -- hashes its own absolute path into its cache filename, which
+# necessarily differs between this build-time path and the phar:// path at
+# runtime, so it always misses regardless of pre-warming. bin/quiote-assistant
+# points core.cache_dir at a real external directory when running from a
+# PHAR specifically so that miss (and any other this step doesn't
+# anticipate) compiles fresh instead of crashing on a read-only write.
+rm -f app/cache/config/*.php app/cache/routing/*.php 2>/dev/null || true
+php vendor/bin/quiote cache:warmup --app-dir="$(pwd)/app" --context=web --no-interaction
+
+mkdir -p build
+php -d phar.readonly=0 "$BOX_PHAR" compile
+
+echo
+echo "Built build/quiote-assistant.phar"

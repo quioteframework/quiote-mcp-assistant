@@ -1,0 +1,90 @@
+name: Release
+
+# Tag-triggered: push a `v*.*.*` tag (e.g. `v0.1.0`) to build, verify, and
+# publish `quiote-assistant.phar` as a GitHub Release asset. Runs the full
+# regression suite first -- PHPStan, the knowledge/project-aware smoke
+# suite, the HTTP transport smoke suite, and the scaffolding smoke suite
+# against a throwaway `quiote new` app -- so a broken build never gets
+# released; the PHAR build/upload steps only run if every one of those
+# passes.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          # git-cliff needs the full commit/tag history to scope the
+          # changelog to "everything since the previous tag" -- the default
+          # shallow checkout only has the tagged commit itself.
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          # symfony/cache (a transitive dependency) conflicts with the
+          # extension "redis" below 6.1; the runner image's bundled version
+          # is older than that and this app doesn't use Redis at all.
+          # `-redis` (removal prefix) doesn't reliably disable an extension
+          # the runner ships by default -- `:redis` (disable prefix) is the
+          # correct syntax for a *shared* extension per setup-php's own docs.
+          extensions: :redis
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon
+
+      - name: Knowledge + project-aware smoke test
+        run: php tools/mcp-smoke-client.php
+
+      - name: HTTP transport smoke test
+        run: php tools/mcp-http-smoke-client.php
+
+      - name: Scaffolding smoke test
+        run: |
+          vendor/bin/quiote new /tmp/release-scratch-app --no-interaction
+          php tools/mcp-smoke-client-scaffold.php /tmp/release-scratch-app
+
+      - name: Build PHAR
+        run: bin/build-phar
+
+      - name: Verify built PHAR over real stdio
+        run: |
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"release-ci","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_docs","arguments":{"query":"routing"}}}' \
+            > /tmp/phar-requests.jsonl
+          php build/quiote-assistant.phar < /tmp/phar-requests.jsonl | tee /tmp/phar-smoke.json
+          grep -q '"count"' /tmp/phar-smoke.json
+
+      - name: Generate changelog
+        # Downloaded standalone rather than via a third-party composite
+        # action, same reasoning as bin/build-phar's box.phar: full control
+        # over the exact invocation instead of trusting an action's
+        # env-var/output contract.
+        run: |
+          GIT_CLIFF_VERSION="2.13.1"
+          curl -sSL -o /tmp/git-cliff.tar.gz \
+            "https://github.com/orhun/git-cliff/releases/download/v${GIT_CLIFF_VERSION}/git-cliff-${GIT_CLIFF_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          tar -xzf /tmp/git-cliff.tar.gz -C /tmp
+          "/tmp/git-cliff-${GIT_CLIFF_VERSION}/git-cliff" --tag "${{ github.ref_name }}" --strip header -o /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/quiote-assistant.phar
+          body_path: /tmp/release-notes.md

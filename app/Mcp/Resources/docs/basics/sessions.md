@@ -1,0 +1,147 @@
+# Sessions and storage
+
+> Session lifecycle, storage backends, cookie flags, and the worker-mode reset that keeps sessions from leaking.
+
+Session state in Quiote goes through a **storage** object, never through `$_SESSION` directly. Your code asks the context for storage and reads and writes namespaced keys; the storage backend decides where those land — PHP's native session, a database table, or nowhere at all. This indirection is what lets the framework swap backends by config and, crucially, reset session state cleanly between requests in [worker mode](/architecture/deployment/).
+
+## Storage backends
+
+Storage is a factory role (`storage`), so you pick the backend by pointing that role at a class. Two ship in the kernel (`Quiote\Storage\SessionStorage`, `Quiote\Storage\NullStorage`); the PDO backend is an opt-in [package](/plugins/official-packages/#quioteframeworksession-pdo):
+
+| Backend | Use it when | Ships in |
+|---|---|---|
+| `Quiote\Storage\SessionStorage` | You want PHP-native sessions (`$_SESSION`) — the usual choice. | the kernel |
+| `Quiote\Storage\Pdo\PdoSessionStorage` | You want sessions in a database table (shared across nodes, survives restarts). | `quioteframework/session-pdo` |
+| `Quiote\Storage\NullStorage` | You want a user object but no sessions at all (stateless APIs). | the kernel |
+
+The scaffolded app uses `NullStorage`. Switch to real sessions by changing the `storage` factory:
+
+#### PHP
+
+```php
+// Config/factories.php — the "storage" role
+'storage' => [
+    'class'  => \Quiote\Storage\SessionStorage::class,
+    'params' => [
+        'session_name'          => 'MyApp',
+        'session_cookie_secure' => true,
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+# Config/factories.yaml
+storage:
+  class: Quiote\Storage\SessionStorage
+  params:
+    session_name: MyApp
+    session_cookie_secure: true
+```
+
+#### XML
+
+```xml
+<!-- Config/factories.xml -->
+<storage class="Quiote\Storage\SessionStorage">
+    <ae:parameter name="session_name">MyApp</ae:parameter>
+    <ae:parameter name="session_cookie_secure">true</ae:parameter>
+</storage>
+```
+
+### Database-backed sessions
+
+`PdoSessionStorage` extends `SessionStorage` and stores session data in a table via PHP's session save-handler mechanism. It ships in the **[`quioteframework/session-pdo`](/plugins/official-packages/#quioteframeworksession-pdo)** package (`composer require quioteframework/session-pdo`). It requires a `db_table` parameter; the rest describe the schema and which [database connection](/basics/databases/) to use:
+
+#### PHP
+
+```php
+'storage' => [
+    'class'  => \Quiote\Storage\Pdo\PdoSessionStorage::class,
+    'params' => [
+        'db_table' => 'session',   // required
+        'database' => 'default',   // connection name, defaults to "default"
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+storage:
+  class: Quiote\Storage\Pdo\PdoSessionStorage
+  params:
+    db_table: session
+    database: default
+```
+
+#### XML
+
+```xml
+<storage class="Quiote\Storage\Pdo\PdoSessionStorage">
+    <ae:parameter name="db_table">session</ae:parameter>
+    <ae:parameter name="database">default</ae:parameter>
+</storage>
+```
+
+Optional column-name parameters (`db_id_col`, `db_data_col`, `db_time_col`, defaulting to `sess_id`/`sess_data`/`sess_time`), `data_as_lob`, and `date_format` let it fit an existing schema.
+
+### Cloud session backends
+
+`session-pdo` also provides a `Quiote\Session\Pdo\PdoSessionPersistence` built on the newer `SessionPersistenceInterface` (which `SessionManager` uses), rather than the native save-handler mechanism above. Three cloud packages implement that same interface to keep sessions in managed object storage — [`quioteframework/session-azure`](/plugins/official-packages/#quioteframeworksession-azure) (Blob or Table), [`quioteframework/session-s3`](/plugins/official-packages/#quioteframeworksession-s3) (S3 and S3-compatible stores like MinIO), and [`quioteframework/session-gcs`](/plugins/official-packages/#quioteframeworksession-gcs) (Google Cloud Storage). Each is a lightweight PSR-18 REST client with no vendor SDK dependency. See [Official packages → Session backends](/plugins/official-packages/#session-backends).
+
+## Cookie flags
+
+`SessionStorage` builds the session cookie from php.ini overlaid with these parameters. The framework's defaults are security-conscious:
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `session_name` | `Quiote` | The cookie name. |
+| `session_cookie_lifetime` | php.ini | Seconds, or a `strtotime`-style string. |
+| `session_cookie_path` | `/` | Forced to `/`. |
+| `session_cookie_domain` | php.ini | — |
+| `session_cookie_secure` | `true` | HTTPS-only by default. |
+| `session_cookie_httponly` | php.ini | Keep on; blocks JS access. |
+| `SameSite` | `Lax` | Set via ini if not otherwise specified. |
+
+Because `Secure` defaults to true, sessions won't be set over plain HTTP unless you explicitly set `session_cookie_secure` to false — intended, so a misconfiguration fails safe rather than leaking a cookie in the clear.
+
+## Reading and writing session data
+
+From an action, go through the storage object. Keys use a directory-style path convention:
+
+```php
+public function executeWrite(WebRequest $rd)
+{
+    $storage = $this->getContext()->getStorage();
+
+    $storage->store('cart/items', $items);      // write
+    $items = $storage->retrieve('cart/items');  // read (null if absent)
+    $storage->remove('cart/items');             // delete, returns old value
+
+    return 'Success';
+}
+```
+
+This is the same API the framework's own `User` classes use to persist authentication state and credentials — see [Authentication and authorization](/advanced/authentication-authorization/).
+
+## Session lifecycle
+
+`SessionMiddleware` drives the session, early in the pipeline (before security). On the way in it starts the session (mirroring the incoming cookie into place first); on the way out it writes and closes the session, then bridges any queued cookies onto the response. You rarely touch this directly — the important method for privilege transitions is regeneration:
+
+```php
+$storage->regenerate();   // new session id, keeps the data — call on login
+```
+
+Regenerating the id on the unauthenticated → authenticated transition defeats session fixation. `SecurityUser::setAuthenticated(true)` does this for you (see the [auth page](/advanced/authentication-authorization/#securityuser)), so you usually get it for free.
+
+## Worker-mode safety
+
+This is the part that matters most under [worker mode](/architecture/deployment/), and it is why storage is an object with a `reset()` rather than raw `$_SESSION` access.
+
+In a long-lived worker process, PHP's session module retains the previous request's `session_id()` and `$_SESSION` after `session_write_close()`. If nothing intervened, the next request's session startup would see a non-empty session id, **skip `session_start()`**, and silently inherit the previous user's session — a cross-user data and authentication leak.
+
+`SessionStorage::reset()` prevents exactly this: after the session is closed it clears `$_SESSION` and the session id so the next request re-reads the incoming cookie from scratch. The order also matters — storage is *persisted* (`shutdown()`) before it is *reset*, so dirty session data is saved before in-memory state is dropped. This happens automatically as part of the per-request [context reset](/architecture/deployment/#per-request-reset); you get it by using storage rather than touching `$_SESSION` yourself.
+
+The rule for your code: **keep session access on the storage object.** Reaching into `$_SESSION` directly sidesteps the reset and reintroduces the leak.

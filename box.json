@@ -1,0 +1,19 @@
+{
+    "main": "bin/quiote-assistant",
+    "output": "build/quiote-assistant.phar",
+    "directories": [
+        "app",
+        "vendor"
+    ],
+    "exclude-composer-files": false,
+    "compression": "GZ",
+    "chmod": "0755",
+    "blacklist": [
+        "vendor/quioteframework/quiote/tests",
+        "vendor/quioteframework/quiote/samples",
+        "vendor/quioteframework/quiote/archeology",
+        "vendor/quioteframework/quiote/docs",
+        "vendor/quioteframework/mcp/tests",
+        "vendor/quioteframework/csrf/tests"
+    ]
+}

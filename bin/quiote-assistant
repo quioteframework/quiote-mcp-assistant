@@ -1,0 +1,158 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Quiote Assistant MCP — stdio entrypoint.
+ *
+ * MCP clients launch a server as a stdio subprocess; this thin wrapper is that
+ * subprocess. It defaults to `mcp:serve` (the knowledge server) but also runs
+ * any other contributed command, e.g. `mcp:docs:sync` to (re)bundle the docs.
+ *
+ * Why a dedicated bin instead of `vendor/bin/quiote mcp:serve`: plugin-
+ * contributed commands (`mcp:serve`, `mcp:docs:sync`) only exist in the console
+ * *after* the app has bootstrapped and plugins have registered — but the stock
+ * `bin/quiote` builds its Application before any bootstrap. So we bootstrap the
+ * app here first, then build the Application (which now sees the contributed
+ * commands). stdout stays clean for the JSON-RPC framing: bootstrap logs to the
+ * app's log dir, not stdout.
+ *
+ * Config:
+ *   { "mcpServers": { "quiote": {
+ *       "command": "php",
+ *       "args": ["/abs/path/to/bin/quiote-assistant", "--target-app-dir=/path/to/your/project"]
+ *   } } }
+ *
+ * `--target-app-dir` (optional) enables the "project-aware" tools against a
+ * Quiote app other than this one -- `Quiote\Config\Config`/`Context`/
+ * `PluginManager` are process-wide
+ * singletons that lock this process's own `core.app_dir` readonly, so the
+ * target app is introspected in an isolated subprocess (see
+ * `app/Mcp/Introspection/probe.php`), never bootstrapped here directly.
+ * Parsed out of argv (and removed from it) *before* Symfony Console ever
+ * sees it, so it doesn't collide with `mcp:serve`'s own option parsing.
+ *
+ * Omitting it falls back to `Quiote\Console\AppDirResolver` (the same
+ * discovery `vendor/bin/quiote --app-dir` itself uses): a `.quiote.json`
+ * marker found by walking up from the launch directory, or the nearest
+ * ancestor with a `Config/settings.*`. Lets a client launch this with the
+ * workspace root as cwd and skip hardcoding an absolute path entirely.
+ */
+
+$repoDir = dirname(__DIR__);
+$appDir = $repoDir . '/app';
+
+// "--app-dir" is a foreseeable mix-up, not a random typo: it's the actual
+// flag name probe.php/ConsoleRunner pass to the *target* app's own
+// vendor/bin/quiote invocations. Silently absorbing it here (Symfony
+// Console doesn't complain about it either) would start a server that
+// looks healthy but is quietly missing every project-aware tool -- fail
+// loudly instead, since that's a much cheaper mistake to fix at launch
+// than to debug after the fact from a client that just doesn't offer the
+// tools it expected.
+foreach ($argv as $arg) {
+    if ($arg === '--app-dir' || str_starts_with($arg, '--app-dir=')) {
+        fwrite(STDERR, "Unrecognized option \"{$arg}\" -- did you mean \"--target-app-dir\"? "
+            . "(--app-dir is not a flag this wrapper accepts.)\n");
+        exit(1);
+    }
+}
+
+$targetAppDir = null;
+$filteredArgv = [$argv[0]];
+for ($i = 1; $i < count($argv); $i++) {
+    $arg = $argv[$i];
+    if (str_starts_with($arg, '--target-app-dir=')) {
+        $targetAppDir = substr($arg, strlen('--target-app-dir='));
+        continue;
+    }
+    if ($arg === '--target-app-dir') {
+        $targetAppDir = $argv[++$i] ?? null;
+        continue;
+    }
+    $filteredArgv[] = $arg;
+}
+$argv = $filteredArgv;
+$_SERVER['argv'] = $filteredArgv;
+
+// The app namespace has no composer.json of its own — register its PSR-4-ish
+// autoloader (mirrors pub/index.php), then pull in Quiote + deps.
+spl_autoload_register(static function (string $class) use ($appDir): void {
+    $prefix = 'QuioteMcpAssistant\\';
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+    $file = $appDir . '/' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+    if (is_file($file)) {
+        require $file;
+    }
+});
+
+$autoload = $repoDir . '/vendor/autoload.php';
+if (!is_file($autoload)) {
+    fwrite(STDERR, "Could not find vendor/autoload.php. Run \"composer install\" first.\n");
+    exit(1);
+}
+require $autoload;
+
+if (!class_exists(\Quiote\Console\Application::class)) {
+    fwrite(STDERR, "quioteframework/quiote is not installed.\n");
+    exit(1);
+}
+
+// No explicit --target-app-dir: fall back to the framework's own
+// Quiote\Console\AppDirResolver (the exact discovery vendor/bin/quiote uses
+// for --app-dir) so an MCP client can just launch this with the workspace
+// root as its cwd and a .quiote.json marker there resolves the real app
+// dir, instead of requiring an absolute path to be hardcoded (and kept in
+// sync by hand) in the client's own config.
+if ($targetAppDir === null && class_exists(\Quiote\Console\AppDirResolver::class)) {
+    $targetAppDir = \Quiote\Console\AppDirResolver::resolve()['appDir'];
+}
+
+if ($targetAppDir !== null) {
+    $realTargetAppDir = realpath($targetAppDir);
+    if ($realTargetAppDir === false || !is_dir($realTargetAppDir)) {
+        fwrite(STDERR, "Target app directory \"{$targetAppDir}\" does not exist.\n");
+        exit(1);
+    }
+    // Not readonly: only this custom key, read by TargetAppIntrospector; the
+    // assistant's own core.app_dir (below) is what gets the readonly lock.
+    \Quiote\Config\Config::set('assistant.target_app_dir', $realTargetAppDir);
+}
+
+// When running from inside a PHAR, core.cache_dir would otherwise derive to
+// a phar:// path (Quiote::bootstrap() sets it to "{core.app_dir}/cache"),
+// which is read-only once compiled into the archive. `bin/build-phar` warms
+// the cache at build time so most lookups hit that bundled cache directly,
+// but at least one -- the framework's own internal default
+// `Quiote/Config/defaults/config_handlers.xml` fallback -- can still miss:
+// its cache filename is a hash of its *absolute path*
+// (Quiote\Config\ConfigCache::checkConfig()), which necessarily differs
+// between build time (a real vendor/ path) and runtime (a phar:// path), so
+// no amount of pre-warming can produce a matching entry for it. Pointing
+// core.cache_dir at a real writable directory means that miss (and any
+// other one this build didn't anticipate) compiles fresh instead of
+// crashing trying to write inside the read-only archive. Reads still come
+// straight from the phar; only compiled cache artifacts land externally.
+$pharPath = \Phar::running(false);
+if ($pharPath !== '') {
+    $cacheDir = getenv('QUIOTE_ASSISTANT_CACHE_DIR') ?: sys_get_temp_dir() . '/quiote-assistant/cache';
+    if (!is_dir($cacheDir)) {
+        mkdir($cacheDir, 0o775, true);
+    }
+    \Quiote\Config\Config::set('core.cache_dir', $cacheDir, true, true);
+}
+
+// Bootstrap the app so plugins register (contributing mcp:serve / mcp:docs:sync,
+// and -- if assistant.target_app_dir is set above -- the project-aware tools)
+// before we build the console Application.
+\Quiote\Config\Config::set('core.app_dir', $appDir, true, true);
+\Quiote\Quiote::bootstrap(getenv('QUIOTE_ENV') ?: 'development');
+
+$application = new \Quiote\Console\Application();
+// Default to the stdio server when no command is given, but still allow others
+// (e.g. `bin/quiote-assistant mcp:docs:sync`).
+$application->setDefaultCommand('mcp:serve');
+exit($application->run());

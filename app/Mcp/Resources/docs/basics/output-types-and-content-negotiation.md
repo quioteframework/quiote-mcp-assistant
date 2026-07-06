@@ -1,0 +1,215 @@
+# Output types and content negotiation
+
+> How Quiote picks an output format and how one view serves several.
+
+An **output type** is a named rendering profile — `html`, `json`, `xml`, and so on. Each output type has its own renderer, layout, and HTTP headers. Content negotiation decides which output type a given request wants; the view then produces output for that type through a matching `execute<OutputType>()` method.
+
+This is how one action and one view serve a browser HTML and an API client JSON, without either the action or the framework special-casing the caller.
+
+## Declaring output types
+
+Output types are declared in the `output_types` config. A minimal HTML type — only `renderers` and `default_renderer` are load-bearing; everything else defaults sensibly:
+
+#### PHP
+
+```php
+// Config/output_types.php
+return [
+    'default' => 'html',
+    'output_types' => [
+        'html' => [
+            'parameters' => [
+                'http_headers' => ['Content-Type' => 'text/html; charset=UTF-8'],
+            ],
+            'default_renderer' => 'php',
+            'renderers' => [
+                'php' => ['class' => \Quiote\Renderer\PhpRenderer::class],
+            ],
+            'default_layout' => 'default',
+            'layouts' => [
+                'default' => [
+                    'layers' => [
+                        'content' => [],
+                    ],
+                ],
+            ],
+        ],
+    ],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/output_types.yaml
+default: html
+output_types:
+  html:
+    parameters:
+      http_headers:
+        Content-Type: 'text/html; charset=UTF-8'
+    default_renderer: php
+    renderers:
+      php:
+        class: Quiote\Renderer\PhpRenderer
+    default_layout: default
+    layouts:
+      default:
+        layers:
+          content: {}
+```
+
+#### XML
+
+```xml
+<!-- Config/output_types.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<configurations xmlns="http://quiote.org/quiote/1.0/config">
+    <configuration>
+        <output_types default="html">
+            <output_type name="html">
+                <renderers default="php">
+                    <renderer name="php" class="Quiote\Renderer\PhpRenderer" />
+                </renderers>
+                <layouts default="default">
+                    <layout name="default">
+                        <layer name="content" />
+                    </layout>
+                </layouts>
+                <parameter name="http_headers">
+                    <parameter name="Content-Type">text/html; charset=UTF-8</parameter>
+                </parameter>
+            </output_type>
+        </output_types>
+    </configuration>
+</configurations>
+```
+
+Each output type declares:
+
+- **Renderers** — which renderer produces the output (`PhpRenderer` for plain PHP templates). See [Templates and rendering](/basics/templates-and-rendering/).
+- **Layouts and layers** — the template structure the renderer fills.
+- **HTTP headers** — most importantly `Content-Type`, applied to the response for this output type.
+
+The default (`html` here) names the output type used when negotiation does not pick one.
+
+:::note[PHP/YAML and XML now default the same way]
+PHP, YAML, and XML output-type config all apply the same defaults: a renderer only needs `class` (`instance` and `parameters` default to none); a layer only needs to exist (`class` defaults to `Quiote\View\FileTemplateLayer`, `parameters`/`slots` to empty, `renderer` to the layout's own); a layout only needs `layers`; an output type with no layout can simply omit `layouts`/`default_layout` in any format. You only need to spell out a key when you want something other than the default. (One small asymmetry: an omitted slot field like `action` or `module` resolves to `null` in XML and to `''` in PHP/YAML — both are falsy, so it rarely matters in practice.) XML output-type config also still uses the legacy `http://quiote.org/quiote/1.0/config` namespace (transformed at load time), rather than the `1.1` envelope used by settings, factories, and databases.
+:::
+
+A JSON output type usually needs no layout — it sets the right `Content-Type` and lets the view return a body string. Omit `layouts`/`default_layout` entirely in any format:
+
+#### PHP
+
+```php
+// Config/output_types.php — the "json" entry under 'output_types'
+'json' => [
+    'parameters' => [
+        'http_headers' => ['Content-Type' => 'application/json; charset=UTF-8'],
+    ],
+    'default_renderer' => 'php',
+    'renderers' => [
+        'php' => ['class' => \Quiote\Renderer\PhpRenderer::class],
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+# Config/output_types.yaml — the "json" entry under output_types
+json:
+  parameters:
+    http_headers:
+      Content-Type: 'application/json; charset=UTF-8'
+  default_renderer: php
+  renderers:
+    php:
+      class: Quiote\Renderer\PhpRenderer
+```
+
+#### XML
+
+```xml
+<!-- Config/output_types.xml — inside <output_types> -->
+<output_type name="json">
+    <renderers default="php">
+        <renderer name="php" class="Quiote\Renderer\PhpRenderer" />
+    </renderers>
+    <parameter name="http_headers">
+        <parameter name="Content-Type">application/json; charset=UTF-8</parameter>
+    </parameter>
+</output_type>
+```
+
+## Content negotiation
+
+`ContentNegotiationMiddleware` runs early (before routing) and negotiates the output type from the request's `Accept` header against the MIME types the app declares (`html`, `json`, `xml`, `pdf`, `csv`, `xlsx`, `docx`, `txt` — `html` wins ties and wildcards). If the request has no `Accept` header, or nothing matches, it falls back to `html`.
+
+There is no URL-extension-based detection (`/report.json` does **not** select `json` on its own) and no `?format=` query parameter — `Accept` is the only signal this middleware reads.
+
+The chosen output type is stored on the request. Because negotiation runs before routing, a route can still override the result by fixing `_output_type` (or the `#[Route(outputType: ...)]` field), which `OutputTypeSyncMiddleware` reconciles.
+
+## Serving multiple output types from one view
+
+The view's method for the *current* output type is the one that runs — `executeHtml()` for `html`, `executeJson()` for `json` — falling back to `execute()` if there is no exact match:
+
+```php
+<?php
+namespace App\Modules\Blog\Views;
+
+use Quiote\Request\WebRequest;
+use Quiote\View\View;
+
+class PostSuccessView extends View
+{
+    public function executeHtml(WebRequest $rd)
+    {
+        $this->loadLayout();
+        $this->setAttribute('pageTitle', 'Post');
+        // returns null → the loaded template layers render
+    }
+
+    public function executeJson(WebRequest $rd)
+    {
+        return json_encode([
+            'post' => $this->getAttribute('post'),
+        ]);
+        // returns a string → that string is the response body
+    }
+}
+```
+
+The two patterns:
+
+- **HTML** — call `loadLayout()`, set presentation attributes, return nothing. The template layers render into the body.
+- **JSON/XML** — build and return the body string directly. No layout needed.
+
+The action does not change. The same `PostAction::executeRead()` sets the same `post` attribute; only the view method that consumes it differs by output type.
+
+## Problem details for JSON errors
+
+For JSON responses, the view base class can emit an [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem document from validation failures via `returnProblemDetailsFromValidationIncidents()`, setting the status and `application/problem+json` content type. This is the same machinery `ValidationMiddleware` uses when a JSON request fails validation — see [Validation](/basics/validation/) — so API error shapes stay consistent whether the failure is caught by the pipeline or produced by your view.
+
+## The response object
+
+Under the hood, views and middlewares write to a `Quiote\Response\WebResponse`, which carries content, status, headers, and cookies. `DispatchMiddleware` bridges it into the final Nyholm PSR-7 response, applying the output type's configured headers and adding `X-Content-Type-Options: nosniff`.
+
+### Status codes
+
+A successful response defaults to **200**. The framework sets a different status *for you* only in specific pipeline cases:
+
+- **400** when validation fails — set by `ValidationMiddleware`, not by your view (see [Validation](/basics/validation/)).
+- **404** for an unmatched route, **500** for an internal failure, and redirects — handled by `DispatchMiddleware`.
+
+For any other status on a **successful** response — `201` after creating a resource, `202`, a custom redirect — you set it yourself on the response. `DispatchMiddleware` reads the status back off the response and carries it through:
+
+```php
+public function executeHtml(WebRequest $rd)
+{
+    $this->getResponse()->setHttpStatusCode(201);
+    // ...
+}
+```
+
+`getResponse()` is available on the view. The same applies to setting a header or cookie explicitly — the framework does not do it for you on the success path.
