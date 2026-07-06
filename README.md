@@ -138,6 +138,57 @@ Use the built `.phar` in place of `bin/quiote-assistant` in any of the client co
 Run `mcp:docs:sync` *before* building — the docs are baked into the archive at build time,
 not regenerated at runtime.
 
+## Run it via Docker
+
+Bundles its own PHP 8.5 + every extension needed, so there's nothing to install locally at
+all — useful if getting a matching local PHP set up (e.g. under WSL) is more trouble than
+it's worth:
+
+```bash
+docker build -t quiote-assistant .
+
+# Knowledge tools only:
+docker run -i --rm quiote-assistant
+
+# Project-aware tools too -- mount the project at a fixed path and point
+# --target-app-dir at that path (not the host path, which doesn't exist
+# inside the container). --user avoids scaffolded files coming out
+# root-owned on the host.
+docker run -i --rm \
+  --user "$(id -u):$(id -g)" \
+  -v /path/to/your/project:/target \
+  quiote-assistant --target-app-dir=/target
+```
+
+Client config is the same shape as everywhere above, just with `docker` as the command:
+
+```jsonc
+{ "mcpServers": {
+    "quiote": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm", "--user", "1000:1000",
+        "-v", "/path/to/your/project:/target",
+        "ghcr.io/quioteframework/quiote-mcp-assistant:latest",
+        "--target-app-dir=/target"
+      ]
+    }
+} }
+```
+
+(Replace `1000:1000` with your actual `uid:gid` — client configs can't run `$(id -u)` for
+you.) Pre-built images are published on tagged releases to
+`ghcr.io/quioteframework/quiote-mcp-assistant`, tagged both `:latest` and `:vX.Y.Z`.
+
+The image only ships `pdo_sqlite` (bundled with the base PHP image) as a PDO driver, not
+`pdo_mysql`/`pdo_pgsql` — none of the project-aware tools open a real database connection
+(`list_db_connections` only parses `databases.xml` for metadata, `run_console`'s whitelist
+never touches the DB, and `Database::connect()` is lazy on first query). Quiote itself
+doesn't stop an app from eagerly connecting somewhere in its own bootstrap, though — it's a
+"do whatever you want" framework, not a walled garden — so if your target app's bootstrap
+path is unusual enough to open a MySQL/Postgres connection eagerly, add the matching
+`docker-php-ext-install` line to the `Dockerfile` yourself.
+
 ## HTTP transport
 
 For a team to share one running instance instead of one subprocess per client, `mcp.transports`

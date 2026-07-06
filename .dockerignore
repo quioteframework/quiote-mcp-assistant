@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+.build
+.phpunit.cache
+build
+internal
+tests
+tools
+vendor
+*.md

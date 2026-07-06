@@ -1,12 +1,13 @@
 name: Release
 
 # Tag-triggered: push a `v*.*.*` tag (e.g. `v0.1.0`) to build, verify, and
-# publish `quiote-assistant.phar` as a GitHub Release asset. Runs the full
+# publish `quiote-assistant.phar` as a GitHub Release asset, plus a Docker
+# image tagged both `:v*.*.*` and `:latest` on GHCR. Runs the full
 # regression suite first -- PHPStan, the knowledge/project-aware smoke
 # suite, the HTTP transport smoke suite, and the scaffolding smoke suite
 # against a throwaway `quiote new` app -- so a broken build never gets
-# released; the PHAR build/upload steps only run if every one of those
-# passes.
+# released; the PHAR/image build+publish steps only run if every one of
+# those passes.
 
 on:
   push:
@@ -15,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
@@ -80,6 +82,22 @@ jobs:
             > /tmp/phar-requests.jsonl
           php build/quiote-assistant.phar < /tmp/phar-requests.jsonl | tee /tmp/phar-smoke.json
           grep -q '"count"' /tmp/phar-smoke.json
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:latest
 
       - name: Generate changelog
         # Downloaded standalone rather than via a third-party composite

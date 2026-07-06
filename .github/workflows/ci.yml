@@ -56,3 +56,26 @@ jobs:
         run: |
           vendor/bin/quiote new /tmp/ci-scratch-app --no-interaction
           php tools/mcp-smoke-client-scaffold.php /tmp/ci-scratch-app
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build image (validation only -- not pushed; see release.yml)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: quiote-assistant:ci
+
+      - name: Smoke test the built image over stdio
+        run: |
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"ci","version":"1.0"}}}' \
+            '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search_docs","arguments":{"query":"routing"}}}' \
+            > /tmp/docker-requests.jsonl
+          docker run -i --rm quiote-assistant:ci < /tmp/docker-requests.jsonl | tee /tmp/docker-smoke.json
+          grep -q '"count"' /tmp/docker-smoke.json
