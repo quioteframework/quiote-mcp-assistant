@@ -31,20 +31,44 @@ The pattern is always the same two steps — install, then enable:
 composer require quioteframework/db-doctrine
 ```
 
-Then register its plugin in the `plugins` config key (a bare, non-`core.` key — see [Settings reference](/architecture/settings-reference/)):
+Then register its plugin in `Config/plugins.php` (or `.xml`/`.yaml`/`.yml`):
+
+#### PHP
 
 ```php
-// Config/settings.php
-'plugins' => [
-    \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class,
-],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Doctrine\DoctrinePlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Doctrine\DoctrinePlugin" />
+    </ae:configuration>
+</ae:configurations>
 ```
 
 `register()` runs once at boot, after your settings load and before contexts are created, and it can only *add* — your `settings.*` and container bindings always win. Two packages skip the `plugins` step: **rate limiting** is a plain library you call from your own code, and the **telemetry dashboard** contributes a standalone console command that's available as soon as the package is installed. [Official packages](/plugins/official-packages/) spells out the exact "enable" step for each one.
 
+Every official package's plugin class already carries the required `#[Quiote\Plugin\Attribute\Plugin]` attribute — see [Plugins and extensibility: Writing a plugin](/architecture/plugins/#writing-a-plugin) for why that attribute exists and what it means for your own plugins.
+
 ### CSRF is the deliberate exception
 
-One package is *not* opt-in: **`quioteframework/csrf`**. It's a required dependency of the kernel and registers itself automatically at boot, so every app is CSRF-protected out of the box without a `plugins` entry. It's a security default, not a packaging convenience — so you turn it *off* consciously (set `core.csrf.enabled => false`, which logs a warning), rather than turning it on. See [Official packages → csrf](/plugins/official-packages/#quioteframeworkcsrf).
+One package is *not* opt-in: **`quioteframework/csrf`**. It's a required dependency of the kernel and registers itself automatically at boot, so every app is CSRF-protected out of the box without a `plugins` entry. It's a security default, not a packaging convenience — so you turn it *off* consciously (set `core.csrf.enabled => false`, which logs a warning), rather than turning it on. See [Official packages: csrf](/plugins/official-packages/#quioteframeworkcsrf).
 
 <Aside type="caution" title="Pre-alpha: installing the packages">
 The `quioteframework/*` packages now live in their own GitHub repositories, but — like the kernel itself — they are **not published to Packagist yet** (it's early days). Until they are, add each one you use as a VCS repository in your app's `composer.json` and require the `dev-main` branch:

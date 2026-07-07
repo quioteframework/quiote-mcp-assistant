@@ -9,6 +9,7 @@ This page documents each middleware in Quiote's default pipeline, **in execution
 Middleware draws configuration from four distinct places — this page is explicit about which applies to each:
 
 - **`core.*` settings** — read via `Config::get('core.…')` from your [`settings` config](/architecture/configuration/) (PHP/YAML/XML). Most tunables live here.
+- **Other namespaced settings** — a few middleware read a non-`core.` prefix instead (`middleware.timing.*`, `middleware.trace.*`, `validation.*`, `routing.*`); same `settings` config, just a different key prefix (see [Configuration: The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute) for the XML form).
 - **Enable/disable** — **any** middleware can be switched off via a `<middleware_config>` block (see [Enabling and disabling](#enabling-and-disabling) below). Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all default to on); a config entry overrides it.
 - **Environment variables** — one middleware (`PayloadParsingMiddleware`) reads an OS env var.
 - **Constructor arguments** — some behaviour is only reachable by constructing the middleware yourself (a custom pipeline), with no config-file switch. Called out where it applies.
@@ -22,8 +23,8 @@ Every middleware defaults to on and can be disabled via `<middleware_config>` (s
 | 1 | ErrorHandlingMiddleware | `core.developer_exceptions` |
 | 2 | TelemetryMiddleware | `telemetry.*` (see [Telemetry](/architecture/telemetry/)) |
 | 3 | SessionMiddleware | — (storage via `factories`) |
-| 4 | TimingMiddleware | — |
-| 5 | TraceMiddleware | — |
+| 4 | TimingMiddleware | `middleware.timing.emit_header` |
+| 5 | TraceMiddleware | `middleware.trace.emit_header`, `middleware.trace.header_name` |
 | 6 | PayloadParsingMiddleware | `QUIOTE_JSON_STRICT` env |
 | 7 | ContentNegotiationMiddleware | — |
 | 8 | RoutingMiddleware | — (uses `routing.http_method_map`) |
@@ -48,7 +49,7 @@ Outermost middleware. Catches any throwable from anything downstream and renders
 
 | Setting | Default | Effect |
 |---|---|---|
-| `core.developer_exceptions` | `false` | Selects the error renderer: `true` → a detailed Whoops developer page; `false` → a safe generic response that leaks no internals. This is the *sole* signal — there is no environment-name sniffing or separate debug env var. |
+| `core.developer_exceptions` | `false` | Selects the error renderer: `true` a detailed Whoops developer page, `false` a safe generic response that leaks no internals. This is the *sole* signal — there is no environment-name sniffing or separate debug env var. |
 
 Turn on the developer error page (never in production):
 
@@ -93,35 +94,69 @@ Starts/persists session storage and guarantees an `ExecutionState` request attri
 
 Records total request time into `ExecutionState` metrics, optionally emitting an `X-Quiote-Timing` response header. A common one to disable in production — see [Enabling and disabling](#enabling-and-disabling).
 
-**The header is off by default.** It's controlled by the constructor flag `emitHeader` (default `false`), and the pipeline builds `new TimingMiddleware(false)` — there is no `Config` key for it. To turn it on, re-register the class with your own factory (a `register()` for a framework FQCN wins over the built-in, keeping its attribute-declared position isn't automatic — pass a `before`/`after` hint to place it):
+| Setting | Default | Effect |
+|---|---|---|
+| `middleware.timing.emit_header` | `false` | Whether to emit the `X-Quiote-Timing` response header. Read straight from `settings.*` when the pipeline builds `TimingMiddleware` — no code, no re-registering. |
+
+#### PHP
 
 ```php
-use Quiote\Middleware\{MiddlewareCatalog, TimingMiddleware, TraceMiddleware};
-
-MiddlewareCatalog::register(
-    TimingMiddleware::class,
-    fn() => new TimingMiddleware(emitHeader: true),
-    before: TraceMiddleware::class,   // keep it near the top, where the default sits
-);
+// Config/settings.php
+'middleware.timing.emit_header' => true,
 ```
 
-The pipeline logs a warning noting the class is both attribute-scannable and `register()`-ed — expected here, since that's exactly how `register()` takes over. See [Writing custom middleware](/advanced/custom-middleware/#register-vs-registerattributed).
+#### YAML
+
+```yaml
+# Config/settings.yaml
+middleware.timing.emit_header: true
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="middleware.timing.">
+  <setting name="emit_header">true</setting>
+</settings>
+```
 
 ## TraceMiddleware
 
-Appends each executed middleware's name to `ExecutionState` metrics (a running trace), optionally emitting an `X-Quiote-Trace` response header. A common one to disable in production.
+Appends each executed middleware's name to `ExecutionState` metrics (a running trace), optionally emitting a trace response header. A common one to disable in production.
 
-**The header is off by default**, exactly like `TimingMiddleware`. Its constructor is `new TraceMiddleware(bool $emitHeader = false, ?string $headerName = 'X-Quiote-Trace')`, and the pipeline builds it with the header off. Re-register to turn it on (and, optionally, rename the header):
+| Setting | Default | Effect |
+|---|---|---|
+| `middleware.trace.emit_header` | `false` | Whether to emit the trace response header. |
+| `middleware.trace.header_name` | `'X-Quiote-Trace'` | Name of the emitted header. |
+
+#### PHP
 
 ```php
-use Quiote\Middleware\{MiddlewareCatalog, TraceMiddleware, PayloadParsingMiddleware};
-
-MiddlewareCatalog::register(
-    TraceMiddleware::class,
-    fn() => new TraceMiddleware(emitHeader: true, headerName: 'X-Trace'),
-    before: PayloadParsingMiddleware::class,
-);
+// Config/settings.php
+'middleware.trace.emit_header'  => true,
+'middleware.trace.header_name'  => 'X-Trace',
 ```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+middleware.trace.emit_header: true
+middleware.trace.header_name: X-Trace
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="middleware.trace.">
+  <setting name="emit_header">true</setting>
+  <setting name="header_name">X-Trace</setting>
+</settings>
+```
+
+Both settings are read directly by `MiddlewarePipeline` when it builds the default stack — no `MiddlewareCatalog::register()` re-registration needed, unlike most other constructor-only behaviour on this page. If you do need to construct either middleware yourself (a custom pipeline, or a different position), the same values are just the `emitHeader`/`headerName` constructor arguments — see [Writing custom middleware](/advanced/custom-middleware/#register-vs-registerattributed).
 
 ## PayloadParsingMiddleware
 
@@ -147,7 +182,7 @@ Determines the negotiated output format (from the `Accept` header) before routin
 
 Matches the request path, attaches `module` / `action` / `output_type` and an `ActionDescriptor`. Runs by default.
 
-**No settings of its own.** It calls `HttpMethodMapper`, which reads `routing.http_method_map` — how you remap HTTP verbs to action methods is documented in [Routing → Customising the HTTP verb mapping](/basics/routing/#customising-the-http-verb-mapping).
+**No settings of its own.** It calls `HttpMethodMapper`, which reads `routing.http_method_map` — how you remap HTTP verbs to action methods is documented in [Routing: Customising the HTTP verb mapping](/basics/routing/#customising-the-http-verb-mapping).
 
 ## OutputTypeSyncMiddleware
 
@@ -161,7 +196,11 @@ Wraps the response to inject CSRF tokens into HTML forms, a `<meta>` tag, and th
 
 ## CsrfValidationMiddleware
 
-Rejects unsafe-method requests with 403 unless a valid token is present. Runs by default; gated by `core.csrf.enabled`. Both CSRF middleware read the same settings:
+Rejects unsafe-method requests with 403 unless a valid token is present. Runs by default; gated by `core.csrf.enabled`.
+
+Two classes of request are exempted from the check automatically, with no per-route opt-out needed, because they fall outside CSRF's threat model (an attacker riding a victim's ambient session cookie): a request carrying an `Authorization` header (not forgeable cross-site the way a cookie is), and — the one worth reading twice — **any request with no session cookie at all**. That second exemption fires on every single request in an app whose `storage` role is `Quiote\Storage\NullStorage`, since no session cookie is ever issued: CSRF validation silently never runs, even though the token field is still injected into forms. See [Authentication & authorization: the NullStorage trap](/advanced/authentication-authorization/#automatic-exemptions--and-the-nullstorage-trap).
+
+Both CSRF middleware read the same settings:
 
 | Setting | Default | Effect |
 |---|---|---|
@@ -212,7 +251,7 @@ core.csrf.safe_methods: [GET, HEAD, OPTIONS, TRACE]
 </settings>
 ```
 
-The pipeline comment "gated at runtime by `core.csrf.enabled`" is documentation only — both middleware are always constructed and check `CsrfManager::isEnabled()` themselves. Per-route opt-out uses an `_csrf => false` route default. See [Authentication & authorization → CSRF](/advanced/authentication-authorization/#csrf-protection).
+The pipeline comment "gated at runtime by `core.csrf.enabled`" is documentation only — both middleware are always constructed and check `CsrfManager::isEnabled()` themselves. Per-route opt-out uses an `_csrf => false` route default. See [Authentication & authorization: CSRF](/advanced/authentication-authorization/#csrf-protection).
 
 ## SecurityMiddleware
 
@@ -233,7 +272,7 @@ Runs the action's validators and records a pass/fail decision; renders the error
 | `core.expose_validation_errors_header` | `false` | If `true`, attaches a base64-encoded JSON of validator errors as `X-Quiote-Validation-Errors` on a 400. Off by default — it leaks internal field/validator structure; use only behind a trusted dev front end. |
 | `validation.reject_unknown_parameters` | `'throw'` | Compile-time (not per-request) handling of a validator parameter not in the validator's accepted list: `'throw'` aborts the compile with a "did you mean" hint, `'warn'` logs and records a diagnostic then continues, `'off'` skips the check. |
 
-Note `validation.reject_unknown_parameters` lives under the `validation.` prefix, not `core.` — in XML that means a second `<settings prefix="validation.">` wrapper (see [Configuration → The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute)):
+Note `validation.reject_unknown_parameters` lives under the `validation.` prefix, not `core.` — in XML that means a second `<settings prefix="validation.">` wrapper (see [Configuration: The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute)):
 
 #### PHP
 
@@ -265,7 +304,7 @@ validation.reject_unknown_parameters: warn
 
 ## SlotMiddleware
 
-Establishes a slot stack so a view can render sub-actions (slots). Runs by default. **No configuration.** See [Templates and rendering → Slots](/basics/templates-and-rendering/#slots-embedding-one-action-in-another).
+Establishes a slot stack so a view can render sub-actions (slots). Runs by default. **No configuration.** See [Templates and rendering: Slots](/basics/templates-and-rendering/#slots-embedding-one-action-in-another).
 
 ## DispatchMiddleware
 
@@ -329,7 +368,7 @@ Measures execution time and (for legacy-adapter responses) can append an `<!-- e
 
 **Any** middleware can be switched off through the middleware map in your `config_handlers` config. A disabled middleware is never constructed. Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all framework middleware default to on); an entry here overrides that default.
 
-The map lives in `config_handlers`: in XML it's a `<middleware_config>` element (alongside `<handlers>`); in PHP/YAML it's the reserved `__middleware_config` key (a map of FQCN → bool). Because `config_handlers` ships as a framework default, an app typically supplies only this addition.
+The map lives in `config_handlers`: in XML it's a `<middleware_config>` element (alongside `<handlers>`); in PHP/YAML it's the reserved `__middleware_config` key (a map of FQCN to bool). Because `config_handlers` ships as a framework default, an app typically supplies only this addition.
 
 #### PHP
 

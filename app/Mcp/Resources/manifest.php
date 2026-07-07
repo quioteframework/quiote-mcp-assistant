@@ -41,6 +41,13 @@ return array (
     'title' => 'Writing a custom validator',
     'description' => 'The Validator base class contract, the validators.xml format, and wiring a custom validator in XML or PHP.',
   ),
+  'quiote-docs://advanced/mcp-server' => 
+  array (
+    'file' => 'advanced/mcp-server.md',
+    'path' => 'advanced/mcp-server',
+    'title' => 'Exposing your app as an MCP server',
+    'description' => 'Turn a Quiote app into a Model Context Protocol server — actions-as-tools, attribute discovery, transports, and auth.',
+  ),
   'quiote-docs://advanced/migrating-from-agavi' => 
   array (
     'file' => 'advanced/migrating-from-agavi.md',
@@ -285,5 +292,12 @@ return array (
     'path' => 'plugins/overview',
     'title' => 'Plugins overview',
     'description' => 'How Quiote splits an unopinionated kernel from opinionated, separately-installable packages — and how you opt into the ones you want.',
+  ),
+  'quiote-docs://plugins/quickstart' => 
+  array (
+    'file' => 'plugins/quickstart.md',
+    'path' => 'plugins/quickstart',
+    'title' => 'Plugins & middleware quickstart',
+    'description' => 'Copy-pasteable steps for the most common plugin and middleware tasks — using a database adapter, the Whoops error page, and writing your own.',
   ),
 );

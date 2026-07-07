@@ -72,7 +72,7 @@ Calling `parent::initialize()` (or simply not overriding it) reads the `<paramet
 
 ### Exposing `Context` getters with `assigns`
 
-An `assigns` block maps a short template variable name to a `Context` getter. `initialize()` camel-cases the config key into a getter name (`request_data` → `getRequestData`) and keeps only the ones that are real, callable `Context` getters; the rest fall through to `moreAssignNames` (renaming `$moreAssigns` keys instead). In `render()`:
+An `assigns` block maps a short template variable name to a `Context` getter. `initialize()` camel-cases the config key into a getter name (`request_data` becomes `getRequestData`) and keeps only the ones that are real, callable `Context` getters; the rest fall through to `moreAssignNames` (renaming `$moreAssigns` keys instead). In `render()`:
 
 ```php
 foreach ($this->assigns as $variable => $getter) {
@@ -80,7 +80,29 @@ foreach ($this->assigns as $variable => $getter) {
 }
 ```
 
+#### PHP
+
+```php
+// Config/output_types.php — inside the renderer's 'parameters'
+'assigns' => [
+    'routing' => 'ro',   // $ro = $context->getRouting()
+    'request' => 'rq',   // $rq = $context->getRequest()
+],
+```
+
+#### YAML
+
+```yaml
+# Config/output_types.yaml — inside the renderer's parameters
+assigns:
+  routing: ro   # $ro = $context->getRouting()
+  request: rq   # $rq = $context->getRequest()
+```
+
+#### XML
+
 ```xml
+<!-- Config/output_types.xml — inside the <renderer> -->
 <parameter name="assigns">
     <parameter name="routing">ro</parameter>   <!-- $ro = $context->getRouting() -->
     <parameter name="request">rq</parameter>   <!-- $rq = $context->getRequest() -->
@@ -98,9 +120,40 @@ If in doubt, skip the marker and accept per-render construction; it's the safe d
 
 ## Wiring it into an output type
 
-Renderer selection is a plain config-driven registry, unrelated to the [plugin system](/architecture/plugins/) — no registrar call. Declare your class per output type in `output_types.xml`:
+Renderer selection is a plain config-driven registry, unrelated to the [plugin system](/architecture/plugins/) — no registrar call. Declare your class per output type in `Config/output_types.{xml,php,yaml,yml}`:
+
+#### PHP
+
+```php
+// Config/output_types.php — inside the "html" output type's array
+'default_renderer' => 'md',
+'renderers' => [
+    'php' => ['class' => \Quiote\Renderer\PhpRenderer::class],
+    'md'  => [
+        'class'      => \App\Renderer\MarkdownRenderer::class,
+        'parameters' => ['var_name' => 'data'],
+    ],
+],
+```
+
+#### YAML
+
+```yaml
+# Config/output_types.yaml — inside the "html" output type
+default_renderer: md
+renderers:
+  php:
+    class: Quiote\Renderer\PhpRenderer
+  md:
+    class: App\Renderer\MarkdownRenderer
+    parameters:
+      var_name: data
+```
+
+#### XML
 
 ```xml
+<!-- Config/output_types.xml -->
 <output_type name="html">
     <renderers default="md">
         <renderer name="php" class="Quiote\Renderer\PhpRenderer" />
@@ -168,7 +221,7 @@ Because it holds no per-render state, it's safe to mark `IReusableRenderer`. Not
 
 The official renderers — [`quioteframework/phptal`](/plugins/official-packages/#quioteframeworkphptal), [`quioteframework/xslt`](/plugins/official-packages/#quioteframeworkxslt), and [`quioteframework/twig`](/plugins/official-packages/#quioteframeworktwig) — are just renderer classes packaged for Composer, and yours can follow the same shape:
 
-- **`composer.json`** — `type: library`, and `require` the kernel (`quioteframework/quiote`) plus your engine library. PSR-4 autoload a namespace like `Vendor\Renderer\Engine\` → `src/`.
+- **`composer.json`** — `type: library`, and `require` the kernel (`quioteframework/quiote`) plus your engine library. PSR-4 autoload a namespace like `Vendor\Renderer\Engine\`, mapped to `src/`.
 - **`src/EngineRenderer.php`** — the renderer class (nothing more is required; there's no plugin to register).
 - **`README.md`** — the `output_types.xml` snippet to enable it, and any renderer-specific parameters (`encoding`, an `envelope` toggle, …).
 - **`tests/`** — extend `Quiote\Testing\UnitTestCase`, build a real `Quiote\View\FileTemplateLayer` pointed at a temp template, `$layer->setRenderer($renderer)`, then call `$renderer->render(...)` (or `$layer->execute(...)`) and assert on the output.

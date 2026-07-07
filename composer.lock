@@ -1530,12 +1530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/csrf.git",
-                "reference": "135fe7a6bec59b049308e5a8f4af0722e516db88"
+                "reference": "3b25ae6c2106107cde5d0813ee4537e659f0ec54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/135fe7a6bec59b049308e5a8f4af0722e516db88",
-                "reference": "135fe7a6bec59b049308e5a8f4af0722e516db88",
+                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/3b25ae6c2106107cde5d0813ee4537e659f0ec54",
+                "reference": "3b25ae6c2106107cde5d0813ee4537e659f0ec54",
                 "shasum": ""
             },
             "require": {
@@ -1574,7 +1574,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/csrf/tree/main"
             },
-            "time": "2026-07-05T15:55:12+00:00"
+            "time": "2026-07-06T13:32:45+00:00"
         },
         {
             "name": "quioteframework/mcp",
@@ -1582,18 +1582,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/mcp.git",
-                "reference": "c6c14c1239127a0c414b8e765a0f4affcfe4e030"
+                "reference": "e01b27034e4d5ce657dfd08d3719e1cfb495de8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/c6c14c1239127a0c414b8e765a0f4affcfe4e030",
-                "reference": "c6c14c1239127a0c414b8e765a0f4affcfe4e030",
+                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/e01b27034e4d5ce657dfd08d3719e1cfb495de8e",
+                "reference": "e01b27034e4d5ce657dfd08d3719e1cfb495de8e",
                 "shasum": ""
             },
             "require": {
                 "mcp/sdk": "^0.6.0",
                 "php": ">=8.5.0",
-                "quioteframework/quiote": "*"
+                "quioteframework/quiote": "*",
+                "symfony/finder": "^7.0 || ^8.0"
             },
             "default-branch": true,
             "type": "library",
@@ -1626,7 +1627,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/mcp/tree/main"
             },
-            "time": "2026-07-05T19:49:36+00:00"
+            "time": "2026-07-06T16:53:12+00:00"
         },
         {
             "name": "quioteframework/quiote",
@@ -1634,7 +1635,13 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "ecfe8b19932eed2bbe4762fbbca41c5dbcdf9ae2"
+                "reference": "5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4",
+                "reference": "5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4",
+                "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
@@ -1731,43 +1738,7 @@
                     ]
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Sandbox\\": [
-                        "tests/sandbox/app/"
-                    ],
-                    "Quiote\\Test\\Routing\\": [
-                        "tests/lib/routing/"
-                    ],
-                    "QuioteTestGeneratedTest1\\": [
-                        "tests/GeneratedRoutes/test1/"
-                    ],
-                    "QuioteTestGeneratedTest2\\": [
-                        "tests/GeneratedRoutes/test2/"
-                    ],
-                    "Quiote\\Test\\Database\\Entity\\": [
-                        "packages/db-doctrine/tests/Entity/",
-                        "packages/db-cycle/tests/Entity/"
-                    ]
-                },
-                "classmap": [
-                    "tests/lib/"
-                ]
-            },
-            "scripts": {
-                "test": [
-                    "php -d apc.enable_cli=0 vendor/bin/phpunit --no-coverage"
-                ],
-                "test:apcu": [
-                    "php -d apc.enable_cli=1 vendor/bin/phpunit --no-coverage --group apcu"
-                ],
-                "test:e2e": [
-                    "vendor/bin/phpunit --no-coverage tests/e2e --group e2e"
-                ],
-                "test:integration": [
-                    "vendor/bin/phpunit --no-coverage packages/db-eloquent/tests packages/db-doctrine/tests packages/db-cycle/tests --group integration"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL-2.1-or-later"
             ],
@@ -1787,9 +1758,10 @@
                 "mvc"
             ],
             "support": {
-                "issues": "https://github.com/quioteframework/quiote/issues"
+                "issues": "https://github.com/quioteframework/quiote/issues",
+                "source": "https://github.com/quioteframework/quiote/tree/main"
             },
-            "time": "2026-07-05T19:49:36+00:00"
+            "time": "2026-07-07T06:36:44+00:00"
         },
         {
             "name": "relay/relay",
@@ -2281,6 +2253,74 @@
                 }
             ],
             "time": "2026-06-05T06:23:12+00:00"
+        },
+        {
+            "name": "symfony/finder",
+            "version": "v8.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "e2989e762c70f9490fa3a00a0ac0fae5aa97a531"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/e2989e762c70f9490fa3a00a0ac0fae5aa97a531",
+                "reference": "e2989e762c70f9490fa3a00a0ac0fae5aa97a531",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4.1"
+            },
+            "require-dev": {
+                "symfony/filesystem": "^7.4|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Finder\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Finds files and directories via an intuitive fluent interface",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/finder/tree/v8.1.1"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-06-27T09:05:56+00:00"
         },
         {
             "name": "symfony/mime",
@@ -4245,16 +4285,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "14.2.2",
+            "version": "14.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "10d7da3628a99289cdf4c662dd7f0d73f1baec83"
+                "reference": "82f6e49ff224e2cde923d74425e583a883910783"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/10d7da3628a99289cdf4c662dd7f0d73f1baec83",
-                "reference": "10d7da3628a99289cdf4c662dd7f0d73f1baec83",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/82f6e49ff224e2cde923d74425e583a883910783",
+                "reference": "82f6e49ff224e2cde923d74425e583a883910783",
                 "shasum": ""
             },
             "require": {
@@ -4262,7 +4302,7 @@
                 "ext-libxml": "*",
                 "ext-mbstring": "*",
                 "ext-xmlwriter": "*",
-                "nikic/php-parser": "^5.7.0",
+                "nikic/php-parser": "^5.8.0",
                 "php": ">=8.4",
                 "phpunit/php-text-template": "^6.0",
                 "sebastian/complexity": "^6.0",
@@ -4273,7 +4313,7 @@
                 "theseer/tokenizer": "^2.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.2.0"
+                "phpunit/phpunit": "^13.2.2"
             },
             "suggest": {
                 "ext-pcov": "PHP extension that provides line coverage",
@@ -4311,7 +4351,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.2.2"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.2.3"
             },
             "funding": [
                 {
@@ -4331,7 +4371,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-08T11:50:38+00:00"
+            "time": "2026-07-06T15:04:02+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -4628,24 +4668,24 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "13.2.2",
+            "version": "13.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "492c067e618de7b3c76105082c90f9d2833401b7"
+                "reference": "d76d0e24225e587d6a5f0c6f6d9fef0d90712b54"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/492c067e618de7b3c76105082c90f9d2833401b7",
-                "reference": "492c067e618de7b3c76105082c90f9d2833401b7",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d76d0e24225e587d6a5f0c6f6d9fef0d90712b54",
+                "reference": "d76d0e24225e587d6a5f0c6f6d9fef0d90712b54",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
+                "ext-filter": "*",
                 "ext-json": "*",
                 "ext-libxml": "*",
                 "ext-mbstring": "*",
-                "ext-xml": "*",
                 "ext-xmlwriter": "*",
                 "myclabs/deep-copy": "^1.13.4",
                 "phar-io/manifest": "^2.0.4",
@@ -4708,7 +4748,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.2.2"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.2.3"
             },
             "funding": [
                 {
@@ -4716,7 +4756,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-06-29T13:36:29+00:00"
+            "time": "2026-07-06T14:55:56+00:00"
         },
         {
             "name": "sebastian/cli-parser",

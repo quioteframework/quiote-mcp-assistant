@@ -4,12 +4,13 @@
 
 Quiote's request pipeline is a plain PSR-15 stack (see [The middleware pipeline](/architecture/middleware-pipeline/)). Adding your own behaviour — a health check, a JWT authenticator, a tenant resolver — means writing a standard PSR-15 middleware and telling the pipeline where it goes.
 
-There are two ways to place it:
+There are three ways to place it, and they can be mixed freely:
 
+- **A `middleware.xml`/`.php`/`.yaml` config file** — declarative, no code: drop a file in `Config/` and it's registered, positioned by `before`/`after`/`phase`. Good for most apps, and the only way a module can register middleware just by being present (no app wiring). See [Declarative middleware.xml](#declarative-middlewarexml) below.
 - **`MiddlewareCatalog::register()`** — imperative: you pass a factory and explicit `before`/`after`/`priority`. Good for one-off wiring in a bootstrap file.
-- **The `#[Middleware]` attribute + `MiddlewareCatalog::registerAttributed()`** — declarative: the class states its own placement, and it is ordered in the same pass as the framework's own middleware (which is how they order themselves). Good for reusable middleware that ships with its position.
+- **The `#[Middleware]` attribute + `MiddlewareCatalog::registerAttributed()`** — declarative in code: the class states its own placement, and it is ordered in the same pass as the framework's own middleware (which is how they order themselves). Good for reusable middleware that ships with its position.
 
-Both are shown below.
+All three are shown below.
 
 ## Write a PSR-15 middleware
 
@@ -38,6 +39,45 @@ final class HealthzMiddleware implements MiddlewareInterface
 ```
 
 Two things every middleware does: it can short-circuit by returning a response (as `/healthz` does), or delegate downstream with `$handler->handle($request)` and optionally post-process the returned response on the way back out.
+
+## Declarative middleware.xml
+
+The no-code way. Drop a `middleware.xml` (or `.php`/`.yaml`/`.yml`) next to `settings.xml` in `Config/`, or inside any module's own `Config/` directory — resolved the same way as any other config type (`.php` > `.yaml`/`.yml` > `.xml`). This is a **drop-in**: a module registers its own middleware just by containing the file, no app wiring required.
+
+#### PHP
+
+```php
+// Config/middleware.php
+return [
+    ['class' => \App\Middleware\HealthzMiddleware::class, 'phase' => 'pre_routing', 'before' => 'SessionMiddleware'],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/middleware.yaml
+- class: App\Middleware\HealthzMiddleware
+  phase: pre_routing
+  before: SessionMiddleware
+```
+
+#### XML
+
+```xml
+<!-- Config/middleware.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/middleware/1.1">
+    <ae:configuration>
+        <use class="App\Middleware\HealthzMiddleware" phase="pre_routing" before="SessionMiddleware" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+The PHP array shape above is exactly the canonical shape any format compiles to. Each entry is resolved via the [DI container](/architecture/container/) — like `registerAttributed()` below, no factory closures in config — and merged with any `#[Middleware]` attribute the class already carries: a field left unset (`null`) keeps the attribute's own value or the framework default; a field that's set overrides it. A class with no attribute at all can be declared purely through config — `phase` defaults to `'pre'` if omitted, same as the `#[Middleware]` attribute's own constructor default.
+
+**Framework middleware is protected by default.** Naming one of Quiote's own shipped classes (`ErrorHandlingMiddleware`, `SessionMiddleware`, `RoutingMiddleware`, `SecurityMiddleware`, etc. — see `MiddlewarePipeline::coreMiddlewareClasses()`) to change its `enabled` state or placement requires **both**: `override_framework: true` on that specific entry (`override-framework="true"` in XML — the attribute is hyphenated, the PHP/YAML key underscored), **and** the global `core.middleware.allow_framework_overrides` setting set to `true`. Either alone is refused with a `ConfigurationException` at config-load time (not silently ignored, and not deferred to the first request) — a config file, least of all one dropped in by a third-party module, shouldn't be able to silently disable error handling or CSRF just by declaring an entry.
 
 ## Option 1 — register()
 
@@ -128,6 +168,17 @@ ExecutionTimeMiddleware
 ```
 
 Place your middleware relative to the earliest built-in whose work it depends on. A route-aware middleware goes `after: RoutingMiddleware`; something that must run before the session is touched goes `before: SessionMiddleware`.
+
+### ErrorHandlingMiddleware before and after are not symmetric
+
+`ErrorHandlingMiddleware` is the one anchor where `before:`/`after:` don't just mean "earlier/later" the way they do everywhere else — because it wraps the rest of the stack in a try/catch, which side you're on determines whether your middleware runs at all on an error response:
+
+- **`after: ErrorHandlingMiddleware`** places your middleware **inside** the try/catch — closer to the handler. If something downstream (the action, a renderer) throws, the exception unwinds straight past your middleware on its way to being caught. Anything your middleware does on the way *out* — setting a response header, say — never happens on an error response.
+- **`before: ErrorHandlingMiddleware`** places your middleware **outside** it, wrapping it. It still runs on the way out even when an inner layer threw and `ErrorHandlingMiddleware` converted that into an error response.
+
+:::caution["Runs early" is the wrong intuition here]
+A middleware that adds a response header to *every* response, registered with `after: ErrorHandlingMiddleware` because "runs early" sounded right, will pass every happy-path test and then silently drop the header on any route that throws. If your middleware needs to observe or modify every response including error ones, use `before: ErrorHandlingMiddleware` explicitly — don't infer it from "early vs. late." See [Testing the full pipeline](/advanced/testing/#testing-the-full-pipeline) for exercising the error path, not just the happy path, when you write its test.
+:::
 
 ## Ordering rules and caveats
 
@@ -247,3 +298,5 @@ What you get and what you owe:
 - Registered as it is (process-global static state), `replaceCoreStack()` must be called at bootstrap, before `Kernel::run()` — same timing as `register()`. `MiddlewareCatalog::reset()` clears it (along with registered middleware).
 
 If you only need to *remove* a default or two — not the whole stack — do not use this. Disable the specific middlewares via `MiddlewareCatalog::initialize([Fqcn::class => false])` (see [The middleware pipeline](/architecture/middleware-pipeline/)) and keep everything else.
+
+For copy-pasteable steps, see the [Plugins & middleware quickstart: Write your own middleware](/plugins/quickstart/#write-your-own-middleware).

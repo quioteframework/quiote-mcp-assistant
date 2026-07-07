@@ -25,8 +25,11 @@ final class ScaffoldPluginTest extends TestCase
         self::assertSame('would_create', $file['status']);
         self::assertIsString($result['next_step']);
         self::assertStringContainsString('PhpunitCapabilityPreviewPlugin::class', $result['next_step']);
-        self::assertStringContainsString('"plugins" key', $result['next_step']);
+        self::assertStringContainsString('Config/plugins.php', $result['next_step']);
         self::assertFileDoesNotExist(dirname(__DIR__, 5) . '/app/Plugin/PhpunitCapabilityPreviewPlugin.php');
+
+        self::assertIsString($file['diff'] ?? null);
+        self::assertStringContainsString('#[Plugin(', $file['diff']);
     }
 
     #[Test]

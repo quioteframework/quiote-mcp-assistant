@@ -5,6 +5,7 @@ namespace QuioteMcpAssistant\Mcp;
 
 use Quiote\Config\Config;
 use Quiote\Mcp\McpCatalog;
+use Quiote\Plugin\Attribute\Plugin;
 use Quiote\Plugin\PluginInterface;
 use Quiote\Plugin\PluginRegistrar;
 use QuioteMcpAssistant\Mcp\Console\DocsSyncCommand;
@@ -54,7 +55,14 @@ use QuioteMcpAssistant\Mcp\Introspection\ConsoleCommandWhitelist;
  * `quioteframework/mcp` package) to the `plugins` config key and set
  * `mcp.enabled = true` to serve it over stdio via `mcp:serve` /
  * `bin/quiote-assistant`.
+ *
+ * `#[Plugin]` is required as of quioteframework/quiote's newer PluginManager:
+ * a class named via the `plugins.*` config key (a class-string activation
+ * source) must carry this attribute as a deliberate opt-in, or
+ * PluginManager::instantiate() silently refuses to register it (logged, not
+ * thrown -- which is exactly why this was easy to miss after bumping quiote).
  */
+#[Plugin(name: 'quiote/assistant')]
 final class AssistantPlugin implements PluginInterface
 {
     public function name(): string

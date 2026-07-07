@@ -18,7 +18,7 @@ You can mix formats across files in one application — `settings.php` alongside
 
 ## Format resolution
 
-When Quiote needs a config, it looks for the base name (e.g. `settings`) and resolves the extension in priority order **PHP → YAML → XML** (`FormatDriverRegistry::locate()`). The first match wins. So if both `settings.php` and `settings.xml` exist, the PHP file is used.
+When Quiote needs a config, it looks for the base name (e.g. `settings`) and resolves the extension in this priority order: **PHP, then YAML, then XML** (`FormatDriverRegistry::locate()`). The first match wins. So if both `settings.php` and `settings.xml` exist, the PHP file is used.
 
 You do not usually configure this — autodetection by extension is the default. Where you need to force a format, `core.config_format` overrides the choice.
 
@@ -38,6 +38,8 @@ An application typically has these, in `Config/`:
 | `output_types` | Output types, their renderers, layouts, and headers |
 | `validators` | (Per module/action) input validators |
 | `routing` | Routes — though a `Routing` subclass is the supported way today |
+| `middleware` | Extra middleware to register declaratively — see [Declarative middleware.xml](/advanced/custom-middleware/#declarative-middlewarexml) |
+| `plugins` | Which plugins run and in what order — see [Plugins: Registering a plugin](/architecture/plugins/#registering-a-plugin) |
 
 ### settings
 
@@ -50,7 +52,7 @@ An application typically has these, in `Config/`:
 return [
     'core.app_name'         => 'MyApp',
     'core.namespace_prefix' => 'MyApp',
-    'core.available'        => true,   // false → maintenance mode
+    'core.available'        => true,   // false = maintenance mode
     'core.debug'            => false,
     'core.use_database'     => true,
     'core.use_logging'      => true,
@@ -66,7 +68,7 @@ return [
 # Config/settings.yaml
 core.app_name: MyApp
 core.namespace_prefix: MyApp
-core.available: true        # false → maintenance mode
+core.available: true        # false = maintenance mode
 core.debug: false
 core.use_database: true
 core.use_logging: true
@@ -210,6 +212,8 @@ validation_manager:
 ```
 
 In PHP and YAML, include `params` for every role — an empty `[]` is fine, but the key must be present (it is passed to each role's constructor). In XML, role elements are direct children of `<ae:configuration>`, and params are `<ae:parameter>` children of a role element (omit them for none). You swap a role's implementation by changing its `class` — e.g. pointing `user` at your own `RbacSecurityUser` subclass, or `routing` at your app's `Routing` subclass. This is the primary extension seam for the framework's core objects.
+
+The `storage` role above is shown as `NullStorage` because it's the scaffolded default — see [Sessions and storage](/basics/sessions/#storage-backends) before shipping with it, since it also means no session cookie is ever sent, which silently disables CSRF protection app-wide.
 
 ## Reading config at runtime
 

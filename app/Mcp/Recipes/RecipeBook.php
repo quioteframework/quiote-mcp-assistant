@@ -28,6 +28,28 @@ final class RecipeBook
     private static function recipes(): array
     {
         return [
+            'new-project' => [
+                'title' => 'Scaffold a brand-new Quiote application',
+                'steps' => [
+                    ['description' => 'Quiote is not yet on Packagist -- install it from GitHub directly into the (empty or nonexistent) directory you want the app in. This creates that directory\'s own composer.json + vendor/, which the scaffolded app\'s front controller will locate at runtime. minimum-stability/prefer-stable are required, not optional -- a plain "composer require quioteframework/quiote:dev-main" fails: quiote\'s dev-main branch depends on quioteframework/csrf\'s dev-main branch too, which composer\'s default "stable" minimum-stability rejects.', 'code' => <<<'BASH'
+                        mkdir my-app && cd my-app
+                        composer init --no-interaction --name you/my-app
+                        composer config minimum-stability dev
+                        composer config prefer-stable true
+                        composer require quioteframework/quiote:dev-main --no-interaction
+                        BASH],
+                    ['description' => 'Run `quiote new` to scaffold the application files -- a Default module (Index/About/Boom actions), the minimal Config/ needed to boot, and a FrankenPHP-ready pub/index.php. Target "." since composer already populated this directory (composer.json/vendor/ make it non-empty, hence --force); --namespace defaults to "App", --config-format defaults to "php" (also accepts yaml/xml).', 'code' => <<<'BASH'
+                        vendor/bin/quiote new . --force
+                        # or, e.g.: vendor/bin/quiote new . --force --namespace Shop --config-format yaml
+                        BASH],
+                    ['description' => 'Smoke test it -- GET /, /about, and /boom (the last deliberately throws, to see error handling) should all respond.', 'code' => <<<'BASH'
+                        php -S localhost:8000 -t pub pub/index.php
+                        # or, with FrankenPHP:
+                        frankenphp php-server --root pub
+                        BASH],
+                    ['description' => 'From here, use project_info/list_routes (once this MCP server is relaunched with --target-app-dir pointed at the new app) to confirm what was generated, and scaffold_module/scaffold_action/scaffold_plugin/scaffold_db_connection to keep building -- rather than hand-writing files that already have a generator.'],
+                ],
+            ],
             'read-only-action' => [
                 'title' => 'Add a read-only (GET) action',
                 'steps' => [
@@ -155,13 +177,15 @@ final class RecipeBook
             'add-plugin' => [
                 'title' => 'Write and register a plugin',
                 'steps' => [
-                    ['description' => 'Implement PluginInterface -- a name() and a register() that only calls PluginRegistrar methods.', 'code' => <<<'PHP'
+                    ['description' => 'Implement PluginInterface -- a name() and a register() that only calls PluginRegistrar methods. #[Plugin] is required, not optional: a class named via a class-string activation source (plugins.* or PluginManager::add() passed a string) is silently refused -- logged, not thrown -- unless it carries this attribute as a deliberate opt-in.', 'code' => <<<'PHP'
                         <?php
                         namespace App\Plugin;
 
                         use Quiote\DI\Container;
+                        use Quiote\Plugin\Attribute\Plugin;
                         use Quiote\Plugin\{PluginInterface, PluginRegistrar};
 
+                        #[Plugin(name: 'health')]
                         final class HealthPlugin implements PluginInterface
                         {
                             public function name(): string
@@ -177,12 +201,15 @@ final class RecipeBook
                             }
                         }
                         PHP],
-                    ['description' => 'Add the class to the plugins list in Config/settings.php. Plugins register once, in order, at Quiote::bootstrap() -- after settings load (app config wins) and before any Context is created.', 'code' => <<<'PHP'
-                        // Config/settings.php
-                        'plugins' => [
-                            \App\Plugin\HealthPlugin::class,
-                        ],
+                    ['description' => 'Activate it via Config/plugins.php -- the canonical, auto-discovered file for this (Quiote::bootstrap() looks for %core.config_dir%/plugins.{php,yaml,yml,xml} directly, PHP taking priority if more than one exists). This is NOT a "plugins" key inside settings.php -- writing one there happens to still work (it shares the same underlying config key) but is an unsupported, undocumented incidental side effect, not the interface to target. Each entry is {class, enabled?} (enabled defaults to true), not a bare class-string -- create the file fresh if this app has no plugins yet.', 'code' => <<<'PHP'
+                        <?php
+                        // Config/plugins.php
+                        return [
+                            ['class' => \App\Plugin\HealthPlugin::class],
+                            // ['class' => \App\Plugin\SomeOtherPlugin::class, 'enabled' => false],
+                        ];
                         PHP],
+                    ['description' => 'Config/plugins.xml (or .yaml/.yml) is the same mechanism in that format -- see quiote-docs://architecture/plugins for the exact XML/YAML shape. A module can also ship its own %core.module_dir%/<Module>/Config/plugins.xml, contributing without any change to the app-level file.'],
                 ],
             ],
             'add-database-connection' => [
@@ -194,6 +221,69 @@ final class RecipeBook
                         $db   = $context->getDatabaseManager()->getDatabase('main'); // Quiote\Database\Database
                         $conn = $db->getConnection(); // PDO, or the adapter's ORM object
                         PHP],
+                ],
+            ],
+            'throttle-login' => [
+                'title' => 'Rate-limit repeated login attempts',
+                'steps' => [
+                    ['description' => 'Install quioteframework/ratelimit -- a plain library, not a plugin (no "plugins" entry). It provides LoginThrottle (sliding-window counter per key, e.g. IP or username) and PdoRateLimiterStorage (state kept in your own database, no Redis needed).', 'code' => <<<'BASH'
+                        composer require quioteframework/ratelimit
+                        BASH],
+                    ['description' => 'Create the storage table once (PdoRateLimiterStorage::schema() returns Postgres/SQLite-compatible DDL) -- e.g. from a one-off console command or migration, using the same PDO connection the app already has via the DatabaseManager.', 'code' => <<<'PHP'
+                        <?php
+                        $conn = $context->getDatabaseManager()->getDatabase('main')->getConnection(); // PDO
+                        $conn->exec(\Quiote\Security\RateLimit\PdoRateLimiterStorage::schema());
+                        PHP],
+                    ['description' => 'Wire it into the login action: peek with retryAfter() before doing any real auth work (cheap rejection of a flood), registerFailure() on a bad password, reset() on success so a legitimate user is never penalized for an earlier typo. Build LoginThrottle lazily inside execute*(), not the constructor -- getContext() (needed to reach the DatabaseManager) returns null until the executor calls initialize() on the action, which happens after the constructor runs. maxAttempts/interval are constructor args -- this example is 5 attempts per 60 seconds; the constructor defaults to 10 per 15 minutes if omitted. Do NOT add isSimple(): true here, even though other scaffolded actions have it -- isSimple() skips execute*() entirely and always renders getDefaultViewName() directly, which only looks harmless on an action whose default view happens to match its execute*() return value. This action must return a different view per outcome (Throttled/Error/Success), so isSimple() must stay at its default (false) or the throttle/auth logic below silently never runs.', 'code' => <<<'PHP'
+                        <?php
+                        namespace App\Modules\Auth\Actions;
+
+                        use Quiote\Action\Action;
+                        use Quiote\Request\WebRequest;
+                        use Quiote\Security\RateLimit\LoginThrottle;
+                        use Quiote\Security\RateLimit\PdoRateLimiterStorage;
+
+                        class LoginAction extends Action
+                        {
+                            public function executeWrite(WebRequest $rd)
+                            {
+                                $throttle = $this->throttle();
+
+                                // Keying by IP throttles a single source regardless of which
+                                // username it tries; key by the submitted username instead (or
+                                // both, checked separately) to stop credential stuffing across IPs.
+                                $key = $rd->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
+
+                                if (($wait = $throttle->retryAfter($key)) !== null) {
+                                    $this->setAttribute('retryAfter', $wait);
+                                    return 'Throttled';
+                                }
+
+                                if (!$this->credentialsAreValid($rd)) {
+                                    if (($wait = $throttle->registerFailure($key)) !== null) {
+                                        $this->setAttribute('retryAfter', $wait);
+                                        return 'Throttled';
+                                    }
+                                    return 'Error';
+                                }
+
+                                $throttle->reset($key);
+                                return 'Success';
+                            }
+
+                            public function getDefaultViewName(): string
+                            {
+                                return 'Input';
+                            }
+
+                            private function throttle(): LoginThrottle
+                            {
+                                $conn = $this->getContext()->getDatabaseManager()->getDatabase('main')->getConnection();
+                                return new LoginThrottle(new PdoRateLimiterStorage($conn), maxAttempts: 5, interval: '60 seconds', id: 'login');
+                            }
+                        }
+                        PHP],
+                    ['description' => 'Add the "Throttled" view/template alongside the action\'s existing Input/Success/Error ones -- render a 429-style "too many attempts, try again in N seconds" message using the retryAfter attribute set above.'],
                 ],
             ],
             'expose-action-as-tool' => [

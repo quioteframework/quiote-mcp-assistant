@@ -6,11 +6,17 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 use Quiote\Config\Config;
 
 /**
- * `scaffold_plugin(name)` -- a new plugin class only. Never edits the
- * target's `Config/settings.*` to add it to the `plugins` key -- that file
- * already exists in virtually every real app, and this tool never modifies
- * existing files (see {@see ScaffoldWriter}). The response's `next_step`
- * tells the caller the one line to add by hand.
+ * `scaffold_plugin(name)` -- a new plugin class only. Never edits/creates the
+ * target's `Config/plugins.*` to activate it -- that file (if PHP-format)
+ * already exists in virtually every real app once it has one plugin, and
+ * this tool never modifies existing files (see {@see ScaffoldWriter}). The
+ * response's `next_step` tells the caller the one line to add by hand.
+ *
+ * The generated class carries `#[Plugin]` -- required as of
+ * quioteframework/quiote's newer PluginManager: a class named via a
+ * class-string activation source (`plugins.*` or `PluginManager::add()`
+ * passed a string) is silently refused (logged, not thrown) unless it
+ * deliberately opts in with this attribute.
  */
 final class ScaffoldPlugin
 {
@@ -26,9 +32,11 @@ final class ScaffoldPlugin
             <?php
             namespace {$namespacePrefix}\\Plugin;
 
+            use Quiote\\Plugin\\Attribute\\Plugin;
             use Quiote\\Plugin\\PluginInterface;
             use Quiote\\Plugin\\PluginRegistrar;
 
+            #[Plugin(name: '{$slug}')]
             final class {$name}Plugin implements PluginInterface
             {
                 public function name(): string
@@ -52,7 +60,9 @@ final class ScaffoldPlugin
         return array_merge($result, [
             'plugin' => $name,
             'next_step' => sprintf(
-                'Add \\%s\\Plugin\\%sPlugin::class to the "plugins" key in Config/settings.* to enable it.',
+                'Add \\%s\\Plugin\\%sPlugin::class to Config/plugins.php\'s list (create it -- return [[\'class\' => \\%s\\Plugin\\%sPlugin::class]]; -- if this app has no plugins yet) to enable it.',
+                $namespacePrefix,
+                $name,
                 $namespacePrefix,
                 $name,
             ),

@@ -59,7 +59,7 @@ interface ISecurityUser
 
 Authentication state and credentials persist in session storage. Two security-relevant behaviours are built in:
 
-- **`setAuthenticated(true)` regenerates the session id** on the unauthenticated → authenticated transition, defeating session fixation.
+- **`setAuthenticated(true)` regenerates the session id** on the unauthenticated-to-authenticated transition, defeating session fixation.
 - **`isAuthenticated()` reads the value loaded once at init** and does not re-read storage mid-request, avoiding a class of fail-open bugs.
 
 ### Credentials: AND / OR
@@ -76,7 +76,7 @@ $user->hasCredentials(['edit', ['admin', 'moderator']]);
 
 ### RbacSecurityUser
 
-`RbacSecurityUser` adds roles on top of credentials. Granting a role walks its role → parent chain and adds each permission as a credential:
+`RbacSecurityUser` adds roles on top of credentials. Granting a role walks its chain of roles up to their parents and adds each permission as a credential:
 
 ```php
 $user->grantRole('editor');   // adds every permission the editor role (and its parents) grant
@@ -88,9 +88,38 @@ Roles and their permissions are defined in the `rbac_definitions` config. So in 
 
 ### Defining roles and permissions
 
-Roles and permissions live in `Config/rbac_definitions.xml`. Role hierarchy is expressed by **nesting** — a role declared inside another role's `<roles>` is a child, and a granted role receives its own permissions plus every ancestor's:
+Roles and permissions live in `Config/rbac_definitions.{xml,php,yaml,yml}`. Role hierarchy is expressed by **nesting** in XML — a role declared inside another role's `<roles>` is a child; the PHP/YAML canonical form flattens that into a `parent` key per role instead. A granted role receives its own permissions plus every ancestor's:
+
+#### PHP
+
+```php
+// Config/rbac_definitions.php
+return [
+    'guest'          => ['parent' => null,             'permissions' => ['photos.list']],
+    'member'         => ['parent' => 'guest',           'permissions' => ['photos.rate']],
+    'photomoderator' => ['parent' => 'member',           'permissions' => ['photos.edit', 'photos.delete']],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/rbac_definitions.yaml
+guest:
+  parent: null
+  permissions: [photos.list]
+member:
+  parent: guest
+  permissions: [photos.rate]
+photomoderator:
+  parent: member
+  permissions: [photos.edit, photos.delete]
+```
+
+#### XML
 
 ```xml
+<!-- Config/rbac_definitions.xml -->
 <ae:configurations
     xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
     xmlns="http://quiote.dev/quiote/config/parts/rbac_definitions/1.1">
@@ -123,7 +152,7 @@ Roles and permissions live in `Config/rbac_definitions.xml`. Role hierarchy is e
 
 Here `photomoderator` inherits `member`'s `photos.rate` and `guest`'s `photos.list` on top of its own permissions. Granting `photomoderator` therefore adds all of them as credentials, so an action requiring `photos.delete` is allowed. A `member` — lacking `photos.delete` — is forwarded to the `secure` action; an unauthenticated user is forwarded to `login`.
 
-`rbac_definitions.xml` is compiled and cached like the rest of Quiote's config; it is read once when the `RbacSecurityUser` initializes (from `core.config_dir`, overridable with the user's `definitions_file` parameter).
+`rbac_definitions.*` is compiled and cached like the rest of Quiote's config; it is read once when the `RbacSecurityUser` initializes (from `core.config_dir`, overridable with the user's `definitions_file` parameter).
 
 ## Authenticating a user
 
@@ -213,6 +242,21 @@ CSRF protection ships in the **[`quioteframework/csrf`](/plugins/official-packag
 
 - **`CsrfInjectionMiddleware`** injects a hidden token field into every non-GET HTML form, adds a `<meta name="csrf-token">` tag, and sets a readable `XSRF-TOKEN` cookie for SPA clients.
 - **`CsrfValidationMiddleware`** rejects unsafe-method requests (non GET/HEAD/OPTIONS/TRACE) with 403 unless a valid token is present in the form field or the `X-CSRF-Token` header.
+
+### Automatic exemptions — and the NullStorage trap
+
+CSRF exists to stop an attacker site from riding a victim's ambient, automatically-attached session cookie. `CsrfValidationMiddleware` exempts two classes of request from that check automatically, with no per-route opt-out needed:
+
+- **A request carrying an `Authorization` header** — a cross-site attacker page can't read or attach the caller's bearer/basic credential the way a browser auto-attaches a session cookie, so token/signature-authenticated callers are never forgeable.
+- **A request with no session cookie at all.** With no ambient session-backed credential present, the middleware reasons there's nothing for an attacker to ride, and skips validation.
+
+That second exemption is the trap:
+
+:::danger[NullStorage silently disables CSRF protection for your entire app]
+If your `storage` factory role is `Quiote\Storage\NullStorage` — **the scaffolded app's default**, see [Sessions and storage](/basics/sessions/) — no session is ever persisted, so no session cookie is ever sent, on *any* request. Every unsafe request then satisfies the "no session cookie" exemption above and sails through `CsrfValidationMiddleware` unchecked, regardless of whether it submits a `_csrf_token` field or a valid header. The `_csrf_token` hidden field still gets injected into every form by `CsrfInjectionMiddleware` — it looks like protection is active — but nothing ever validates it.
+
+This is a consequence of your app's own session configuration, not a framework bug: the exemption logic is deliberate (see above), and it's just as deliberately wrong for an app that has real state-changing forms but hasn't turned on real sessions. If your app has any form or endpoint an attacker could forge a cross-site request against, switch `storage` to `SessionStorage` (or the PDO-backed session package) before relying on CSRF protection — see [Sessions and storage: Storage backends](/basics/sessions/#storage-backends). `NullStorage` is the right choice only for genuinely stateless apps/APIs, where the CSRF threat model (riding an ambient session cookie) doesn't apply in the first place.
+:::
 
 Server-rendered forms get tokens automatically. Two things to remember:
 

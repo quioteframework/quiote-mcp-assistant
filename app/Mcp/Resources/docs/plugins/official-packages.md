@@ -10,6 +10,8 @@ All of these packages are **MIT-licensed** (the kernel itself is LGPL-2.1+); an 
 Each package lives in its own `github.com/quioteframework/*` repository, but none is **published to Packagist** yet. Until then, install them by adding a VCS repository and requiring `dev-main` — see the [pre-alpha note in the overview](/plugins/overview/#enabling-a-package). The plain `composer require` lines below describe the eventual Packagist experience.
 </Aside>
 
+Every `Plugin::class` below is only *activated* by listing it in `plugins.*` because its class already carries the mandatory `#[Quiote\Plugin\Attribute\Plugin]` attribute — a class-string named in config without that attribute is silently refused. All official packages carry it already; you only need to add it yourself when [writing your own plugin](/architecture/plugins/#writing-a-plugin).
+
 ## At a glance
 
 | Package | Provides | Carries |
@@ -45,7 +47,7 @@ Unlike every other package here, **this one is not opt-in.** `quioteframework/cs
 'core.csrf.enabled' => false,
 ```
 
-Configure it with the `core.csrf.*` settings and opt individual routes out with an `_csrf => false` route default rather than disabling protection wholesale. See [Authentication & authorization → CSRF](/advanced/authentication-authorization/#csrf-protection) and the [Middleware reference](/architecture/middleware-reference/#csrfvalidationmiddleware).
+Configure it with the `core.csrf.*` settings and opt individual routes out with an `_csrf => false` route default rather than disabling protection wholesale. See [Authentication & authorization: CSRF](/advanced/authentication-authorization/#csrf-protection) and the [Middleware reference](/architecture/middleware-reference/#csrfvalidationmiddleware).
 
 ### `quioteframework/ratelimit`
 
@@ -55,7 +57,7 @@ Rate-limiting building blocks — `Quiote\Security\RateLimit\LoginThrottle` for 
 composer require quioteframework/ratelimit
 ```
 
-See [Authentication & authorization → Login rate limiting](/advanced/authentication-authorization/#login-rate-limiting).
+See [Authentication & authorization: Login rate limiting](/advanced/authentication-authorization/#login-rate-limiting).
 
 ## Developer experience
 
@@ -66,15 +68,41 @@ The rich developer exception page — full stack trace, source, and request data
 ```bash
 composer require quioteframework/whoops
 ```
+
+#### PHP
+
 ```php
-'plugins' => [ \Quiote\Exception\Rendering\Whoops\WhoopsPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Exception\Rendering\Whoops\WhoopsPlugin::class, 'enabled' => true],
+];
 ```
 
-Keep `core.developer_exceptions` **off** in production regardless — the page exposes source and environment. See [Error handling → Developer vs safe rendering](/architecture/error-handling/#developer-vs-safe-rendering).
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Exception\Rendering\Whoops\WhoopsPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Exception\Rendering\Whoops\WhoopsPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Keep `core.developer_exceptions` **off** in production regardless — the page exposes source and environment. See [Error handling: Developer vs safe rendering](/architecture/error-handling/#developer-vs-safe-rendering).
 
 ### `quioteframework/mcp`
 
-Turns a Quiote app into a [Model Context Protocol](https://modelcontextprotocol.io) server — expose tools, resources, and prompts (or existing `#[Route]` actions) to AI agents over stdio or streamable HTTP.
+Turns a Quiote app into a [Model Context Protocol](https://modelcontextprotocol.io) server — expose tools, resources, and prompts, or turn an existing `#[Route]` action into a tool with one attribute (its validators become the tool's input schema), over stdio or streamable HTTP. Full coverage, including auth and what's not built yet: [Exposing your app as an MCP server](/advanced/mcp-server/).
 
 ```bash
 composer require quioteframework/mcp
@@ -82,8 +110,37 @@ composer require quioteframework/mcp
 
 Enable the plugin and switch MCP on:
 
+#### PHP
+
 ```php
-'plugins'     => [ \Quiote\Mcp\McpPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Mcp\McpPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Mcp\McpPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Mcp\McpPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+```php
+// Config/settings.php
 'mcp.enabled' => true,
 ```
 
@@ -101,8 +158,37 @@ composer require quioteframework/telemetry-otel
 
 Register the plugin, then turn it on with `telemetry.enabled = true` and pick an exporter:
 
+#### PHP
+
 ```php
-'plugins'           => [ \Quiote\Telemetry\TelemetryPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Telemetry\TelemetryPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Telemetry\TelemetryPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Telemetry\TelemetryPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+```php
+// Config/settings.php
 'telemetry.enabled' => true,
 ```
 
@@ -126,40 +212,148 @@ Each adapter hands back a fully-configured ORM and registers a short `class` ali
 ```bash
 composer require quioteframework/db-eloquent
 ```
+
+#### PHP
+
 ```php
-'plugins' => [ \Quiote\Database\Adapter\Eloquent\EloquentPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Eloquent\EloquentPlugin::class, 'enabled' => true],
+];
 ```
-Registers the `eloquent` alias → `EloquentDatabase`. See [Databases → Eloquent](/basics/databases/#eloquent).
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Eloquent\EloquentPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Eloquent\EloquentPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Registers the `eloquent` alias for `EloquentDatabase`. See [Databases: Eloquent](/basics/databases/#eloquent).
 
 ### `quioteframework/db-doctrine`
 
 ```bash
 composer require quioteframework/db-doctrine
 ```
+
+#### PHP
+
 ```php
-'plugins' => [ \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class, 'enabled' => true],
+];
 ```
-Registers both the `doctrine` (ORM) and `doctrine_dbal` (query builder only) aliases. See [Databases → Doctrine ORM](/basics/databases/#doctrine-orm).
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Doctrine\DoctrinePlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Doctrine\DoctrinePlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Registers both the `doctrine` (ORM) and `doctrine_dbal` (query builder only) aliases. See [Databases: Doctrine ORM](/basics/databases/#doctrine-orm).
 
 ### `quioteframework/db-cycle`
 
 ```bash
 composer require quioteframework/db-cycle
 ```
+
+#### PHP
+
 ```php
-'plugins' => [ \Quiote\Database\Adapter\Cycle\CyclePlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Cycle\CyclePlugin::class, 'enabled' => true],
+];
 ```
-Registers the `cycle` alias → `CycleDatabase` (configured in `databases.php` only — see [Databases → Cycle ORM](/basics/databases/#cycle-orm)).
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Cycle\CyclePlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Cycle\CyclePlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Registers the `cycle` alias for `CycleDatabase` (configured in `databases.php` only — see [Databases: Cycle ORM](/basics/databases/#cycle-orm)).
 
 ### `quioteframework/db-propulsion`
 
 ```bash
 composer require quioteframework/db-propulsion
 ```
+
+#### PHP
+
 ```php
-'plugins' => [ \Quiote\Database\Adapter\Propulsion\PropulsionPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Propulsion\PropulsionPlugin::class, 'enabled' => true],
+];
 ```
-Registers the `propulsion` alias → `PropulsionDatabase`. Carries the [`quioteframework/propulsion`](https://github.com/quioteframework/propulsion) runtime — a PHP 8.5, Propel-style ORM with its own code generator (`bin/propulsion model:build`). Unlike the other adapters it owns its own connection factory (a runtime `config` file, no inline DSN or layer mode). See [Databases → Propulsion](/basics/databases/#propulsion).
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Propulsion\PropulsionPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Propulsion\PropulsionPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Registers the `propulsion` alias for `PropulsionDatabase`. Carries the [`quioteframework/propulsion`](https://github.com/quioteframework/propulsion) runtime — a PHP 8.5, Propel-style ORM with its own code generator (`bin/propulsion model:build`). Unlike the other adapters it owns its own connection factory (a runtime `config` file, no inline DSN or layer mode). See [Databases: Propulsion](/basics/databases/#propulsion).
 
 <Aside type="note" title="PDO stays in the core">
 The raw **PDO** driver (`class="pdo"`) is built into the kernel and always available — no package needed. Only the ORM adapters are extracted.

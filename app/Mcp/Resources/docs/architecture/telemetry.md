@@ -2,7 +2,7 @@
 
 > OpenTelemetry tracing and metrics — enabling it, the telemetry.* settings, sampling, spans, and log correlation.
 
-Quiote ships OpenTelemetry-based **distributed tracing and metrics**. When enabled it opens a span tree for each request (request → route → action → view, and optionally per middleware), records resource metrics (wall time, CPU, memory), propagates W3C trace context, and correlates every log line with its trace.
+Quiote ships OpenTelemetry-based **distributed tracing and metrics**. When enabled it opens a span tree for each request (request, route, action, view, in order, and optionally per middleware), records resource metrics (wall time, CPU, memory), propagates W3C trace context, and correlates every log line with its trace.
 
 It is **off by default** and built to be invisible when off: instrumentation call sites resolve to shared no-op handles, so they cost nothing and need no changes when you turn telemetry on.
 
@@ -14,9 +14,33 @@ Telemetry lives outside the kernel, in the optional **[`quioteframework/telemetr
 
 Install the [`quioteframework/telemetry-otel`](/plugins/official-packages/#quioteframeworktelemetry-otel) package and register its plugin, then set `telemetry.enabled` and pick an exporter. Registering the plugin is what wires telemetry in — it's fully opt-in:
 
+#### PHP
+
 ```php
-// Config/settings.php
-'plugins' => [ \Quiote\Telemetry\TelemetryPlugin::class ],
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Telemetry\TelemetryPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Telemetry\TelemetryPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Telemetry\TelemetryPlugin" />
+    </ae:configuration>
+</ae:configurations>
 ```
 
 Then, in each config format:
@@ -50,7 +74,7 @@ telemetry.otlp.endpoint: 'http://localhost:4318'
 </settings>
 ```
 
-`telemetry.*` is not a `core.*` key, so in XML it needs a `<settings prefix="telemetry.">` wrapper (see [Configuration → The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute)).
+`telemetry.*` is not a `core.*` key, so in XML it needs a `<settings prefix="telemetry.">` wrapper (see [Configuration: The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute)).
 
 Turning `telemetry.enabled` on is necessary but not sufficient: the SDK must also be installed. `TelemetryBootstrap` (run once per worker from the kernel) fails safe — if telemetry is disabled, the SDK is missing, or exporter config is bad, it stays off rather than throwing.
 
@@ -73,7 +97,7 @@ Turning `telemetry.enabled` on is necessary but not sufficient: the SDK must als
 | `telemetry.otlp.endpoint` | `'http://localhost:4318'` | OTLP endpoint (only when `exporter = otlp`). |
 | `telemetry.otlp.protocol` | `'http/protobuf'` | OTLP protocol. |
 | `telemetry.otlp.headers` | `[]` | OTLP headers (comma-joined `key=value`). |
-| `telemetry.sampling.strategy` | `'parentbased_traceidratio'` | `always_on`, `always_off`, or `parentbased_traceidratio`. Unrecognized → falls back to `parentbased_traceidratio` with a warning. |
+| `telemetry.sampling.strategy` | `'parentbased_traceidratio'` | `always_on`, `always_off`, or `parentbased_traceidratio`. An unrecognized value falls back to `parentbased_traceidratio` with a warning. |
 | `telemetry.sampling.ratio` | `0.1` | Fraction of locally-initiated root traces recorded under the ratio strategy. |
 | `telemetry.sampling.force_header` | `'X-Quiote-Trace'` | Request header that force-samples one request; `''` disables the header path. |
 | `telemetry.spans.route` | `true` | Route-match span **and** the root-span rename. |
