@@ -1635,12 +1635,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "d49f299482dd3840a1d23d9bf2420698cbfa870e"
+                "reference": "98ec19d6ff729f78f11ad66787425273d597513b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/d49f299482dd3840a1d23d9bf2420698cbfa870e",
-                "reference": "d49f299482dd3840a1d23d9bf2420698cbfa870e",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/98ec19d6ff729f78f11ad66787425273d597513b",
+                "reference": "98ec19d6ff729f78f11ad66787425273d597513b",
                 "shasum": ""
             },
             "require": {
@@ -1761,7 +1761,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/quiote/tree/main"
             },
-            "time": "2026-07-07T16:54:18+00:00"
+            "time": "2026-07-07T17:07:33+00:00"
         },
         {
             "name": "relay/relay",
