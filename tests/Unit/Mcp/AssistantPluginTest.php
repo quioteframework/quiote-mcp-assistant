@@ -41,9 +41,14 @@ final class AssistantPluginTest extends TestCase
     }
 
     #[Test]
-    public function reportsItsOwnPluginName(): void
+    public function carriesThePluginAttributeWithItsName(): void
     {
-        self::assertSame('quiote/assistant', $this->plugin->name());
+        // PluginInterface itself declares no name() -- PluginManager reads
+        // #[Plugin]'s name argument instead (see the class docblock).
+        $attributes = (new \ReflectionClass(AssistantPlugin::class))->getAttributes(\Quiote\Plugin\Attribute\Plugin::class);
+
+        self::assertCount(1, $attributes);
+        self::assertSame('quiote/assistant', $attributes[0]->newInstance()->name);
     }
 
     #[Test]

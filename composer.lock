@@ -1530,12 +1530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/csrf.git",
-                "reference": "3b25ae6c2106107cde5d0813ee4537e659f0ec54"
+                "reference": "b0c036e2a11b76ae42427938bd9ae72a5676a35c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/3b25ae6c2106107cde5d0813ee4537e659f0ec54",
-                "reference": "3b25ae6c2106107cde5d0813ee4537e659f0ec54",
+                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/b0c036e2a11b76ae42427938bd9ae72a5676a35c",
+                "reference": "b0c036e2a11b76ae42427938bd9ae72a5676a35c",
                 "shasum": ""
             },
             "require": {
@@ -1574,7 +1574,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/csrf/tree/main"
             },
-            "time": "2026-07-06T13:32:45+00:00"
+            "time": "2026-07-07T10:56:05+00:00"
         },
         {
             "name": "quioteframework/mcp",
@@ -1582,12 +1582,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/mcp.git",
-                "reference": "e01b27034e4d5ce657dfd08d3719e1cfb495de8e"
+                "reference": "64508ec8cb0826827176d9e934be9e002b4f112b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/e01b27034e4d5ce657dfd08d3719e1cfb495de8e",
-                "reference": "e01b27034e4d5ce657dfd08d3719e1cfb495de8e",
+                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/64508ec8cb0826827176d9e934be9e002b4f112b",
+                "reference": "64508ec8cb0826827176d9e934be9e002b4f112b",
                 "shasum": ""
             },
             "require": {
@@ -1627,7 +1627,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/mcp/tree/main"
             },
-            "time": "2026-07-06T16:53:12+00:00"
+            "time": "2026-07-07T16:54:18+00:00"
         },
         {
             "name": "quioteframework/quiote",
@@ -1635,12 +1635,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4"
+                "reference": "d49f299482dd3840a1d23d9bf2420698cbfa870e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4",
-                "reference": "5bed5959496e84a9ca6c8cc7eec37b3311bdd9c4",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/d49f299482dd3840a1d23d9bf2420698cbfa870e",
+                "reference": "d49f299482dd3840a1d23d9bf2420698cbfa870e",
                 "shasum": ""
             },
             "require": {
@@ -1761,7 +1761,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/quiote/tree/main"
             },
-            "time": "2026-07-07T06:36:44+00:00"
+            "time": "2026-07-07T16:54:18+00:00"
         },
         {
             "name": "relay/relay",

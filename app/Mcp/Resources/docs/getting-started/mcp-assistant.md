@@ -73,6 +73,8 @@ Five tools work with no target app at all; they answer questions about the frame
 
 <Aside type="note">
 `register-mcp-tool`'s generated code currently calls a `PluginRegistrar::mcpTool()` method that no longer exists on the framework's `PluginRegistrar` (see [How it's built](#how-its-built) below) — a known staleness in this recipe from the same pinned-dependency gap. Don't copy it verbatim; register against `Quiote\Mcp\McpCatalog` directly instead.
+
+`add-plugin`'s own description text above ("a `name()` and a `register()`") is also stale for the same reason: `PluginInterface` no longer declares `name()` — a plugin only implements `register()`, and its diagnostic name comes from `#[Plugin(name: '...')]` instead (or `NamedPlugin` for a name that can't be a compile-time constant). See [Plugins and extensibility: Writing a plugin](/architecture/plugins/#writing-a-plugin) for the current shape; don't add a redundant `name()` method to a generated plugin class.
 </Aside>
 
 #### describe_symbol

@@ -61,15 +61,14 @@ use QuioteMcpAssistant\Mcp\Introspection\ConsoleCommandWhitelist;
  * source) must carry this attribute as a deliberate opt-in, or
  * PluginManager::instantiate() silently refuses to register it (logged, not
  * thrown -- which is exactly why this was easy to miss after bumping quiote).
+ * `PluginInterface` itself declares no `name()` method -- the attribute's
+ * `name` argument is what `PluginManager::resolveName()` reads for
+ * diagnostics/logging; a plugin only needs `NamedPlugin` instead when its
+ * name can't be a compile-time constant, which doesn't apply here.
  */
 #[Plugin(name: 'quiote/assistant')]
 final class AssistantPlugin implements PluginInterface
 {
-    public function name(): string
-    {
-        return 'quiote/assistant';
-    }
-
     public function register(PluginRegistrar $registrar): void
     {
         // Sensible knowledge-server identity (app settings.php still wins).

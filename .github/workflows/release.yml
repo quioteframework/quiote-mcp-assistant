@@ -70,6 +70,11 @@ jobs:
           vendor/bin/quiote new /tmp/release-scratch-app --no-interaction
           php tools/mcp-smoke-client-scaffold.php /tmp/release-scratch-app
 
+      - name: Expose-action-as-tool smoke test
+        run: |
+          vendor/bin/quiote new /tmp/release-scratch-expose-app --no-interaction
+          php tools/mcp-smoke-client-expose-tool.php /tmp/release-scratch-expose-app
+
       - name: Build PHAR
         run: bin/build-phar
 

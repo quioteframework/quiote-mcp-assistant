@@ -177,7 +177,7 @@ final class RecipeBook
             'add-plugin' => [
                 'title' => 'Write and register a plugin',
                 'steps' => [
-                    ['description' => 'Implement PluginInterface -- a name() and a register() that only calls PluginRegistrar methods. #[Plugin] is required, not optional: a class named via a class-string activation source (plugins.* or PluginManager::add() passed a string) is silently refused -- logged, not thrown -- unless it carries this attribute as a deliberate opt-in.', 'code' => <<<'PHP'
+                    ['description' => 'Implement PluginInterface -- just a register() that only calls PluginRegistrar methods; the interface declares no name() method. #[Plugin(name: ...)] is required, not optional: a class named via a class-string activation source (plugins.* or PluginManager::add() passed a string) is silently refused -- logged, not thrown -- unless it carries this attribute as a deliberate opt-in, and its name argument is also what PluginManager reads for diagnostics/logging (don\'t also add your own name() method -- nothing calls it). Only implement NamedPlugin instead of passing name to the attribute if the name genuinely can\'t be a compile-time constant (computed from config, an env value, etc).', 'code' => <<<'PHP'
                         <?php
                         namespace App\Plugin;
 
@@ -188,11 +188,6 @@ final class RecipeBook
                         #[Plugin(name: 'health')]
                         final class HealthPlugin implements PluginInterface
                         {
-                            public function name(): string
-                            {
-                                return 'health';
-                            }
-
                             public function register(PluginRegistrar $r): void
                             {
                                 $r->configDefault('health.path', '/healthz')

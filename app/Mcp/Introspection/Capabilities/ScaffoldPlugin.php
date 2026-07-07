@@ -16,7 +16,11 @@ use Quiote\Config\Config;
  * quioteframework/quiote's newer PluginManager: a class named via a
  * class-string activation source (`plugins.*` or `PluginManager::add()`
  * passed a string) is silently refused (logged, not thrown) unless it
- * deliberately opts in with this attribute.
+ * deliberately opts in with this attribute. `PluginInterface` itself
+ * declares no `name()` -- the attribute's `name` argument is what
+ * `PluginManager::resolveName()` reads for diagnostics/logging, so the
+ * generated class doesn't also define one (that would just be maintaining
+ * the same string twice).
  */
 final class ScaffoldPlugin
 {
@@ -39,11 +43,6 @@ final class ScaffoldPlugin
             #[Plugin(name: '{$slug}')]
             final class {$name}Plugin implements PluginInterface
             {
-                public function name(): string
-                {
-                    return '{$slug}';
-                }
-
                 public function register(PluginRegistrar \$registrar): void
                 {
                     // TODO: contribute config defaults, services, middleware, commands, etc.

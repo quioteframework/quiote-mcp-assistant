@@ -371,6 +371,10 @@ The [PHPTAL](https://phptal.org/) renderer, `Quiote\Renderer\Phptal\PhptalRender
 composer require quioteframework/phptal
 ```
 
+:::caution[PHPTAL throws on a genuinely undefined array key]
+A template that reads `${foo/bar}` (or `tal:content="foo/bar"`) **throws** if `bar` was never set on the `foo` array — unlike plain PHP array access with `??`/`isset()`, PHPTAL does not treat a missing key as `null`. This is upstream PHPTAL behavior, not something Quiote's renderer wrapper changes: a defensible, arguably safer default (a forgotten attribute surfaces at render time instead of silently printing nothing), but it means every attribute a PHPTAL template reads must be `setAttribute()`-ed — or explicitly given a default — on **every** code path through the view, including early-return and error branches, not just the happy path you tested first.
+:::
+
 ### `quioteframework/xslt`
 
 The XSLT renderer, `Quiote\Renderer\Xslt\XsltRenderer` (needs PHP's `ext-xsl`).

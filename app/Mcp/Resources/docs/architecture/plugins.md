@@ -12,7 +12,7 @@ Plugins aren't just for your code — **many subsystems have been extracted from
 
 ## Writing a plugin
 
-Implement `Quiote\Plugin\PluginInterface` — a name, and a `register()` that receives a `PluginRegistrar` — and mark the class with `#[Quiote\Plugin\Attribute\Plugin]`:
+Implement `Quiote\Plugin\PluginInterface` — just a `register()` that receives a `PluginRegistrar` — and mark the class with `#[Quiote\Plugin\Attribute\Plugin]`, passing a `name` for diagnostics/logging:
 
 ```php
 <?php
@@ -22,14 +22,9 @@ use Quiote\Plugin\{PluginInterface, PluginRegistrar};
 use Quiote\Plugin\Attribute\Plugin;
 use Quiote\DI\Container;
 
-#[Plugin]
+#[Plugin(name: 'health')]
 final class HealthPlugin implements PluginInterface
 {
-    public function name(): string
-    {
-        return 'health';
-    }
-
     public function register(PluginRegistrar $r): void
     {
         $r->configDefault('health.path', '/healthz')
@@ -40,6 +35,10 @@ final class HealthPlugin implements PluginInterface
     }
 }
 ```
+
+`PluginInterface` itself declares no `name()` method — a plugin only has to implement `register()`. The `#[Plugin(name: '...')]` attribute's `name` argument is what `PluginManager::resolveName()` actually reads for diagnostics/logging; don't also add your own `name(): string` method to the class, since nothing would call it and you'd just be maintaining the same string twice.
+
+If a plugin's name genuinely can't be a compile-time constant — computed from config, an environment value, or an instance the plugin was built with — implement `Quiote\Plugin\NamedPlugin` (`extends PluginInterface`, adds back `name(): string`) instead of passing `name` to the attribute. `resolveName()` prefers `NamedPlugin::name()` over the attribute when a plugin implements both. A plugin with **neither** a `NamedPlugin` implementation nor an attribute `name` fails fast at boot with a `QuioteException` naming both routes — it's never silently unnamed.
 
 <Aside type="caution" title="`#[Plugin]` is mandatory for class-string activation">
 Naming a class in `plugins.*` (or passing a class-string to `PluginManager::add()`) is **not, by itself, enough to activate it** — the class must also carry `#[Plugin]`. Without it, `PluginManager::instantiate()` refuses (logs, returns `null`) and the plugin never runs, even if it's correctly named in `plugins.php`. This is a deliberate supply-chain safeguard: merely `composer require`-ing a package can never activate anything in it, because the class itself must have already opted in at authoring time.

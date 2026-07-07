@@ -663,11 +663,11 @@ Ship it as a [plugin](/architecture/plugins/) to get a short alias:
 
 ```php
 use Quiote\Plugin\{PluginInterface, PluginRegistrar};
+use Quiote\Plugin\Attribute\Plugin;
 
+#[Plugin(name: 'vendor/my-orm')]
 final class MyOrmPlugin implements PluginInterface
 {
-    public function name(): string { return 'vendor/my-orm'; }
-
     public function register(PluginRegistrar $registrar): void
     {
         $registrar->databaseDriver('myorm', MyOrmDatabase::class);

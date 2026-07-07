@@ -57,6 +57,11 @@ jobs:
           vendor/bin/quiote new /tmp/ci-scratch-app --no-interaction
           php tools/mcp-smoke-client-scaffold.php /tmp/ci-scratch-app
 
+      - name: Expose-action-as-tool smoke test
+        run: |
+          vendor/bin/quiote new /tmp/ci-scratch-expose-app --no-interaction
+          php tools/mcp-smoke-client-expose-tool.php /tmp/ci-scratch-expose-app
+
   docker:
     runs-on: ubuntu-latest
     steps:

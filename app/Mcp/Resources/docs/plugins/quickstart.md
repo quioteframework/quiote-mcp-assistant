@@ -195,14 +195,9 @@ See [Error handling: Developer vs safe rendering](/architecture/error-handling/#
    use Quiote\Plugin\PluginInterface;
    use Quiote\Plugin\PluginRegistrar;
 
-   #[Plugin]
+   #[Plugin(name: 'app/healthz')]
    final class HealthzPlugin implements PluginInterface
    {
-       public function name(): string
-       {
-           return 'app/healthz';
-       }
-
        public function register(PluginRegistrar $registrar): void
        {
            $registrar
@@ -213,6 +208,8 @@ See [Error handling: Developer vs safe rendering](/architecture/error-handling/#
    ```
 
    `#[Plugin]` is **mandatory** for any plugin activated via a class-string (a `plugins.*` file, or `PluginManager::add('App\Plugin\HealthzPlugin')`) — a class without it is silently refused (logged) even if it's correctly named somewhere. It's skipped only for `PluginManager::add(new HealthzPlugin())` — passing an already-built instance is itself the trust boundary, since your own code named the class directly.
+
+   `PluginInterface` has no `name()` method — the attribute's `name` argument is the name `PluginManager` actually reads. Don't add a `name(): string` method on top of it; nothing calls it, and you'd just be repeating the same string twice. Reach for `Quiote\Plugin\NamedPlugin` (adds `name(): string` back) only when the name genuinely can't be a compile-time constant — see [Plugins and extensibility: Writing a plugin](/architecture/plugins/#writing-a-plugin).
 
 2. **Pick contribution methods on `PluginRegistrar`** inside `register()` — all fluent, mix and match as needed:
 
