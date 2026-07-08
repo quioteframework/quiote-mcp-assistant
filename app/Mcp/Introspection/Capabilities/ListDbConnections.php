@@ -56,7 +56,7 @@ final class ListDbConnections
         $databases = [];
         foreach ($canonical['databases'] as $name => $db) {
             $databases[$name] = [
-                'class' => $db['class'] ?? null,
+                'class' => $db['class'],
                 'parameter_keys' => array_keys($db['parameters']),
             ];
         }
