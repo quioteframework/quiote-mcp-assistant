@@ -179,6 +179,8 @@ try {
         'modules' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ListModules::run(),
         'config' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ReadConfig::run((string) ($options['key'] ?? '')),
         'validate_config' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ValidateConfig::run((string) ($options['key'] ?? '')),
+        'overview' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\Overview::run($contextName),
+        'diagnostics' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\Diagnostics::run($contextName),
         'scaffold_module' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ScaffoldModule::run(
             $appDir,
             (string) ($options['module'] ?? ''),

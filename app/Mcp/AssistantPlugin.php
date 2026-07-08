@@ -15,6 +15,7 @@ use QuioteMcpAssistant\Mcp\Recipes\RecipeBook;
 use QuioteMcpAssistant\Mcp\Resources\DocsResource;
 use QuioteMcpAssistant\Mcp\Tools\DescribeActionTool;
 use QuioteMcpAssistant\Mcp\Tools\DescribeSymbolTool;
+use QuioteMcpAssistant\Mcp\Tools\DiagnosticsTool;
 use QuioteMcpAssistant\Mcp\Tools\GetConventionTool;
 use QuioteMcpAssistant\Mcp\Tools\GetRecipeTool;
 use QuioteMcpAssistant\Mcp\Tools\ListApiTool;
@@ -22,6 +23,7 @@ use QuioteMcpAssistant\Mcp\Tools\ListDbConnectionsTool;
 use QuioteMcpAssistant\Mcp\Tools\ListModulesTool;
 use QuioteMcpAssistant\Mcp\Tools\ListPluginsTool;
 use QuioteMcpAssistant\Mcp\Tools\ListRoutesTool;
+use QuioteMcpAssistant\Mcp\Tools\OverviewTool;
 use QuioteMcpAssistant\Mcp\Tools\ProjectInfoTool;
 use QuioteMcpAssistant\Mcp\Tools\ReadConfigTool;
 use QuioteMcpAssistant\Mcp\Tools\RunConsoleTool;
@@ -265,6 +267,28 @@ final class AssistantPlugin implements PluginInterface
             // An empty PHP array for "properties" serializes as a JSON array
             // ([]), which the SDK's opis/json-schema validator rejects
             // ("properties must be an object") -- force object serialization.
+            inputSchema: ['type' => 'object', 'properties' => new \stdClass(), 'additionalProperties' => false],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: OverviewTool::class,
+            method: 'overview',
+            name: 'overview',
+            description: 'Routes + modules + Action/View/Template triads + diagnostics + '
+                . 'shadowed-config info, all from one app bootstrap. Prefer this over calling '
+                . 'list_routes/list_modules/describe_action separately when you need more than '
+                . 'one of them.',
+            inputSchema: ['type' => 'object', 'properties' => new \stdClass(), 'additionalProperties' => false],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: DiagnosticsTool::class,
+            method: 'diagnostics',
+            name: 'diagnostics',
+            description: 'Every problem this app can find in one call: routing (missing action '
+                . 'class, duplicate route name/path), triad (missing view/template), and config '
+                . '(syntax/semantic/schema errors, shadowed configs) -- one flat list sharing a '
+                . 'single {severity, code, message, file, line, ...} shape.',
             inputSchema: ['type' => 'object', 'properties' => new \stdClass(), 'additionalProperties' => false],
         );
 

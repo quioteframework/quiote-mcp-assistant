@@ -231,6 +231,8 @@ Read-only:
 | Tool | Description |
 | --- | --- |
 | `project_info()` | Environment, default context, enabled plugins, module list. |
+| `overview()` | Routes + modules + Action/View/Template triads + diagnostics + shadowed-config info, all from one app bootstrap. Prefer this over calling `list_routes`/`list_modules`/`describe_action` separately when you need more than one of them. |
+| `diagnostics()` | Every problem this app can find in one call: routing (missing action class, duplicate route), triad (missing view/template), and config (syntax/semantic/schema errors, shadowed configs) — one flat list sharing a single `{severity, code, message, file, line, ...}` shape. |
 | `list_routes(module?, action?)` | Every route the target app's live `RouteCollection` resolves with (attribute-routed and programmatic). Filter server-side to one module and/or action (e.g. `module: "Library"`) instead of fetching everything on a large app. |
 | `describe_action(action)` | Verbs, validator-derived input schema per verb, credentials, default view for `"Module.Action"`. |
 | `list_db_connections()` | Adapter class + parameter *names* only — never parameter values (DSNs/credentials are never disclosed). |
