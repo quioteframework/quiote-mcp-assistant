@@ -37,6 +37,7 @@ final class ReadConfig
 
     /**
      * @return array{
+     *     _schema_version: int,
      *     allowed_keys?: list<string>,
      *     key?: string,
      *     error?: string,
@@ -46,17 +47,18 @@ final class ReadConfig
     public static function run(string $key): array
     {
         if ($key === '') {
-            return ['allowed_keys' => self::ALLOWED_KEYS];
+            return ['_schema_version' => 1, 'allowed_keys' => self::ALLOWED_KEYS];
         }
 
         if (!in_array($key, self::ALLOWED_KEYS, true)) {
             return [
+                '_schema_version' => 1,
                 'key' => $key,
                 'error' => 'Not a whitelisted key.',
                 'allowed_keys' => self::ALLOWED_KEYS,
             ];
         }
 
-        return ['key' => $key, 'value' => Config::get($key)];
+        return ['_schema_version' => 1, 'key' => $key, 'value' => Config::get($key)];
     }
 }

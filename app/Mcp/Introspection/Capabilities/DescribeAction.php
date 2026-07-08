@@ -6,8 +6,11 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 use Quiote\Config\Config;
 use Quiote\Context;
 use Quiote\Mcp\Compiler\ValidatorSchemaMapper;
+use Quiote\Routing\Compiler\ModuleActionEntry;
+use Quiote\Routing\Compiler\TriadViewResolver;
 use Quiote\Validator\Compiler\ValidatorCompiler;
 use Quiote\Validator\Compiler\ValidatorSource;
+use ReflectionClass;
 
 /**
  * `describe_action("Module.Action")` -- verbs (detected the same way
@@ -28,15 +31,19 @@ final class DescribeAction
 
     /**
      * @return array{
+     *     _schema_version: int,
      *     _source: string,
      *     module: string,
      *     action: string,
      *     class: class-string,
-     *     verbs: array<string, array{schema: array<string, mixed>|null}>,
+     *     file: ?string,
+     *     verbs: array<string, array{schema: array<string, mixed>|null, line: ?int}>,
      *     isSecure: bool,
      *     credentials: ?string,
      *     isSimple: bool,
      *     defaultViewName: ?string,
+     *     viewFile: ?string,
+     *     templateFile: ?string,
      * }
      */
     public static function run(string $contextName, string $module, string $action): array
@@ -53,27 +60,92 @@ final class DescribeAction
             throw new \RuntimeException(sprintf('Could not instantiate action "%s.%s": %s', $module, $action, $e->getMessage()));
         }
 
+        $reflection = self::reflectionFor($instance::class);
+        $file = $reflection->getFileName();
+
         $verbs = [];
         foreach (self::VERB_TOKENS as $token) {
-            if (method_exists($instance, 'execute' . ucfirst($token))) {
-                $verbs[$token] = ['schema' => self::schemaFor($module, $action, $token)];
+            $method = 'execute' . ucfirst($token);
+            if ($reflection->hasMethod($method)) {
+                $startLine = $reflection->getMethod($method)->getStartLine();
+                $verbs[$token] = ['schema' => self::schemaFor($module, $action, $token), 'line' => $startLine !== false ? $startLine : null];
             }
         }
-        if ($verbs === [] && method_exists($instance, 'execute')) {
-            $verbs['*'] = ['schema' => null];
+        if ($verbs === [] && $reflection->hasMethod('execute')) {
+            $startLine = $reflection->getMethod('execute')->getStartLine();
+            $verbs['*'] = ['schema' => null, 'line' => $startLine !== false ? $startLine : null];
         }
 
+        [$viewFile, $templateFile] = self::locateViewAndTemplate($module, $action, $reflection);
+
         return [
+            '_schema_version' => 1,
             '_source' => 'target-app-untrusted',
             'module' => $module,
             'action' => $action,
             'class' => $instance::class,
+            'file' => $file !== false ? $file : null,
             'verbs' => $verbs,
             'isSecure' => (bool) self::safeCall($instance, 'isSecure', false),
             'credentials' => self::sanitizeString(self::safeCall($instance, 'getCredentials', null)),
             'isSimple' => (bool) self::safeCall($instance, 'isSimple', false),
             'defaultViewName' => self::sanitizeString(self::safeCall($instance, 'getDefaultViewName', null)),
+            'viewFile' => $viewFile,
+            'templateFile' => $templateFile,
         ];
+    }
+
+    /**
+     * A plain `string` parameter (not `class-string<T>`) so the resulting
+     * ReflectionClass's inferred template type is the widest one,
+     * `ReflectionClass<object>` -- matching `TriadViewResolver`'s declared
+     * parameter type. Reflecting `$instance` directly would instead infer
+     * the narrower `ReflectionClass<Action>`, which PHPStan then refuses to
+     * pass where `ReflectionClass<object>` is expected (the native
+     * ReflectionClass template parameter is invariant, not covariant).
+     * Mirrors `ModuleActionEntry::$fqcn` (a plain string) in
+     * `AppIntrospectionCompiler`, which has the same need.
+     * @param class-string $className
+     * @return ReflectionClass<object>
+     */
+    private static function reflectionFor(string $className): ReflectionClass
+    {
+        return new ReflectionClass($className);
+    }
+
+    /**
+     * Reuses `Quiote\Routing\Compiler\TriadViewResolver` -- the exact triad
+     * resolution logic `AppIntrospectionCompiler` computes for the
+     * `overview`/`routes:compile` artifact -- rather than reimplementing the
+     * `{Action}{ViewName}View`/`{ViewName}.php` naming convention here.
+     * @param ReflectionClass<object> $reflection
+     * @return array{0: ?string, 1: ?string}
+     */
+    private static function locateViewAndTemplate(string $module, string $action, ReflectionClass $reflection): array
+    {
+        $resolver = new TriadViewResolver();
+        $viewToken = $resolver->resolveViewToken($reflection);
+        if ($viewToken === null) {
+            return [null, null];
+        }
+
+        $file = $reflection->getFileName();
+        $entry = new ModuleActionEntry(
+            $module,
+            $action,
+            $file !== false ? $file : '',
+            $reflection->getName(),
+            Config::getString('core.module_dir'),
+        );
+
+        $namespacePrefix = Config::getString('core.namespace_prefix', 'App');
+        $canonical = $resolver->canonicalViewToken($entry, $viewToken);
+        $viewFile = $resolver->resolveExistingViewFile($entry, $canonical, $namespacePrefix);
+
+        $templateFile = $resolver->templateFileFor($entry, $canonical);
+        $templateFile = is_file($templateFile) ? $templateFile : null;
+
+        return [$viewFile, $templateFile];
     }
 
     /**

@@ -10,7 +10,7 @@ use Quiote\Plugin\PluginManager;
 /** `list_plugins` -- every plugin registered during the target app's bootstrap. */
 final class ListPlugins
 {
-    /** @return array{count: int, plugins: list<array{class: string, name: string}>} */
+    /** @return array{_schema_version: int, count: int, plugins: list<array{class: string, name: string}>} */
     public static function run(): array
     {
         $plugins = [];
@@ -18,7 +18,7 @@ final class ListPlugins
             $plugins[] = ['class' => $class, 'name' => self::resolveName($instance)];
         }
 
-        return ['count' => count($plugins), 'plugins' => $plugins];
+        return ['_schema_version' => 1, 'count' => count($plugins), 'plugins' => $plugins];
     }
 
     /**

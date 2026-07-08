@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Context;
+use Quiote\Introspection\AppIntrospectionCompiler;
 
 /**
  * `list_routes` -- every route the target app's bootstrapped Routing
@@ -16,6 +17,11 @@ use Quiote\Context;
  * scan would silently miss the former. The RouteCollection is the same one
  * every real HTTP request is matched against, so it's authoritative
  * regardless of declaration style.
+ *
+ * `file`/`line` per route and the top-level `diagnostics` array reuse
+ * `Quiote\Introspection\AppIntrospectionCompiler` -- the same compiler
+ * `routes:compile`/`overview` use -- rather than re-deriving action-class
+ * resolution here.
  */
 final class ListRoutes
 {
@@ -28,17 +34,22 @@ final class ListRoutes
      * context on routes it's about to discard anyway.
      *
      * @return array{
+     *     _schema_version: int,
      *     context: string,
      *     module_filter: ?string,
      *     action_filter: ?string,
      *     count: int,
-     *     routes: list<array{name: string, path: string, methods: list<string>, defaults: array<string, mixed>, requirements: array<string, mixed>}>,
+     *     routes: list<array{name: string, path: string, methods: list<string>, defaults: array<string, mixed>, requirements: array<string, mixed>, file: ?string, line: ?int}>,
+     *     diagnostics: list<array{severity: string, code: string, message: string, file: string, line: ?int, column: ?int, endLine: ?int, endColumn: ?int, symbol: ?string}>,
      * }
      */
     public static function run(string $contextName, ?string $module = null, ?string $action = null): array
     {
         $routing = Context::getInstance($contextName)->getRouting();
         $collection = $routing->getRouteCollection();
+
+        $artifact = (new AppIntrospectionCompiler())->compile($contextName);
+        $locations = self::locationsByRouteName($artifact);
 
         $routes = [];
         foreach ($collection as $name => $route) {
@@ -50,22 +61,41 @@ final class ListRoutes
                 continue;
             }
 
+            $location = $locations[$name] ?? ['file' => null, 'line' => null];
+
             $routes[] = [
                 'name' => $name,
                 'path' => $route->getPath(),
                 'methods' => array_values($route->getMethods()) ?: ['ANY'],
                 'defaults' => $defaults,
                 'requirements' => $route->getRequirements(),
+                'file' => $location['file'],
+                'line' => $location['line'],
             ];
         }
 
         return [
+            '_schema_version' => 1,
             'context' => $contextName,
             'module_filter' => $module,
             'action_filter' => $action,
             'count' => count($routes),
             'routes' => $routes,
+            'diagnostics' => $artifact['diagnostics'],
         ];
+    }
+
+    /**
+     * @param array{routes: list<array{name: string, file: ?string, line: ?int}>} $artifact
+     * @return array<string, array{file: ?string, line: ?int}>
+     */
+    private static function locationsByRouteName(array $artifact): array
+    {
+        $locations = [];
+        foreach ($artifact['routes'] as $route) {
+            $locations[$route['name']] = ['file' => $route['file'], 'line' => $route['line']];
+        }
+        return $locations;
     }
 
     private static function matches(mixed $defaultValue, string $filter): bool

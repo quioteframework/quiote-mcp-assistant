@@ -28,7 +28,7 @@ final class ListDbConnections
         $configDir = Config::getString('core.config_dir');
         $path = rtrim($configDir, '/') . '/databases.xml';
         if (!is_file($path)) {
-            return ['found' => false, 'default' => null, 'databases' => []];
+            return ['_schema_version' => 1, 'found' => false, 'default' => null, 'databases' => []];
         }
 
         $document = XmlConfigParser::run(
@@ -62,6 +62,7 @@ final class ListDbConnections
         }
 
         return [
+            '_schema_version' => 1,
             'found' => true,
             'default' => $canonical['default'] ?? null,
             'databases' => $databases,

@@ -54,6 +54,7 @@ final class ScaffoldDbConnection
 
         if (is_file($path)) {
             return [
+                '_schema_version' => 1,
                 'connection' => $name,
                 'driver' => $driver,
                 'status' => 'exists_manual_edit_required',

@@ -70,4 +70,26 @@ final class ListRoutesTest extends TestCase
         self::assertNotEmpty($result['routes'][0]['path']);
         self::assertNotEmpty($result['routes'][0]['methods']);
     }
+
+    #[Test]
+    public function reportsTheActionClassFileForAnAttributeRoutedAction(): void
+    {
+        $result = ListRoutes::run('web', module: 'Default', action: 'Contact');
+
+        self::assertSame(1, $result['_schema_version']);
+        self::assertStringEndsWith('ContactAction.php', (string) $result['routes'][0]['file']);
+    }
+
+    #[Test]
+    public function surfacesTheKnownMissingViewDiagnosticAlongsideRoutes(): void
+    {
+        // This app's own demo "Boom" action deliberately declares a view
+        // with no backing class/file -- reused as a stable fixture (see
+        // OverviewTest) to assert route/triad diagnostics reach this
+        // capability's top-level "diagnostics", not just overview()'s.
+        $result = ListRoutes::run('web');
+
+        $codes = array_column($result['diagnostics'], 'code');
+        self::assertContains('MISSING_VIEW', $codes);
+    }
 }

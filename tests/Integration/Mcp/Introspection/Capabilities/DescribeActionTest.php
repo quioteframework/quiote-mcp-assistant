@@ -30,6 +30,25 @@ final class DescribeActionTest extends TestCase
     }
 
     #[Test]
+    public function reportsTheActionFileAndPerVerbLine(): void
+    {
+        $result = DescribeAction::run('web', 'Default', 'Contact');
+
+        self::assertSame(1, $result['_schema_version']);
+        self::assertStringEndsWith('ContactAction.php', (string) $result['file']);
+        self::assertIsInt($result['verbs']['read']['line']);
+    }
+
+    #[Test]
+    public function resolvesTheTriadsViewAndTemplateFiles(): void
+    {
+        $result = DescribeAction::run('web', 'Default', 'Contact');
+
+        self::assertStringEndsWith('ContactSuccessView.php', (string) $result['viewFile']);
+        self::assertStringEndsWith('ContactSuccess.php', (string) $result['templateFile']);
+    }
+
+    #[Test]
     public function rejectsAnEmptyModule(): void
     {
         $this->expectException(\InvalidArgumentException::class);

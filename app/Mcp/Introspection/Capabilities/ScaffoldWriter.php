@@ -18,7 +18,7 @@ final class ScaffoldWriter
 {
     /**
      * @param list<array{path: string, content: string}> $files
-     * @return array{dry_run: bool, files: list<array{path: string, status: string, diff?: string}>}
+     * @return array{_schema_version: int, dry_run: bool, files: list<array{path: string, status: string, diff?: string}>}
      */
     public static function apply(string $appDir, array $files, bool $dryRun): array
     {
@@ -60,7 +60,7 @@ final class ScaffoldWriter
             $results[] = ['path' => $relative, 'status' => 'created'];
         }
 
-        return ['dry_run' => $dryRun, 'files' => $results];
+        return ['_schema_version' => 1, 'dry_run' => $dryRun, 'files' => $results];
     }
 
     private static function relativePath(string $appDir, string $path): string

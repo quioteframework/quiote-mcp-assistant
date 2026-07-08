@@ -10,6 +10,7 @@ final class ProjectInfo
 {
     /**
      * @return array{
+     *     _schema_version: int,
      *     _source: string,
      *     app_name: mixed,
      *     namespace_prefix: mixed,
@@ -24,6 +25,7 @@ final class ProjectInfo
     public static function run(string $contextName): array
     {
         return [
+            '_schema_version' => 1,
             '_source' => 'target-app-untrusted',
             'app_name' => Config::get('core.app_name'),
             'namespace_prefix' => Config::get('core.namespace_prefix'),
