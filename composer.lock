@@ -905,16 +905,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "2.3.2",
+            "version": "2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "a004701b11273a26cd7955a61d67a7f1e525a45a"
+                "reference": "fb19eedd2bb67ff8cf7a5502ad329e701d6398a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/a004701b11273a26cd7955a61d67a7f1e525a45a",
-                "reference": "a004701b11273a26cd7955a61d67a7f1e525a45a",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/fb19eedd2bb67ff8cf7a5502ad329e701d6398a3",
+                "reference": "fb19eedd2bb67ff8cf7a5502ad329e701d6398a3",
                 "shasum": ""
             },
             "require": {
@@ -946,9 +946,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.2"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/2.3.3"
             },
-            "time": "2026-01-25T14:56:51+00:00"
+            "time": "2026-07-08T07:01:06+00:00"
         },
         {
             "name": "psr/cache",
@@ -1635,12 +1635,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "98ec19d6ff729f78f11ad66787425273d597513b"
+                "reference": "71b4492b0571f2d6a3ce628c2b0031e0aa458e37"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/98ec19d6ff729f78f11ad66787425273d597513b",
-                "reference": "98ec19d6ff729f78f11ad66787425273d597513b",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/71b4492b0571f2d6a3ce628c2b0031e0aa458e37",
+                "reference": "71b4492b0571f2d6a3ce628c2b0031e0aa458e37",
                 "shasum": ""
             },
             "require": {
@@ -1761,7 +1761,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/quiote/tree/main"
             },
-            "time": "2026-07-07T17:07:33+00:00"
+            "time": "2026-07-08T14:06:27+00:00"
         },
         {
             "name": "relay/relay",
@@ -4668,16 +4668,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "13.2.3",
+            "version": "13.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "d76d0e24225e587d6a5f0c6f6d9fef0d90712b54"
+                "reference": "8f5180f4627fc1978be2f61d8d9979dbe37e0c10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d76d0e24225e587d6a5f0c6f6d9fef0d90712b54",
-                "reference": "d76d0e24225e587d6a5f0c6f6d9fef0d90712b54",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/8f5180f4627fc1978be2f61d8d9979dbe37e0c10",
+                "reference": "8f5180f4627fc1978be2f61d8d9979dbe37e0c10",
                 "shasum": ""
             },
             "require": {
@@ -4691,7 +4691,7 @@
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.4.1",
-                "phpunit/php-code-coverage": "^14.2.2",
+                "phpunit/php-code-coverage": "^14.2.3",
                 "phpunit/php-file-iterator": "^7.0.0",
                 "phpunit/php-invoker": "^7.0.0",
                 "phpunit/php-text-template": "^6.0.0",
@@ -4748,7 +4748,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.2.3"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.2.4"
             },
             "funding": [
                 {
@@ -4756,7 +4756,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-07-06T14:55:56+00:00"
+            "time": "2026-07-08T08:36:51+00:00"
         },
         {
             "name": "sebastian/cli-parser",

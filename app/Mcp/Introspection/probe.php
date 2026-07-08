@@ -178,6 +178,7 @@ try {
         'plugins' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ListPlugins::run(),
         'modules' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ListModules::run(),
         'config' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ReadConfig::run((string) ($options['key'] ?? '')),
+        'validate_config' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ValidateConfig::run((string) ($options['key'] ?? '')),
         'scaffold_module' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ScaffoldModule::run(
             $appDir,
             (string) ($options['module'] ?? ''),

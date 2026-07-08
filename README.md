@@ -237,6 +237,7 @@ Read-only:
 | `list_plugins()` | Plugins registered during the target app's bootstrap. |
 | `list_modules()` | Module names discovered under the target app's module directory. |
 | `read_config(key?)` | One setting, restricted to an explicit allowlist (never secrets like `mcp.auth_token`). Omit `key` to see the allowlist. |
+| `validate_config(key?)` | Validates the target app's config files — syntax (per-format, with line numbers), semantic (the real config handler's own compilation), and array-shape schema checks — format-agnostically across PHP/YAML/XML. Omit `key` to validate every known config type (`settings`, `factories`, `databases`, `output_types`, `rbac_definitions`, `translation`, `plugins`, `middleware`). |
 
 Scaffolding + console (`dry_run` defaults to `true` on every write tool — it returns a diff and
 writes nothing until you pass `dry_run=false`; none of them ever overwrite an existing file):

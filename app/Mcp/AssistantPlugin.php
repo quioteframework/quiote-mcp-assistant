@@ -30,6 +30,7 @@ use QuioteMcpAssistant\Mcp\Tools\ScaffoldDbConnectionTool;
 use QuioteMcpAssistant\Mcp\Tools\ScaffoldModuleTool;
 use QuioteMcpAssistant\Mcp\Tools\ScaffoldPluginTool;
 use QuioteMcpAssistant\Mcp\Tools\SearchDocsTool;
+use QuioteMcpAssistant\Mcp\Tools\ValidateConfigTool;
 use QuioteMcpAssistant\Mcp\Introspection\ConsoleCommandWhitelist;
 
 /**
@@ -357,6 +358,23 @@ final class AssistantPlugin implements PluginInterface
                 'type' => 'object',
                 'properties' => [
                     'key' => ['type' => 'string', 'description' => 'A whitelisted config key, e.g. "core.use_database".'],
+                ],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: ValidateConfigTool::class,
+            method: 'validate',
+            name: 'validate_config',
+            description: 'Validate the target app\'s config files: syntax (per-format, with line '
+                . 'numbers), semantic (the real config handler\'s own compilation), and array-shape '
+                . 'schema checks, format-agnostic across PHP/YAML/XML. Omit "key" to validate every '
+                . 'known config type.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'key' => ['type' => 'string', 'description' => 'A config type, e.g. "settings", "factories", "databases". Omit for all.'],
                 ],
                 'additionalProperties' => false,
             ],
