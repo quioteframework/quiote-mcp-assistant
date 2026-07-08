@@ -100,6 +100,47 @@ final class ScaffoldTemplatesTest extends TestCase
         self::assertStringContainsString('public function executeXml(WebRequest $rd): string', $content);
     }
 
+    /**
+     * Regression test: a scaffolded JSON-only (or other non-html) action
+     * used to false-flag `MISSING_TEMPLATE` the moment it was created,
+     * because `TriadDiagnosticsScanner` has no way to know a method that
+     * returns its body directly never renders a template -- see
+     * `../../../../../internal/TRIAD_MISSING_TEMPLATE_FIX.md` in `quiote`.
+     * The abstract `execute()` dispatch-guard stub and every non-`html`
+     * `execute<Format>()` method must carry `@quiote-viewmethod-has-no-template`;
+     * only `executeHtml()` (which actually calls `loadLayout()`) may not.
+     */
+    #[Test]
+    public function nonTemplateMethodsCarryTheNoTemplateAnnotation(): void
+    {
+        $content = ScaffoldTemplates::viewContent('App', 'Blog', 'Index', ['html', 'json']);
+
+        self::assertValidPhp($content);
+        self::assertMatchesRegularExpression(
+            '/@quiote-viewmethod-has-no-template\s*\*\/\s*public function execute\(WebRequest \$rd\): never/',
+            $content,
+        );
+        self::assertMatchesRegularExpression(
+            '/@quiote-viewmethod-has-no-template\s*\*\/\s*public function executeJson\(WebRequest \$rd\): string/',
+            $content,
+        );
+        self::assertDoesNotMatchRegularExpression(
+            '/@quiote-viewmethod-has-no-template\s*\*\/\s*public function executeHtml/',
+            $content,
+        );
+    }
+
+    #[Test]
+    public function theUnknownFormatPlaceholderAlsoCarriesTheNoTemplateAnnotation(): void
+    {
+        $content = ScaffoldTemplates::viewContent('App', 'Blog', 'Index', ['xml']);
+
+        self::assertMatchesRegularExpression(
+            '/@quiote-viewmethod-has-no-template\s*\*\/\s*public function executeXml\(WebRequest \$rd\): string/',
+            $content,
+        );
+    }
+
     #[Test]
     public function templateContentGeneratesValidPhp(): void
     {

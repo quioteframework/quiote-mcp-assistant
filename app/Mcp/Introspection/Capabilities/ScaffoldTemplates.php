@@ -90,7 +90,11 @@ final class ScaffoldTemplates
      * "Serving multiple output types from one view"): `html` calls
      * `loadLayout()` + sets attributes and lets the template layers render;
      * every other format builds and returns its body directly, since those
-     * generally need no layout/template at all.
+     * generally need no layout/template at all. Every non-template method
+     * (the abstract `execute()` stub, and every non-`html` `execute<Format>()`)
+     * carries `@quiote-viewmethod-has-no-template`, so `TriadDiagnosticsScanner`
+     * doesn't false-flag `MISSING_TEMPLATE` for a scaffolded JSON-only (or
+     * similar) action the moment it's created.
      *
      * @param list<string> $formats each one an output type name, e.g. "html"/"json"
      */
@@ -113,6 +117,7 @@ final class ScaffoldTemplates
 
             class {$name}SuccessView extends View
             {
+                /** @quiote-viewmethod-has-no-template */
                 public function execute(WebRequest \$rd): never
                 {
                     throw new ViewException(sprintf(
@@ -145,6 +150,7 @@ final class ScaffoldTemplates
 
         if ($format === 'json') {
             return <<<PHP
+                    /** @quiote-viewmethod-has-no-template */
                     public function {$methodName}(WebRequest \$rd): string
                     {
                         return json_encode(['title' => '{$name}'], JSON_THROW_ON_ERROR);
@@ -154,6 +160,7 @@ final class ScaffoldTemplates
         }
 
         return <<<PHP
+                /** @quiote-viewmethod-has-no-template */
                 public function {$methodName}(WebRequest \$rd): string
                 {
                     // TODO: build and return the "{$format}" response body directly --

@@ -78,7 +78,32 @@ if (!is_string($capability) || $capability === '') {
 }
 
 $assistantAppDir = dirname(__DIR__, 2); // app/Mcp/Introspection -> app/
-require dirname($assistantAppDir) . '/vendor/autoload.php';
+
+// Standalone checkout: dirname($assistantAppDir) is the assistant's own repo
+// root, with its own vendor/autoload.php one level up -- found immediately.
+// Installed as `composer require --dev quioteframework/quiote-mcp-assistant`:
+// the assistant has no vendor/ of its own (Composer doesn't nest one inside
+// a dependency), so this climbs until it reaches the *consuming* app's
+// shared vendor/autoload.php instead, which already has the assistant's own
+// classes' dependencies flattened into it. Composer's generated
+// autoload.php is idempotent (static-guarded), so it's harmless if the
+// target-app search below (which starts from $appDir, not $assistantAppDir)
+// ends up finding and requiring this same file again.
+$dir = dirname($assistantAppDir);
+while (true) {
+    $assistantAutoload = $dir . '/vendor/autoload.php';
+    if (is_file($assistantAutoload)) {
+        require $assistantAutoload;
+        break;
+    }
+    $parent = dirname($dir);
+    if ($parent === $dir) {
+        break; // None found above the assistant itself -- not fatal here; the
+               // target-app search below supplies the shared autoloader when
+               // the assistant is installed as a dependency.
+    }
+    $dir = $parent;
+}
 
 // A real target app is usually its own independently-managed Composer
 // project, with plugin/adapter packages (e.g. an ORM adapter) this

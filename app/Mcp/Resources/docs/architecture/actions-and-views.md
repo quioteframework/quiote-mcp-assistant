@@ -127,6 +127,35 @@ class PostSuccessView extends View
 
 For HTML, `executeHtml()` typically calls `loadLayout()` (which prepares the template layers) and sets a few presentation attributes, then returns nothing — the layers render. For JSON, `executeJson()` returns the body string directly. See [Output types](/basics/output-types-and-content-negotiation/) and [Templates and rendering](/basics/templates-and-rendering/).
 
+A method that returns its body directly (like `executeJson()` above) never renders a template, but the framework's diagnostics tooling (`diagnostics`/`overview`) can't always see that statically — it flags a `MISSING_TEMPLATE` warning for any `execute<OutputType>()` with no matching `Templates/{Action}{View}.{ext}` file. Two ways to avoid a false positive:
+
+**Declare a non-nullable return type.** `ActionExecutor::renderView()` only reaches the template/layer path when the resolved method returns `null`, so a declared type that provably can't be `null` (a concrete type like `string`, a union of non-null types, or `never`) is detected automatically — no annotation needed:
+
+```php
+// No annotation needed -- the non-nullable `string` return type alone
+// proves this never touches a template.
+public function executeJson(WebRequest $rd): string
+{
+    return json_encode(['post' => $this->getAttribute('post')]);
+}
+```
+
+An untyped, nullable (`?string`), `void`, or `mixed` return can't prove this statically, so it falls through to the next option.
+
+**Annotate the method with `@quiote-viewmethod-has-no-template`** — the manual escape hatch for whatever the automatic detection can't prove (or won't, in a case that's genuinely ambiguous to the scanner but known-safe to you):
+
+```php
+/** @quiote-viewmethod-has-no-template */
+public function executeJson(WebRequest $rd)
+{
+    // untyped return -- the annotation is required here since the
+    // automatic detection above can't prove anything about it.
+    return json_encode(['post' => $this->getAttribute('post')]);
+}
+```
+
+Both are scoped per method, not per class, since one view is free to mix template-backed and template-less `execute<OutputType>()` methods. `scaffold_action`'s generated JSON (and other non-HTML) view methods declare non-nullable return types, so they're covered automatically — but also carry the annotation, since it's the one override that always works regardless of what a future edit does to the method's signature.
+
 ### Attributes and templates
 
 A view sees the action's attributes plus any it sets itself. Those attributes become the `$template` array in a PHP template. See [Templates and rendering](/basics/templates-and-rendering/) for the rendering half.
