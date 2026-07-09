@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45a44e6a30f0f75e5330611d2f6f94bc",
+    "content-hash": "c317b28af510eb68ca3e73fdd8a196ad",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -1526,7 +1526,7 @@
         },
         {
             "name": "quioteframework/csrf",
-            "version": "dev-main",
+            "version": "v1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/csrf.git",
@@ -1543,7 +1543,6 @@
                 "quioteframework/quiote": "*",
                 "symfony/security-csrf": "^8.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/csrf/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
@@ -1572,13 +1571,13 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/csrf/tree/main"
+                "source": "https://github.com/quioteframework/csrf/tree/v1.2.2"
             },
             "time": "2026-07-07T10:56:05+00:00"
         },
         {
             "name": "quioteframework/mcp",
-            "version": "dev-main",
+            "version": "v1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/mcp.git",
@@ -1596,7 +1595,6 @@
                 "quioteframework/quiote": "*",
                 "symfony/finder": "^7.0 || ^8.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/mcp/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
@@ -1625,22 +1623,22 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/mcp/tree/main"
+                "source": "https://github.com/quioteframework/mcp/tree/v1.2.2"
             },
             "time": "2026-07-07T16:54:18+00:00"
         },
         {
             "name": "quioteframework/quiote",
-            "version": "dev-main",
+            "version": "v1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "3ba78a16fe3f555e3da2b5416bdd5dda9955a478"
+                "reference": "fe19f27a57b4e83673c76452b71818b1611b75af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/3ba78a16fe3f555e3da2b5416bdd5dda9955a478",
-                "reference": "3ba78a16fe3f555e3da2b5416bdd5dda9955a478",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/fe19f27a57b4e83673c76452b71818b1611b75af",
+                "reference": "fe19f27a57b4e83673c76452b71818b1611b75af",
                 "shasum": ""
             },
             "require": {
@@ -1675,25 +1673,25 @@
             "require-dev": {
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^12.0 || ^13.0",
-                "quioteframework/auth": "@dev",
-                "quioteframework/auth-jwt": "@dev",
-                "quioteframework/auth-oauth": "@dev",
-                "quioteframework/db-cycle": "@dev",
-                "quioteframework/db-doctrine": "@dev",
-                "quioteframework/db-eloquent": "@dev",
-                "quioteframework/db-propulsion": "@dev",
-                "quioteframework/mcp": "@dev",
-                "quioteframework/phptal": "@dev",
-                "quioteframework/ratelimit": "@dev",
-                "quioteframework/session-azure": "@dev",
-                "quioteframework/session-gcs": "@dev",
-                "quioteframework/session-pdo": "@dev",
-                "quioteframework/session-s3": "@dev",
-                "quioteframework/telemetry-dashboard": "@dev",
-                "quioteframework/telemetry-otel": "@dev",
-                "quioteframework/twig": "@dev",
-                "quioteframework/whoops": "@dev",
-                "quioteframework/xslt": "@dev",
+                "quioteframework/auth": "v1.2.2",
+                "quioteframework/auth-jwt": "v1.2.2",
+                "quioteframework/auth-oauth": "v1.2.2",
+                "quioteframework/db-cycle": "v1.2.2",
+                "quioteframework/db-doctrine": "v1.2.2",
+                "quioteframework/db-eloquent": "v1.2.2",
+                "quioteframework/db-propulsion": "v1.2.2",
+                "quioteframework/mcp": "v1.2.2",
+                "quioteframework/phptal": "v1.2.2",
+                "quioteframework/ratelimit": "v1.2.2",
+                "quioteframework/session-azure": "v1.2.2",
+                "quioteframework/session-gcs": "v1.2.2",
+                "quioteframework/session-pdo": "v1.2.2",
+                "quioteframework/session-s3": "v1.2.2",
+                "quioteframework/telemetry-dashboard": "v1.2.2",
+                "quioteframework/telemetry-otel": "v1.2.2",
+                "quioteframework/twig": "v1.2.2",
+                "quioteframework/whoops": "v1.2.2",
+                "quioteframework/xslt": "v1.2.2",
                 "rector/rector": "^2.3",
                 "symfony/http-client": "^8.1",
                 "testcontainers/testcontainers": "^1.0"
@@ -1726,7 +1724,6 @@
                 "quioteframework/whoops": "Full-detail developer exception renderer (Quiote\\Exception\\Rendering\\Whoops\\WhoopsRenderer), built on filp/whoops",
                 "quioteframework/xslt": "Enables the XSLT (.xsl) template renderer (Quiote\\Renderer\\Xslt\\XsltRenderer)"
             },
-            "default-branch": true,
             "bin": [
                 "bin/quiote"
             ],
@@ -1765,9 +1762,9 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/quiote/tree/main"
+                "source": "https://github.com/quioteframework/quiote/tree/v1.2.2"
             },
-            "time": "2026-07-08T22:30:33+00:00"
+            "time": "2026-07-09T16:03:13+00:00"
         },
         {
             "name": "relay/relay",
@@ -5454,24 +5451,24 @@
         },
         {
             "name": "sebastian/lines-of-code",
-            "version": "5.0.1",
+            "version": "5.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/lines-of-code.git",
-                "reference": "d2cff273a90c79b0eb590baa682d4b5c318bdbb7"
+                "reference": "d1b6f8fce682505dbd048977f1abedf1b8ad3ff8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/lines-of-code/zipball/d2cff273a90c79b0eb590baa682d4b5c318bdbb7",
-                "reference": "d2cff273a90c79b0eb590baa682d4b5c318bdbb7",
+                "url": "https://api.github.com/repos/sebastianbergmann/lines-of-code/zipball/d1b6f8fce682505dbd048977f1abedf1b8ad3ff8",
+                "reference": "d1b6f8fce682505dbd048977f1abedf1b8ad3ff8",
                 "shasum": ""
             },
             "require": {
-                "nikic/php-parser": "^5.7.0",
+                "nikic/php-parser": "^5.8.0",
                 "php": ">=8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.1.10"
+                "phpunit/phpunit": "^13.2.4"
             },
             "type": "library",
             "extra": {
@@ -5500,7 +5497,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/lines-of-code/issues",
                 "security": "https://github.com/sebastianbergmann/lines-of-code/security/policy",
-                "source": "https://github.com/sebastianbergmann/lines-of-code/tree/5.0.1"
+                "source": "https://github.com/sebastianbergmann/lines-of-code/tree/5.0.2"
             },
             "funding": [
                 {
@@ -5520,7 +5517,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-19T16:23:37+00:00"
+            "time": "2026-07-09T08:42:34+00:00"
         },
         {
             "name": "sebastian/object-enumerator",
@@ -5976,10 +5973,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "quioteframework/mcp": 20,
-        "quioteframework/quiote": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

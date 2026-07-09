@@ -5,8 +5,8 @@
     "license": "MIT",
     "require": {
         "php": ">=8.5",
-        "quioteframework/quiote": "dev-main",
-        "quioteframework/mcp": "dev-main",
+        "quioteframework/quiote": "^1.2",
+        "quioteframework/mcp": "^1.2",
         "mcp/sdk": "^0.6.0"
     },
     "autoload": {

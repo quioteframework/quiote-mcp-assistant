@@ -11,13 +11,8 @@ return array (
   'core.use_translation' => false,
   'core.default_context' => 'web',
 
-  // Plugins load at bootstrap, in order. McpPlugin publishes the mcp.* settings
-  // family and registers `mcp:serve`; AssistantPlugin (this app) registers the
-  // knowledge resources/tools/prompts and `mcp:docs:sync`.
-  'plugins' => array(
-    \Quiote\Mcp\McpPlugin::class,
-    \QuioteMcpAssistant\Mcp\AssistantPlugin::class,
-  ),
+  // Plugins are activated in the canonical, auto-discovered Config/plugins.php
+  // (not a `plugins` key here -- that only works as an unsupported side effect).
 
   // stdio (the common case -- bin/quiote-assistant, per-client subprocess) +
   // an opt-in Streamable HTTP transport for a shared/team deployment via the
