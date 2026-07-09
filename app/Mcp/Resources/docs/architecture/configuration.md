@@ -2,7 +2,9 @@
 
 > Quiote's multi-format config system — PHP, YAML, or XML, mixed per file.
 
-Agavi's configuration was XML-only. Quiote keeps the same conceptual config *types* — `settings`, `factories`, `databases`, `output_types`, and so on — but lets you write each one as **PHP, YAML, or XML**, chosen per file. This is a direct expression of Quiote's unopinionated stance: the framework does not decide what your config looks like on disk.
+Configuration is how you tell Quiote about your application — its name, which subsystems to switch on, which class fills each core role, and how to reach your database. Every config file lives in your app's `Config/` directory, and you choose the format of each one: **PHP, YAML, or XML**. This page explains the format system and the core config types; for an exhaustive list of individual keys, see the [Settings reference](/architecture/settings-reference/).
+
+Agavi's configuration was XML-only. Quiote keeps the same conceptual config *types* — `settings`, `factories`, `databases`, `output_types`, and so on — but lets you write each one as PHP, YAML, or XML, chosen per file. This is a direct expression of Quiote's unopinionated stance: the framework does not decide what your config looks like on disk.
 
 ## The formats
 

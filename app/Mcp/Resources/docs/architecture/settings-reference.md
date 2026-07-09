@@ -2,7 +2,9 @@
 
 > The configuration settings Quiote reads — core.* keys, factory parameters, environment variables, and where each is set.
 
-This page catalogs the configuration Quiote actually reads. For *how* config files work (formats, resolution, inheritance), see [Configuration](/architecture/configuration/). For per-middleware settings in pipeline context, see the [Middleware reference](/architecture/middleware-reference/).
+**Settings** are the individual configuration values Quiote reads to shape your application's behaviour — the app name, the debug flag, which subsystems are switched on, cache and header options, and so on. Most of them are dotted `core.*` keys you write in your app's settings file, `Config/settings.{php,yaml,xml}`.
+
+This page is the catalog: every setting Quiote actually reads, its default, and its effect. Use it as a lookup table — the tables below are grouped by topic so you can scan to the area you need. For *how* config files work (formats, resolution, inheritance), see [Configuration](/architecture/configuration/). For per-middleware settings in pipeline context, see the [Middleware reference](/architecture/middleware-reference/).
 
 ## The four configuration surfaces
 

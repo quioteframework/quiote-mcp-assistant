@@ -81,7 +81,7 @@ return array (
     'file' => 'architecture/container.md',
     'path' => 'architecture/container',
     'title' => 'The DI container',
-    'description' => 'Quiote\'s scope-aware dependency injection container, autowiring, and the service layer.',
+    'description' => 'Quiote\'s dependency-injection container — how services are registered, resolved, autowired, and scoped, and where your own services fit in.',
   ),
   'quiote-docs://architecture/deployment' => 
   array (

@@ -6,6 +6,19 @@ Quiote separates *deciding what to do* from *producing output*. An **action** ha
 
 This split is the same one Agavi used, and it is the reason a single action class can serve HTML, JSON, and XML without knowing anything about rendering.
 
+## How it fits in a request
+
+Actions and views are the last stops on the [request lifecycle](/architecture/request-lifecycle/). By the time control reaches them, routing has already matched the URL and negotiated the output type. `DispatchMiddleware` is the hand-off point:
+
+> `RoutingMiddleware` builds an `ActionDescriptor` → `DispatchMiddleware` calls `ActionExecutor::execute()` → the executor creates and initializes the **action**, runs the verb-matched `execute*()` method, and takes the returned view name → `ViewNameResolver` turns that name into a **view** class → the view's `execute<OutputType>()` method runs → the **renderer** writes the template output into the response body.
+
+Two classes do the finding and wiring:
+
+- **`Quiote\Execution\ActionExecutor`** creates the action (`Controller::createActionInstance()`), initializes it, picks and runs the right method, then resolves and runs the view.
+- **`Quiote\Execution\ActionResolver`** and **`Quiote\Execution\ViewNameResolver`** decide *which* method and *which* view class, using the rules described below.
+
+For the full picture — kernel, pipeline, and response emission — see [The request lifecycle](/architecture/request-lifecycle/) and [The middleware pipeline](/architecture/middleware-pipeline/).
+
 ## Actions
 
 An action extends `Quiote\Action\Action`. The base class defines **no** `execute*` methods — the framework calls them dynamically based on the request. What the base class gives you is a set of hooks:
@@ -46,7 +59,21 @@ The resolver (`Quiote\Execution\ActionResolver`) tries, in order:
 
 Most actions use the semantic methods: `executeRead` to display, `executeWrite` to create, `executeUpdate` to modify, `executeRemove` to delete. Reach for a verb-exact method only when you need to tell apart two verbs that share a semantic method — `PUT` and `PATCH`, for instance, both resolve to `executeUpdate`, so define `executePut` / `executePatch` if they must behave differently.
 
-The same tokens (`read` / `write` / `update` / `remove`) name the per-method validation hooks — see [Validation](/basics/validation/). The mapping is not fixed: you can override or extend it (remap a verb, or add a non-standard one like `LOCK`) with the `routing.http_method_map` setting — see [Customising the HTTP verb mapping](/basics/routing/#customising-the-http-verb-mapping).
+The same tokens (`read` / `write` / `update` / `remove`) name the per-method validation hooks — see [Validation](/basics/validation/).
+
+The mapping is not fixed: you can override or extend it — remap a verb, or add a non-standard one like `LOCK` — with the `routing.http_method_map` setting in your app's settings file:
+
+```php
+// Config/settings.php
+return [
+    'routing.http_method_map' => [
+        'PATCH' => 'write', // route PATCH to executeWrite() instead of executeUpdate()
+        'LOCK'  => 'lock',  // custom verb -> executeLock()
+    ],
+];
+```
+
+Keys are matched case-insensitively; each value is `ucfirst`-ed into the `execute<Token>()` method name, so a custom `lock` token needs a matching `executeLock()` on any action that should handle it. The same setting can be written in YAML or XML (in XML it needs a `prefix="routing."` on the `<settings>` wrapper) — see [Configuration](/architecture/configuration/) and [Customising the HTTP verb mapping](/basics/routing/#customising-the-http-verb-mapping).
 
 ```php
 <?php
@@ -127,47 +154,23 @@ class PostSuccessView extends View
 
 For HTML, `executeHtml()` typically calls `loadLayout()` (which prepares the template layers) and sets a few presentation attributes, then returns nothing — the layers render. For JSON, `executeJson()` returns the body string directly. See [Output types](/basics/output-types-and-content-negotiation/) and [Templates and rendering](/basics/templates-and-rendering/).
 
-A method that returns its body directly (like `executeJson()` above) never renders a template, but the framework's diagnostics tooling (`diagnostics`/`overview`) can't always see that statically — it flags a `MISSING_TEMPLATE` warning for any `execute<OutputType>()` with no matching `Templates/{Action}{View}.{ext}` file. Two ways to avoid a false positive:
-
-**Declare a non-nullable return type.** `ActionExecutor::renderView()` only reaches the template/layer path when the resolved method returns `null`, so a declared type that provably can't be `null` (a concrete type like `string`, a union of non-null types, or `never`) is detected automatically — no annotation needed:
-
-```php
-// No annotation needed -- the non-nullable `string` return type alone
-// proves this never touches a template.
-public function executeJson(WebRequest $rd): string
-{
-    return json_encode(['post' => $this->getAttribute('post')]);
-}
-```
-
-An untyped, nullable (`?string`), `void`, or `mixed` return can't prove this statically, so it falls through to the next option.
-
-**Annotate the method with `@quiote-viewmethod-has-no-template`** — the manual escape hatch for whatever the automatic detection can't prove (or won't, in a case that's genuinely ambiguous to the scanner but known-safe to you):
-
-```php
-/** @quiote-viewmethod-has-no-template */
-public function executeJson(WebRequest $rd)
-{
-    // untyped return -- the annotation is required here since the
-    // automatic detection above can't prove anything about it.
-    return json_encode(['post' => $this->getAttribute('post')]);
-}
-```
-
-Both are scoped per method, not per class, since one view is free to mix template-backed and template-less `execute<OutputType>()` methods. `scaffold_action`'s generated JSON (and other non-HTML) view methods declare non-nullable return types, so they're covered automatically — but also carry the annotation, since it's the one override that always works regardless of what a future edit does to the method's signature.
-
 ### Attributes and templates
 
 A view sees the action's attributes plus any it sets itself. Those attributes become the `$template` array in a PHP template. See [Templates and rendering](/basics/templates-and-rendering/) for the rendering half.
 
 ## View name resolution
 
-Given an action in module `Blog` named `Post` that returns `'Success'`, Quiote resolves:
+Quiote builds the view class and template names by convention, from the action name plus the returned view name. Take an action in module `Blog` named `Post` that returns `'Success'`:
 
-- **View class**: `PostSuccessView` (action name + view name + `View`), in the module's `Views/` directory.
-- **Template**: `PostSuccess.php` (action name + view name), in the module's `Templates/` directory.
+| Piece | Convention | Resolved to | Location |
+|---|---|---|---|
+| Action | `<Name>Action` | `PostAction` | `Blog/Actions/` |
+| View class | `<Action><View>View` | `PostSuccessView` | `Blog/Views/` |
+| Template | `<Action><View>.php` | `PostSuccess.php` | `Blog/Templates/` |
 
-The `ViewNameResolver` handles this mapping. Keeping the names aligned — action, view, template — is what lets the convention stay implicit; deviate and you wire it explicitly.
+So the class name is action name + view name + `View`, and the template file is action name + view name. The `ViewNameResolver` performs this mapping (the class namespace uses the `core.namespace_prefix` setting, `App` by default — e.g. `App\Modules\Blog\Views\PostSuccessView`).
+
+Keeping the three names aligned — action, view, template — is what lets the convention stay implicit. Deviate from it and you have to wire the view up explicitly.
 
 ## The two-phase pattern
 

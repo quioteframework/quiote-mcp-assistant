@@ -10,12 +10,30 @@ All of these packages are **MIT-licensed** (the kernel itself is LGPL-2.1+); an 
 Each package lives in its own `github.com/quioteframework/*` repository, but none is **published to Packagist** yet. Until then, install them by adding a VCS repository and requiring `dev-main` — see the [pre-alpha note in the overview](/plugins/overview/#enabling-a-package). The plain `composer require` lines below describe the eventual Packagist experience.
 </Aside>
 
-Every `Plugin::class` below is only *activated* by listing it in `plugins.*` because its class already carries the mandatory `#[Quiote\Plugin\Attribute\Plugin]` attribute — a class-string named in config without that attribute is silently refused. All official packages carry it already; you only need to add it yourself when [writing your own plugin](/architecture/plugins/#writing-a-plugin).
+## How enabling works
+
+Almost every package follows the **same two steps**: install the code, then activate it.
+
+1. **Install** — `composer require quioteframework/<package>` (during pre-alpha, via the VCS repository above).
+2. **Enable** — add the package's `Plugin` class to your app's `Config/plugins.{php,yaml,yml,xml}`. Listing it there is what actually runs it: at boot, `PluginManager` reads that file and calls each plugin's `register()`, which wires the package into the framework's seams (config, DI, middleware, events, routes, commands). From then on the contribution is present on every request. See [Plugins overview: How a plugin reaches a request](/plugins/overview/#how-a-plugin-reaches-a-request).
+
+A `Plugin` class is only accepted from `plugins.*` because it already carries the mandatory `#[Quiote\Plugin\Attribute\Plugin]` attribute — a class-string named in config without that attribute is silently refused. All official packages carry it already; you only add it yourself when [writing your own plugin](/architecture/plugins/#writing-a-plugin).
+
+A few packages break the pattern — worth knowing before you go looking for a missing `plugins` entry:
+
+- **`quioteframework/csrf`** is on by **default** — it's a required kernel dependency that registers itself at boot; you never add it, you consciously turn it *off*.
+- **`quioteframework/ratelimit`** is a plain **library**, not a plugin — you call it from your own code; nothing goes in `plugins.*`.
+- **`quioteframework/telemetry-dashboard`** contributes a **console command** that's available as soon as the package is installed — no `plugins` entry.
+- **Template renderers** (`phptal`/`xslt`/`twig`) plug into the **config-driven renderer registry** instead — you point an output type's `renderer` at the class rather than adding a plugin.
+- **The auth packages** (`auth`/`auth-jwt`/`auth-oauth`) mostly need app-specific secrets, so they register little or nothing automatically — see each entry below.
 
 ## At a glance
 
 | Package | Provides | Carries |
 |---|---|---|
+| `quioteframework/auth` | Form login, HTTP Basic, firewalls, password hashing | — |
+| `quioteframework/auth-jwt` | Bearer/JWT resource-server authentication | `firebase/php-jwt` |
+| `quioteframework/auth-oauth` | OIDC login + machine-to-machine tokens | `league/oauth2-client` |
 | `quioteframework/csrf` | CSRF token injection + validation | `symfony/security-csrf` |
 | `quioteframework/ratelimit` | Login throttling / rate limiting | `symfony/rate-limiter` |
 | `quioteframework/whoops` | The developer exception page | `filp/whoops` |
@@ -35,6 +53,36 @@ Every `Plugin::class` below is only *activated* by listing it in `plugins.*` bec
 | `quioteframework/session-gcs` | Google Cloud Storage session storage | — |
 
 ## Security & web
+
+### `quioteframework/auth`
+
+Firewall-based authentication: form login and HTTP Basic, credential providers (`InMemoryUserProvider`, `PdoUserProvider`, `CallableUserProvider`), password hashing (`DefaultPasswordHasher`, argon2id with a bcrypt fallback), and the `Firewall`/`FirewallMap`/`AuthenticationManager` machinery that runs an authenticator chain and applies the result to `SecurityUser`/`RbacSecurityUser`. `AuthPlugin` registers a default `PasswordHasherInterface` and an **empty** `FirewallMap` — both of its middleware (`StatelessAuthenticationMiddleware`, `SessionAuthenticationMiddleware`) are a complete no-op until your app registers a populated `FirewallMap`.
+
+```bash
+composer require quioteframework/auth
+```
+
+Optionally add a `security.xml`/`.php`/`.yaml` config file (`Config\SecurityConfigHandler` + `Config\FirewallFactory`) instead of wiring `FirewallMap` by hand — see [Authenticating with the auth packages](/advanced/authentication-authorization/#authenticating-with-the-auth-packages).
+
+### `quioteframework/auth-jwt`
+
+Bearer/JWT resource-server authentication on top of `quioteframework/auth`'s contracts: `JwtTokenValidator` (HS256 via a shared secret, or RS256/ES256 via a JWKS-backed `CachedKeySet` with rotation), the default RFC 9068 `ClientTypeResolver` (service vs. user tokens), and `BearerTokenAuthenticator`. `JwtAuthPlugin` registers only the `ClientTypeResolverInterface` default — the validator and authenticator need app-specific secrets, so there's no safe default to wire automatically.
+
+```bash
+composer require quioteframework/auth-jwt
+```
+
+See [`quioteframework/auth-jwt` — bearer/JWT resource server](/advanced/authentication-authorization/#quioteframeworkauth-jwt--bearerjwt-resource-server).
+
+### `quioteframework/auth-oauth`
+
+Makes Quiote an OAuth/OIDC **client** — never an authorization server. Two distinct flows: sending a human browser to an identity provider like Entra ID, Google, or Okta to log in (`OidcClient` to build the redirect, `OidcAuthenticator` for the callback leg, `OidcStateStorage` for the state round-trip), and fetching Quiote's own outbound access token to call another API with no browser involved (`ClientCredentialsClient`, plus `IntrospectionClient` for RFC 7662 revocation checks). Built on `quioteframework/auth`'s contracts and reuses `auth-jwt`'s `TokenValidatorInterface` for ID token validation rather than a second JWT stack. PKCE S256 is hardcoded (OAuth 2.1 mandates it). No plugin ships with this package — every piece needs app-specific secrets or endpoints, so there's nothing safe to register by default.
+
+```bash
+composer require quioteframework/auth-oauth
+```
+
+See [`quioteframework/auth-oauth` — Quiote as an OAuth/OIDC client](/advanced/authentication-authorization/#quioteframeworkauth-oauth--quiote-as-an-oauthoidc-client), including the [decision guide](/advanced/authentication-authorization/#which-package-for-which-role--a-decision-guide) for which of the two flows (or `auth-jwt`) actually applies.
 
 ### `quioteframework/csrf`
 

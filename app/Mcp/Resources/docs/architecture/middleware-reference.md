@@ -2,7 +2,9 @@
 
 > Every middleware in the default pipeline — what it does, how to configure it, and what each setting affects.
 
-This page documents each middleware in Quiote's default pipeline, **in execution order**: what it does, the settings it reads, and what those settings affect. For the conceptual overview see [The middleware pipeline](/architecture/middleware-pipeline/); for adding your own, [Writing custom middleware](/advanced/custom-middleware/).
+This is the lookup table for Quiote's default pipeline. Every middleware that ships with the framework gets its own section, **in execution order**, covering what it does, the settings it reads, and what those settings affect. Reach for this page when you need the exact key or default for one middleware; for the big-picture "what runs when and why," start with [The middleware pipeline](/architecture/middleware-pipeline/), and for adding your own, [Writing custom middleware](/advanced/custom-middleware/).
+
+Each middleware plays a fixed role in handling a request — the pipeline builds itself at worker start by scanning `#[Middleware]` attributes and ordering them, then every request flows through the resolved list (`ErrorHandling` → `Session` → `Routing` → CSRF/`Security` → `Validation` → `Dispatch` → back out). See [How it fits in a request](/architecture/middleware-pipeline/#how-it-fits-in-a-request) for the full chain.
 
 ## How middleware is configured
 
@@ -10,13 +12,13 @@ Middleware draws configuration from four distinct places — this page is explic
 
 - **`core.*` settings** — read via `Config::get('core.…')` from your [`settings` config](/architecture/configuration/) (PHP/YAML/XML). Most tunables live here.
 - **Other namespaced settings** — a few middleware read a non-`core.` prefix instead (`middleware.timing.*`, `middleware.trace.*`, `validation.*`, `routing.*`); same `settings` config, just a different key prefix (see [Configuration: The XML `prefix` attribute](/architecture/configuration/#the-xml-prefix-attribute) for the XML form).
-- **Enable/disable** — **any** middleware can be switched off via a `<middleware_config>` block (see [Enabling and disabling](#enabling-and-disabling) below). Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all default to on); a config entry overrides it.
+- **Enable/disable** — **any** middleware can be switched off in the `middleware.{xml,php,yaml,yml}` config file (see [Enabling and disabling](#enabling-and-disabling) below). Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all default to on); a `<use ... enabled="false">` entry overrides it.
 - **Environment variables** — one middleware (`PayloadParsingMiddleware`) reads an OS env var.
 - **Constructor arguments** — some behaviour is only reachable by constructing the middleware yourself (a custom pipeline), with no config-file switch. Called out where it applies.
 
 ## At a glance
 
-Every middleware defaults to on and can be disabled via `<middleware_config>` (see [Enabling and disabling](#enabling-and-disabling)); this column lists only *other* configuration.
+Every middleware defaults to on and can be disabled with a `middleware.*` `<use ... enabled="false">` entry (see [Enabling and disabling](#enabling-and-disabling)); this column lists only *other* configuration.
 
 | # | Middleware | Configurable |
 |---|---|---|
@@ -32,6 +34,7 @@ Every middleware defaults to on and can be disabled via `<middleware_config>` (s
 | 10 | CsrfInjectionMiddleware | `core.csrf.*` |
 | 11 | CsrfValidationMiddleware | `core.csrf.*` |
 | 12 | SecurityMiddleware | `core.use_security` |
+| — | StatelessAuthenticationMiddleware / SessionAuthenticationMiddleware *(optional, `quioteframework/auth`)* | — (no-op until a `FirewallMap` is registered) |
 | 13 | ValidationMiddleware | `core.expose_validation_errors_header`, `validation.*` |
 | 14 | SlotMiddleware | — |
 | 15 | DispatchMiddleware | `core.cache_enabled`, `core.use_cache`, response-header keys |
@@ -263,6 +266,14 @@ Decides, before dispatch, whether a request may run its action — forwarding to
 
 Per-action security is declared with `isSecure()` / `getCredentials()` — see [Authentication & authorization](/advanced/authentication-authorization/).
 
+## StatelessAuthenticationMiddleware / SessionAuthenticationMiddleware
+
+Optional — contributed by the **[`quioteframework/auth`](/plugins/official-packages/#quioteframeworkauth)** package's `AuthPlugin`, not part of the default kernel stack. `StatelessAuthenticationMiddleware` (HTTP Basic/bearer authenticators) is anchored `before: SessionMiddleware`; `SessionAuthenticationMiddleware` (form login) is anchored `after: RoutingMiddleware, before: SecurityMiddleware` — see [Where the auth packages insert themselves](/architecture/middleware-pipeline/#where-the-auth-packages-insert-themselves).
+
+Both run the matched `Firewall`'s authenticator chain via `AuthenticationManager` and, on success, apply the resulting `Passport` to the request's `SecurityUser`/`RbacSecurityUser` — before `SecurityMiddleware` ever checks `isAuthenticated()`/credentials.
+
+**No settings of their own.** `AuthPlugin` registers an **empty** `FirewallMap` by default, so both middleware are a complete no-op — nothing to disable — until an app registers its own populated `FirewallMap` (by config via `security.xml`/`SecurityConfigHandler`, or by hand in a plugin). See [Authenticating with the auth packages](/advanced/authentication-authorization/#authenticating-with-the-auth-packages).
+
 ## ValidationMiddleware
 
 Runs the action's validators and records a pass/fail decision; renders the error view (or an RFC 9457 problem document) with 400 on failure. Runs by default. See [Validation](/basics/validation/).
@@ -366,62 +377,65 @@ Measures execution time and (for legacy-adapter responses) can append an `<!-- e
 
 ## Enabling and disabling
 
-**Any** middleware can be switched off through the middleware map in your `config_handlers` config. A disabled middleware is never constructed. Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all framework middleware default to on); an entry here overrides that default.
+**Any** middleware can be switched off in the dedicated **`middleware.{xml,php,yaml,yml}`** config file, read by `MiddlewareConfigHandler`. A disabled middleware is never constructed. Each middleware's `#[Middleware(enabled:)]` attribute sets its default (all framework middleware default to on); a `<use>` entry here overrides that default.
 
-The map lives in `config_handlers`: in XML it's a `<middleware_config>` element (alongside `<handlers>`); in PHP/YAML it's the reserved `__middleware_config` key (a map of FQCN to bool). Because `config_handlers` ships as a framework default, an app typically supplies only this addition.
+The file is a flat, ordered list of `<use>` entries. To disable a middleware, name its class and set `enabled` to false:
 
 #### PHP
 
 ```php
-// Config/config_handlers.php
+// Config/middleware.php
 return [
-    '__middleware_config' => [
-        'Quiote\\Middleware\\ExecutionTimeMiddleware' => false,
-        'Quiote\\Middleware\\TimingMiddleware'        => true,
-    ],
-    // ...handler definitions...
+    ['class' => \Quiote\Middleware\ExecutionTimeMiddleware::class, 'enabled' => false],
+    ['class' => \Quiote\Middleware\TimingMiddleware::class,        'enabled' => true],
 ];
 ```
 
 #### YAML
 
 ```yaml
-# Config/config_handlers.yaml
-__middleware_config:
-  'Quiote\Middleware\ExecutionTimeMiddleware': false
-  'Quiote\Middleware\TimingMiddleware': true
-# ...handler definitions...
+# Config/middleware.yaml
+- class: Quiote\Middleware\ExecutionTimeMiddleware
+  enabled: false
+- class: Quiote\Middleware\TimingMiddleware
+  enabled: true
 ```
 
 #### XML
 
 ```xml
-<!-- Config/config_handlers.xml -->
+<!-- Config/middleware.xml -->
 <ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
-                   xmlns="http://quiote.dev/quiote/config/parts/config_handlers/1.1">
+                   xmlns="http://quiote.dev/quiote/config/parts/middleware/1.1">
   <ae:configuration>
-    <middleware_config>
-      <middleware class="Quiote\Middleware\ExecutionTimeMiddleware" enabled="false" />
-      <middleware class="Quiote\Middleware\TimingMiddleware" enabled="true" />
-    </middleware_config>
-    <handlers><!-- ... --></handlers>
+    <use class="Quiote\Middleware\ExecutionTimeMiddleware" enabled="false" />
+    <use class="Quiote\Middleware\TimingMiddleware" enabled="true" />
   </ae:configuration>
 </ae:configurations>
 ```
 
-- `class` (XML) / the map key (PHP/YAML) — the exact middleware FQCN to toggle.
-- `enabled` (XML attribute) — optional, default `"true"`. `"0"` / `"false"` / `"off"` / `"no"` (case-insensitive) count as disabled; anything else (or omitting it) is enabled. The PHP/YAML value is a plain boolean.
+Each `<use>` entry accepts these fields (only `class` is required; every other field left unset means "don't override," falling back to the class's `#[Middleware]` attribute):
+
+- **`class`** — the exact middleware FQCN to target.
+- **`enabled`** — the on/off override. In XML, `"0"` / `"false"` / `"off"` / `"no"` (case-insensitive) count as disabled; anything else is enabled. In PHP/YAML it's a plain boolean.
+- **`phase`**, **`priority`**, **`before`**, **`after`** — placement overrides (same meaning as the `#[Middleware]` attribute), so this file also registers app/plugin middleware and re-positions existing ones.
+- **`override-framework`** (XML) / **`override_framework`** (PHP/YAML) — must be true to change the *placement* of a framework middleware (a guard against accidentally reordering the core stack).
 
 A class with no entry falls back to its attribute's `enabled` default, so an entry is only needed to *change* the default. Disabling a core middleware (say CSRF or Security) removes real protection — do it deliberately.
 
+:::caution[This replaced the old `config_handlers` toggle]
+Middleware used to be enabled/disabled through a `__middleware_config` key (or `<middleware_config>` element) inside `config_handlers`. That mechanism is **superseded and no longer read** — enable/disable now lives entirely in `middleware.*`. Migrate any `__middleware_config` entries to `<use ... enabled="...">` entries here.
+:::
+
 :::note
-XML is the usual form for `config_handlers` (it's what the framework default ships as). The PHP/YAML forms carry the identical `__middleware_config` map, but a full `config_handlers` file also defines the config handlers themselves — extend the default rather than replacing it wholesale.
+Because any module's `Config/` directory can carry its own `middleware.*`, a module can add or toggle middleware just by being present. See [Writing custom middleware](/advanced/custom-middleware/) for the full declarative-registration workflow.
 :::
 
 ## Adding, reordering, and replacing
 
 Positioning your own middleware, and the whole-stack replacement API, are covered in [Writing custom middleware](/advanced/custom-middleware/):
 
+- A `<use>` entry in `middleware.*` — register or reposition middleware declaratively, no code (see [Enabling and disabling](#enabling-and-disabling) above for the file's shape).
 - The `#[Middleware]` attribute + `MiddlewareCatalog::registerAttributed()` — declare placement and join the framework's ordering pass.
 - `MiddlewareCatalog::register()` — insert a middleware imperatively at a chosen point.
 - `MiddlewareCatalog::replaceCoreStack()` — replace the entire built-in stack (a deliberate footgun, gated behind an acknowledgement string).
