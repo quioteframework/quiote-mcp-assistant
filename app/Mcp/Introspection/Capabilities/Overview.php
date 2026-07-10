@@ -28,7 +28,7 @@ final class Overview
      *     config_format: ?string,
      *     modules: list<array{name: string, dir: string, actions: list<string>}>,
      *     routes: list<array{name: string, path: string, methods: list<string>, module: string, action: string, outputType: ?string, source: string, file: ?string, line: ?int}>,
-     *     triads: list<array{module: string, action: string, actionFile: string, viewFile: ?string, templateFile: ?string, verbs: list<array{name: string, line: ?int}>}>,
+     *     triads: list<array{module: string, action: string, actionFile: string, viewFile: ?string, templateFiles: array<string, string>, verbs: list<array{name: string, line: ?int}>}>,
      *     diagnostics: list<array{severity: string, code: string, message: string, file: string, line: ?int, column: ?int, endLine: ?int, endColumn: ?int, symbol: ?string}>,
      *     dependencies: list<array{file: string, hash: string}>,
      *     shadowed: list<array{logical: string, loaded: ?string, ignored: list<string>}>,

@@ -212,6 +212,7 @@ try {
             $dryRun,
         ),
         'scaffold_action' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ScaffoldAction::run(
+            $contextName,
             $appDir,
             (string) ($options['module'] ?? ''),
             (string) ($options['action'] ?? ''),

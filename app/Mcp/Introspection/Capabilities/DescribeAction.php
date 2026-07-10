@@ -5,6 +5,7 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Config\Config;
 use Quiote\Context;
+use Quiote\Controller\Controller;
 use Quiote\Mcp\Compiler\ValidatorSchemaMapper;
 use Quiote\Routing\Compiler\ModuleActionEntry;
 use Quiote\Routing\Compiler\TriadViewResolver;
@@ -43,7 +44,7 @@ final class DescribeAction
      *     isSimple: bool,
      *     defaultViewName: ?string,
      *     viewFile: ?string,
-     *     templateFile: ?string,
+     *     templateFiles: array<string, string>,
      * }
      */
     public static function run(string $contextName, string $module, string $action): array
@@ -76,7 +77,7 @@ final class DescribeAction
             $verbs['*'] = ['schema' => null, 'line' => $startLine !== false ? $startLine : null];
         }
 
-        [$viewFile, $templateFile] = self::locateViewAndTemplate($module, $action, $reflection);
+        [$viewFile, $templateFiles] = self::locateViewAndTemplate($module, $action, $reflection, $controller);
 
         return [
             '_schema_version' => 1,
@@ -91,7 +92,7 @@ final class DescribeAction
             'isSimple' => (bool) self::safeCall($instance, 'isSimple', false),
             'defaultViewName' => self::sanitizeString(self::safeCall($instance, 'getDefaultViewName', null)),
             'viewFile' => $viewFile,
-            'templateFile' => $templateFile,
+            'templateFiles' => $templateFiles,
         ];
     }
 
@@ -118,15 +119,23 @@ final class DescribeAction
      * resolution logic `AppIntrospectionCompiler` computes for the
      * `overview`/`routes:compile` artifact -- rather than reimplementing the
      * `{Action}{ViewName}View`/`{ViewName}.php` naming convention here.
+     *
+     * Resolves one template file per `execute*()` method the view declares
+     * (each its own output type), via `templateExtensionFor()` -- not a
+     * single `.php`-assumed guess -- so a PHPTAL/Twig/XSLT-rendered
+     * `executeHtml()` reports its real extension instead of always looking
+     * like the plain PHP renderer. Mirrors
+     * `AppIntrospectionCompiler::locateViewAndTemplate()` so this
+     * capability's output stays consistent with `overview`/`routes:compile`.
      * @param ReflectionClass<object> $reflection
-     * @return array{0: ?string, 1: ?string}
+     * @return array{0: ?string, 1: array<string, string>}
      */
-    private static function locateViewAndTemplate(string $module, string $action, ReflectionClass $reflection): array
+    private static function locateViewAndTemplate(string $module, string $action, ReflectionClass $reflection, Controller $controller): array
     {
         $resolver = new TriadViewResolver();
         $viewToken = $resolver->resolveViewToken($reflection);
         if ($viewToken === null) {
-            return [null, null];
+            return [null, []];
         }
 
         $file = $reflection->getFileName();
@@ -141,11 +150,42 @@ final class DescribeAction
         $namespacePrefix = Config::getString('core.namespace_prefix', 'App');
         $canonical = $resolver->canonicalViewToken($entry, $viewToken);
         $viewFile = $resolver->resolveExistingViewFile($entry, $canonical, $namespacePrefix);
+        if ($viewFile === null) {
+            return [null, []];
+        }
 
-        $templateFile = $resolver->templateFileFor($entry, $canonical);
-        $templateFile = is_file($templateFile) ? $templateFile : null;
+        $viewClass = $resolver->viewClassFor($entry, $canonical, $namespacePrefix);
+        if (!class_exists($viewClass)) {
+            $templateFile = $resolver->templateFileFor($entry, $canonical);
+            return [$viewFile, is_file($templateFile) ? [self::outputTypeKeyFor(null, $controller) => $templateFile] : []];
+        }
 
-        return [$viewFile, $templateFile];
+        $templateFiles = [];
+        foreach ($resolver->executeMethodsFor(new ReflectionClass($viewClass)) as $method) {
+            if ($resolver->declaresNoTemplate($method) || $resolver->alwaysReturnsContent($method)) {
+                continue;
+            }
+            $extension = $resolver->templateExtensionFor($method, $controller);
+            $templateFile = $resolver->templateFileFor($entry, $canonical, $extension);
+            if (is_file($templateFile)) {
+                $templateFiles[self::outputTypeKeyFor($resolver->outputTypeNameFor($method), $controller)] = $templateFile;
+            }
+        }
+
+        return [$viewFile, $templateFiles];
+    }
+
+    /** Mirrors `AppIntrospectionCompiler::outputTypeKeyFor()`. */
+    private static function outputTypeKeyFor(?string $outputTypeName, Controller $controller): string
+    {
+        if ($outputTypeName !== null) {
+            return $outputTypeName;
+        }
+        try {
+            return $controller->getOutputType(null)->getName();
+        } catch (\Throwable) {
+            return 'default';
+        }
     }
 
     /**

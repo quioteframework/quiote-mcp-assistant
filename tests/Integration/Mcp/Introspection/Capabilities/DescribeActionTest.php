@@ -6,7 +6,11 @@ namespace QuioteMcpAssistant\Tests\Integration\Mcp\Introspection\Capabilities;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Quiote\Context;
+use Quiote\Renderer\Phptal\PhptalRenderer;
+use Quiote\Renderer\Renderer;
 use QuioteMcpAssistant\Mcp\Introspection\Capabilities\DescribeAction;
+use ReflectionProperty;
 
 final class DescribeActionTest extends TestCase
 {
@@ -45,7 +49,60 @@ final class DescribeActionTest extends TestCase
         $result = DescribeAction::run('web', 'Default', 'Contact');
 
         self::assertStringEndsWith('ContactSuccessView.php', (string) $result['viewFile']);
-        self::assertStringEndsWith('ContactSuccess.php', (string) $result['templateFile']);
+        self::assertArrayHasKey('html', $result['templateFiles']);
+        self::assertStringEndsWith('ContactSuccess.php', $result['templateFiles']['html']);
+    }
+
+    /**
+     * Bug A: this used to always call `templateFileFor()` with no
+     * `$extension`, so it silently defaulted to `.php` no matter what
+     * renderer the target app actually configured for a given output
+     * type -- a PHPTAL/Twig/XSLT-rendered `executeHtml()` would always be
+     * reported at the wrong (nonexistent) `.php` path. Swaps the live
+     * Controller's cached "html" renderer for a real
+     * `Quiote\Renderer\Phptal\PhptalRenderer` (`quioteframework/phptal`, a
+     * require-dev dependency) and touches the `.tal` file the fixed code
+     * should now resolve, to exercise `templateExtensionFor()` against the
+     * real, bootstrapped app rather than a guess.
+     */
+    #[Test]
+    public function resolvesThePhptalExtensionWhenHtmlIsConfiguredWithPhptal(): void
+    {
+        $talFile = str_replace('ContactSuccess.php', 'ContactSuccess.tal', $this->contactHtmlTemplatePath());
+        self::assertFileDoesNotExist($talFile);
+        touch($talFile);
+
+        $controller = Context::getInstance('web')->getController();
+        $outputTypesProp = new ReflectionProperty($controller, 'outputTypes');
+        /** @var array<string, object> $outputTypes */
+        $outputTypes = $outputTypesProp->getValue($controller);
+        $htmlOutputType = $outputTypes['html'];
+
+        $rendererProp = new ReflectionProperty($htmlOutputType, 'renderers');
+        /** @var array<string, array{instance: ?Renderer, parameters: array<string, mixed>}> $rendererConfig */
+        $rendererConfig = $rendererProp->getValue($htmlOutputType);
+        $restore = $rendererConfig;
+
+        try {
+            $rendererConfig['php']['instance'] = new PhptalRenderer();
+            $rendererProp->setValue($htmlOutputType, $rendererConfig);
+
+            $result = DescribeAction::run('web', 'Default', 'Contact');
+
+            self::assertArrayHasKey('html', $result['templateFiles']);
+            self::assertStringEndsWith('ContactSuccess.tal', $result['templateFiles']['html']);
+        } finally {
+            $rendererProp->setValue($htmlOutputType, $restore);
+            unlink($talFile);
+        }
+    }
+
+    private function contactHtmlTemplatePath(): string
+    {
+        $result = DescribeAction::run('web', 'Default', 'Contact');
+        self::assertArrayHasKey('html', $result['templateFiles']);
+
+        return $result['templateFiles']['html'];
     }
 
     #[Test]
