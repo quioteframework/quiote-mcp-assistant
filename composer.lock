@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c6b716a944d350dc6a1057e76024c99f",
+    "content-hash": "02120c0d492c284fc1ed48807e038168",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -1526,25 +1526,28 @@
         },
         {
             "name": "quioteframework/csrf",
-            "version": "v3.1.0",
+            "version": "v4.0.0-RC2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/csrf.git",
-                "reference": "bb3fe9f6f57edc963ebbeff2b2452b65e85730c1"
+                "reference": "79f16723e96a7433e3e1a5527ed70de7e0cd79c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/bb3fe9f6f57edc963ebbeff2b2452b65e85730c1",
-                "reference": "bb3fe9f6f57edc963ebbeff2b2452b65e85730c1",
+                "url": "https://api.github.com/repos/quioteframework/csrf/zipball/79f16723e96a7433e3e1a5527ed70de7e0cd79c0",
+                "reference": "79f16723e96a7433e3e1a5527ed70de7e0cd79c0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.5.0",
-                "quioteframework/quiote": "*",
+                "quioteframework/quiote": "^4.0",
                 "symfony/security-csrf": "^8.0"
             },
             "type": "library",
             "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/csrf/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
             "autoload": {
@@ -1571,9 +1574,9 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/csrf/tree/v3.1.0"
+                "source": "https://github.com/quioteframework/csrf/tree/v4.0.0-RC2"
             },
-            "time": "2026-07-29T21:25:35+00:00"
+            "time": "2026-08-05T18:33:50+00:00"
         },
         {
             "name": "quioteframework/mcp",

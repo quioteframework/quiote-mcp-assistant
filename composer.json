@@ -7,6 +7,7 @@
         "php": ">=8.5",
         "quioteframework/quiote": "^4.0",
         "quioteframework/mcp": "^4.0",
+        "quioteframework/csrf": "^4.0",
         "mcp/sdk": "^0.7.0"
     },
     "autoload": {

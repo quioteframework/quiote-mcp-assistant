@@ -71,7 +71,7 @@ function mcpRequest(\Nyholm\Psr7\Factory\Psr17Factory $factory, array $body, ?st
 
 function dispatch(\Psr\Http\Message\ServerRequestInterface $request): \Psr\Http\Message\ResponseInterface
 {
-    return \Quiote\Context::getInstance('web')->handle($request);
+    return \Quiote\Context::getInstance('web')->getRequestHandler()->handle($request);
 }
 
 $fail = 0;
