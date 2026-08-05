@@ -76,7 +76,7 @@ final class AssistantPlugin implements PluginInterface
     {
         // Sensible knowledge-server identity (app settings.php still wins).
         $registrar->configDefault('mcp.server_name', 'quiote-assistant');
-        $registrar->configDefault('mcp.server_version', '0.1.0');
+        $registrar->configDefault('mcp.server_version', '1.2.0');
 
         // The re-runnable docs bundler.
         $registrar->command(DocsSyncCommand::class);

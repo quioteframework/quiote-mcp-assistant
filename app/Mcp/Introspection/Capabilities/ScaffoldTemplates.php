@@ -170,12 +170,4 @@ final class ScaffoldTemplates
 
             PHP;
     }
-
-    public static function templateContent(string $name): string
-    {
-        return <<<PHP
-            <p><?php echo htmlspecialchars(\$template['title'] ?? '{$name}', ENT_QUOTES, 'UTF-8'); ?></p>
-
-            PHP;
-    }
 }

@@ -69,12 +69,25 @@ if (!is_array($settings)) {
     fwrite(STDERR, "Could not read {$settingsFile} as a PHP array.\n");
     exit(1);
 }
-$settings['plugins'] = [\Quiote\Mcp\McpPlugin::class];
+// A stale `plugins` key from an older revision of this script would activate
+// McpPlugin through the unsupported settings-key path below, masking a broken
+// Config/plugins.php.
+unset($settings['plugins']);
 $settings['mcp.enabled'] = true;
 $settings['mcp.expose_actions'] = true;
 $settings['mcp.server_name'] = 'expose-tool-smoke';
 $settings['mcp.server_version'] = '0.0.0';
 file_put_contents($settingsFile, "<?php\n\nreturn " . var_export($settings, true) . ";\n");
+
+// Plugins are activated in their own auto-discovered Config/plugins.php, as
+// entries of {class, enabled?} -- not via a `plugins` key inside settings.php.
+// (`quiote new` scaffolds no plugins.php, so this creates it.) Writing this
+// the supported way keeps the smoke test an honest exercise of the mechanism
+// the `add-plugin` recipe and `plugins` convention card actually teach.
+file_put_contents(
+    $scratchAppDir . '/Config/plugins.php',
+    "<?php\n\nreturn [\n    ['class' => \\Quiote\\Mcp\\McpPlugin::class],\n];\n",
+);
 
 $actionsDir = $scratchAppDir . '/Modules/Blog/Actions';
 $viewsDir = $scratchAppDir . '/Modules/Blog/Views';

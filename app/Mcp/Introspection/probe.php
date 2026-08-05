@@ -207,6 +207,7 @@ try {
         'overview' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\Overview::run($contextName),
         'diagnostics' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\Diagnostics::run($contextName),
         'scaffold_module' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ScaffoldModule::run(
+            $contextName,
             $appDir,
             (string) ($options['module'] ?? ''),
             $dryRun,

@@ -120,6 +120,24 @@ assigns:
 </parameter>
 ```
 
+## Optional: a scaffold starter template
+
+`getStarterTemplate(): ?string` is an opt-in hook (default `null` on the base `Renderer` class) a renderer can override to hand back a minimal, syntactically valid stub in its own templating syntax — for a scaffolding tool that needs to generate an engine-correct starter template for whichever renderer an output type is actually configured to use, not just the kernel's native PHP one.
+
+```php
+public function getStarterTemplate(): ?string
+{
+    $expr = $this->extractVars ? '$title' : ('$' . $this->varName . "['title']");
+    return "<p><?php echo htmlspecialchars({$expr} ?? '', ENT_QUOTES, 'UTF-8'); ?></p>\n";
+}
+```
+
+The kernel's `PhpRenderer`, and the `PhptalRenderer`, `TwigRenderer`, and `XsltRenderer` packages, all implement it — each rendering a `title` variable per its own idiom, and honoring the instance's configured `$varName`/`$extractVars` (above) the same way `render()` itself does.
+
+[`make:action`](/getting-started/cli/#makeaction) calls it: it resolves the renderer your app actually configures for the `html` output type and writes that renderer's starter, under its `getDefaultExtension()`. A PHPTAL/Twig/XSLT app is therefore scaffolded a `.tal`/`.twig`/`.xsl` template rather than a `.php` file its renderer would never execute. External tooling (an IDE plugin, an MCP server) can call it the same way.
+
+Leaving this at the default `null` is fine: `make:action` then writes no template at all and warns instead, naming the file and extension to author by hand. Guessing PHP syntax for a renderer known not to be PHP would only produce a file the app can never render.
+
 ## Worker-mode reuse: `IReusableRenderer` and `reset()`
 
 Under a persistent worker ([FrankenPHP](/architecture/deployment/), RoadRunner) a renderer instance can outlive a single request, so state hygiene matters.

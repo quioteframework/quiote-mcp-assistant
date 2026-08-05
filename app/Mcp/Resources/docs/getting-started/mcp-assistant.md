@@ -6,15 +6,15 @@ The **Quiote Assistant MCP** is a [Model Context Protocol](https://modelcontextp
 
 It is, itself, **a Quiote application**. It dogfoods the framework's own [app-as-MCP-server capability](/advanced/mcp-server/) — the same `Quiote\Mcp\McpPlugin` any Quiote app can turn on — so the assistant is both a useful tool and the reference example of building an MCP server with Quiote.
 
-<Aside type="caution" title="Pre-alpha">
-The assistant's capability surface has grown quickly and its shape can still change. It has no independent version scheme yet (`mcp.server_version` is still `0.1.0` despite everything below). It isn't on Packagist — build it from a checkout, the PHAR, or the published Docker image (`ghcr.io/quioteframework/quiote-mcp-assistant`, tagged releases only).
+<Aside type="note" title="Version">
+The Quiote Assistant MCP is at **v1.1.0** (`mcp.server_version` reports `1.1.0`). It's published as a Docker image (`ghcr.io/quioteframework/quiote-mcp-assistant`, tagged releases), and can also be built from a checkout or run as the PHAR.
 </Aside>
 
 ## What it exposes
 
 ### Resources — the docs, one URI each
 
-Every page of this documentation site is bundled as an MCP **resource** under a `quiote-docs://` URI (40 at last sync), readable with the standard `resources/read` call:
+Every page of this documentation site is bundled as an MCP **resource** under a `quiote-docs://` URI (49 at last sync), readable with the standard `resources/read` call:
 
 ```
 quiote-docs://basics/routing
@@ -63,19 +63,17 @@ Five tools work with no target app at all; they answer questions about the frame
 {
   "task": "add-plugin", "title": "Write and register a plugin",
   "steps": [
-    { "description": "Implement PluginInterface -- a name() and a register()...",
-      "code": "final class HealthPlugin implements PluginInterface { ... }" },
-    { "description": "Activate it in the plugins list in Config/settings.php...",
-      "code": "'plugins' => [ \\App\\Plugin\\HealthPlugin::class ]," }
+    { "description": "Implement PluginInterface -- just a register()...
+                      #[Plugin(name: ...)] is required, not optional...",
+      "code": "#[Plugin(name: 'health')]\nfinal class HealthPlugin implements PluginInterface { ... }" },
+    { "description": "Activate it via Config/plugins.php -- NOT a \"plugins\" key
+                      inside settings.php. Each entry is {class, enabled?}...",
+      "code": "return [ ['class' => \\App\\Plugin\\HealthPlugin::class] ];" }
   ]
 }
 ```
 
-<Aside type="note">
-`register-mcp-tool`'s generated code currently calls a `PluginRegistrar::mcpTool()` method that no longer exists on the framework's `PluginRegistrar` (see [How it's built](#how-its-built) below) — a known staleness in this recipe from the same pinned-dependency gap. Don't copy it verbatim; register against `Quiote\Mcp\McpCatalog` directly instead.
-
-`add-plugin`'s own description text above ("a `name()` and a `register()`") is also stale for the same reason: `PluginInterface` no longer declares `name()` — a plugin only implements `register()`, and its diagnostic name comes from `#[Plugin(name: '...')]` instead (or `NamedPlugin` for a name that can't be a compile-time constant). See [Plugins and extensibility: Writing a plugin](/architecture/plugins/#writing-a-plugin) for the current shape; don't add a redundant `name()` method to a generated plugin class.
-</Aside>
+Note how much of the step text is spent on the failure modes rather than the happy path — that `#[Plugin]` is mandatory for class-string activation, and that the `settings.php` route only incidentally works. That is deliberate: the recipes carry the caveats an agent would otherwise have to infer from a silent failure.
 
 #### describe_symbol
 
@@ -295,22 +293,25 @@ Omit `--target-app-dir` if you only want the knowledge tools. Once registered, t
 
 This is the part worth studying if you're building your own MCP server on Quiote — the assistant is deliberately a plain app with nothing special about it.
 
-**It's turned on by two settings.** `mcp.enabled = true`, plus both `Quiote\Mcp\McpPlugin` (which publishes the `mcp.*` settings and registers the `mcp:serve` transport) and the app's own `AssistantPlugin` listed in the `plugins` config key:
+**It's turned on by two settings.** `mcp.enabled = true`, plus both `Quiote\Mcp\McpPlugin` (which publishes the `mcp.*` settings and registers the `mcp:serve` transport) and the app's own `AssistantPlugin`, both listed in `Config/plugins.php`:
+
+```php
+// app/Config/plugins.php
+return [
+    ['class' => \Quiote\Mcp\McpPlugin::class, 'enabled' => true],
+    ['class' => \QuioteMcpAssistant\Mcp\AssistantPlugin::class, 'enabled' => true],
+];
+```
 
 ```php
 // app/Config/settings.php
-'plugins' => [
-    \Quiote\Mcp\McpPlugin::class,
-    \QuioteMcpAssistant\Mcp\AssistantPlugin::class,
-],
-
 'mcp.enabled'    => true,
 'mcp.transports' => ['stdio', 'http'],
 'mcp.server_name' => 'quiote-assistant',
 ```
 
-<Aside type="caution" title="Pinned to an older plugin mechanism">
-The assistant currently depends on a `quioteframework/quiote` commit from before `#[Plugin]`-attribute activation and the dedicated `Config/plugins.php` file existed (see [Plugins and extensibility](/architecture/plugins/#registering-a-plugin) for the current, documented mechanism) — it hasn't been updated to `composer update`'s latest `dev-main` yet. Treat the snippet above as "what this specific reference app does today," not as current best practice for your own plugins.
+<Aside type="note" title="Plugin registration">
+The assistant tracks `quioteframework/quiote` **3.x** and activates its plugins through the dedicated `Config/plugins.php` file with `#[Plugin]`-attribute activation (see [Plugins and extensibility](/architecture/plugins/#registering-a-plugin)).
 </Aside>
 
 **Every capability is registered manually**, directly against `Quiote\Mcp\McpCatalog`. There's no attribute discovery for plain handler classes (only `#[Route]` actions carrying `#[McpTool]` are scanned) — and note that `PluginRegistrar::mcpTool()`/`mcpResource()`/`mcpPrompt()` convenience methods, which used to be the documented seam here, have since been **removed from the framework core**. `AssistantPlugin` reproduces that convenience itself with small private wrapper methods, `mcpResource()`/`mcpTool()`/`mcpPrompt()`, that forward to `McpCatalog::addResource()`/`addTool()`/`addPrompt()`:

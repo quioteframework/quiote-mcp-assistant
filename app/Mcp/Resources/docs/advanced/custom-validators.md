@@ -37,6 +37,28 @@ Return `true` to pass, `false` to fail. Everything else — severity, error repo
 `validate()`'s boolean return value only decides pass/fail — it does **not**, by itself, attach an error message anywhere. On every failure path, you must also call `$this->throwError()` (with or without an index) *before* returning `false`. Skip it, and the base class still correctly marks the argument invalid (severity is applied, `getParameter()` still refuses the field under strict access) — but no `ValidationError` incident is ever recorded, so nothing surfaces to the error view, the JSON problem document, or `FormPopulationMiddleware`. The user sees a failed submission with no indication of what was wrong. Every `return false;` in your `validate()` needs a `throwError()` call on the same path — this bit even one of the framework's own built-in validators (a format-check branch that returned `false` directly, one line below a sibling branch that correctly called `throwError()` first), so don't assume a validator with a `throwError()` call *somewhere* in it is safe; check every failure branch individually.
 :::
 
+### Constructor dependencies
+
+Validator construction goes through the [container](/architecture/container/), so a validator may take collaborators like anything else:
+
+```php
+final class VatNumberValidator extends Validator
+{
+    public function __construct(private readonly VatLookupService $lookup) {}
+
+    protected function validate(): bool
+    {
+        return $this->lookup->isRegistered((string) $this->getData($this->getArgument()));
+    }
+}
+```
+
+This is purely additive: a validator with no constructor — every one the framework ships, and every one written before this — is `new`'d directly, so nothing about the existing path changes.
+
+Parameters, argument names and error messages still arrive through `initialize()`, not the constructor. Those are per-declaration *data* read out of a config file, so there's nothing for the container to resolve them from.
+
+A validator is built per validation and never cached, so unlike a singleton service it may depend on request-scoped state — the `WebRequest`, the user — directly. See [a singleton cannot depend on request-scoped state](/architecture/container/#a-singleton-cannot-depend-on-request-scoped-state) for why that distinction exists.
+
 ### Declaring accepted parameters
 
 A validator whitelists the parameters it understands via a static method. Override it and merge with the parent's:

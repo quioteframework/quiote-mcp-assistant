@@ -16,9 +16,11 @@ routing:
 request:
   class: Quiote\Request\WebRequest
   params: []
-storage:
-  class: Quiote\Storage\NullStorage
-  params: []
+# No `session` slot: this is a stateless MCP server (stdio and HTTP alike),
+# so a context with no session entry gets a NullSessionBag -- reads return
+# their default, writes are discarded. That is exactly what the pre-3.0
+# `storage: Quiote\Storage\NullStorage` slot expressed, and 3.0 removed that
+# class. See quiote-docs://basics/sessions ("The slot is optional").
 user:
   class: Quiote\User\User
   params: []

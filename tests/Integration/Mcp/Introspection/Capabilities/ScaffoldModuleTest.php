@@ -23,12 +23,13 @@ final class ScaffoldModuleTest extends TestCase
     #[Test]
     public function previewsTheThreeGeneratedFilesWithoutWriting(): void
     {
-        $result = ScaffoldModule::run('/irrelevant-app-dir', 'PhpunitCapabilityPreview', dryRun: true);
+        $result = ScaffoldModule::run('web', '/irrelevant-app-dir', 'PhpunitCapabilityPreview', dryRun: true);
 
         self::assertSame('PhpunitCapabilityPreview', $result['module']);
         self::assertTrue($result['dry_run']);
         self::assertIsArray($result['files']);
-        self::assertCount(3, $result['files']);
+        self::assertCount(3, $result['files']); // action + view + PhpRenderer-authored html template
+        self::assertArrayNotHasKey('skipped_templates', $result);
         foreach ($result['files'] as $file) {
             self::assertIsArray($file);
             self::assertSame('would_create', $file['status']);
@@ -42,6 +43,6 @@ final class ScaffoldModuleTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid module name');
 
-        ScaffoldModule::run('/irrelevant-app-dir', 'not-pascal-case', dryRun: true);
+        ScaffoldModule::run('web', '/irrelevant-app-dir', 'not-pascal-case', dryRun: true);
     }
 }

@@ -1,10 +1,12 @@
 # Input validation
 
-> Declaring validators with the fluent PHP builder and reading validated input.
+> Declaring validators with the fluent PHP builder or #[MapRequest] DTOs, and reading validated input.
 
 Quiote validates input *before* the action runs, and enforces a strict rule afterwards: an action can only read parameters that a validator has approved. This is a security default, not a convenience — unvalidated input is not merely discouraged, it is inaccessible.
 
 Validation runs in `ValidationMiddleware`, after security and before dispatch. This page covers the common cases; operator groups, exports, and custom validators are in [Advanced validation](/advanced/advanced-validation/).
+
+There are three ways to declare what an action accepts, and they all compile to the same validators: the [fluent PHP builder](#the-fluent-builder) (in a `Validate/` file or on the action), a [`#[MapRequest]` DTO](#request-dtos--maprequest), and legacy `validators.xml`. Mix them freely — they all register onto the same validation manager.
 
 ## How it fits in a request
 
@@ -105,6 +107,88 @@ class PostAction extends Action
 
 Fluent validators run *alongside* legacy `validators.xml` — both add to the same validation manager — so you can migrate a module incrementally.
 
+## Request DTOs — `#[MapRequest]`
+
+There is a third way to declare an action's input, alongside the fluent builder and `validators.xml`: put the declaration on a **data-transfer object** and let the framework derive the validators from it. Instead of naming fields twice — once in a validator, once in `getParameter()` calls — you describe the shape once as a class and receive it typed.
+
+Declare a plain constructor-promoted class, mark it `#[MapRequest]`, and annotate constrained properties with `Quiote\Request\Attribute\Constraint\*` attributes:
+
+```php
+<?php
+namespace App\Modules\Blog\Dto;
+
+use Quiote\Request\Attribute\Constraint\Email;
+use Quiote\Request\Attribute\Constraint\StringLength;
+use Quiote\Request\Attribute\MapRequest;
+
+#[MapRequest]
+final readonly class ContactDto
+{
+    public function __construct(
+        #[StringLength(min: 2, max: 20)] public string $title,
+        #[Email] public ?string $authorEmail = null,
+    ) {}
+}
+```
+
+Then add it as a second parameter to the action method handling the request. There is no other registration step — no `registerValidators()` override, no validator file:
+
+```php
+public function executeWrite(WebRequest $rd, ContactDto $dto): string
+{
+    // $dto is only constructed once validation has already passed.
+    $this->mailer->send($dto->authorEmail, $dto->title);
+    return 'Success';
+}
+```
+
+The DTO is bound to that *one* method. `executeWrite(WebRequest $rd, ContactDto $dto)` and `executeRead(WebRequest $rd)` on the same action are perfectly normal — each verb declares its own input shape, or none.
+
+### Constraints
+
+Each attribute compiles to the same fluent-builder call you would otherwise write by hand, so it produces identical failure handling. All of them accept a `message:` argument that becomes the validator's error message.
+
+| Attribute | Arguments | Compiles to |
+|---|---|---|
+| `#[NotBlank]` | — | `isNotEmpty()` |
+| `#[StringLength]` | `min`, `max` (both optional) | `string()` + `minLength`/`maxLength` |
+| `#[Range]` | `min`, `max` (`int\|float`, both optional) | `number()` + `min`/`max` |
+| `#[Email]` | — | `email()` |
+| `#[Choice]` | `values` (**required**) | `enum()` |
+| `#[Regexp]` | `pattern` (**required**), `match` (default `true`) | `regex()` |
+| `#[BooleanType]` | — | `boolean()` |
+| `#[JsonType]` | — | `json()` |
+| `#[DateTimeType]` | — | `DateTimeValidator` |
+
+A property may carry several attributes; each registers its own validator against the same field name.
+
+### Required, optional, and types
+
+Whether a property is required is read from the constructor signature, not from an attribute: a parameter with **no default value and a non-nullable type** is required, and everything else is optional. That's why `?string $authorEmail = null` above is an optional email.
+
+A property with **no constraint attribute at all** still gets a minimal type-inferred validator. This is not decoration — registering a validator is what puts the property's name on `WebRequest`'s [strict-validation whitelist](#reading-validated-input) in the first place, so an unannotated property would otherwise be unreadable and the DTO could never be constructed.
+
+Supported property types, and how each arrives:
+
+| Type | Notes |
+|---|---|
+| `string` | As submitted (after the validator's own trimming/sanitization). |
+| `int`, `float` | Already cast by `NumberValidator` during validation. |
+| `bool` | Already literalized by `BooleanValidator` (so `"on"`, `"1"`, `"true"` all work). |
+| `array` | An array parameter as-is, or a JSON-encoded string decoded to an array. Pair with `#[JsonType]` for a JSON body field. |
+| `DateTimeImmutable` | Parsed from the validated string. Pair with `#[DateTimeType]`. |
+| Backed enum | Resolved via `from()` on the backing value. Pair with `#[Choice]` to constrain the accepted set. |
+
+The one hard requirement: DTOs must be plain constructor-promoted classes with a **single named type per property** — no union types, no intersection types, no untyped properties. `RequestDtoScanner` throws a clear `InvalidArgumentException` naming the offending property rather than failing mysteriously later, and does the same for an unsupported type.
+
+### What you get for free
+
+Because `#[MapRequest]` registers *real* validators on the same validation manager as everything else, it inherits the rest of the stack rather than living beside it:
+
+- **Failures are identical.** A validation failure produces the same 400 and the same RFC 9457 `application/problem+json` document as an XML or fluent validator — see [What happens on failure](#what-happens-on-failure).
+- **Schemas are derived.** `ActionInputSchemaResolver` reads the same validator IR, so a `#[MapRequest]`-based action's [MCP tool `inputSchema`](/advanced/mcp-server/) and its [OpenAPI operation parameters](/advanced/openapi/) are generated automatically, with no second description of the same fields.
+- **Strict access still applies.** `$rd->getParameter()` works exactly as before for the DTO's fields, and still throws for anything the DTO didn't declare.
+
 ## Reading validated input
 
 An action reads input through `WebRequest::getParameter()`. Access is whitelist-enforced:
@@ -141,6 +225,17 @@ When validation *fails* — a validator or `validate()` returns `false`/reports 
 3. For JSON, returns an [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) problem document (`application/problem+json`) instead of an HTML page.
 
 On an HTML form submission, the submitted values are repopulated into the re-rendered error form — see [Sticky forms after a partial validation failure](#sticky-forms-after-a-partial-validation-failure) below for how that survives strict pruning.
+
+### When dispatch handles the failure itself
+
+A failed validation decision that reaches `DispatchMiddleware` — the container-less fallback path, or an action carrying its own `validation.error.content` — is negotiated the same way rather than being answered with a fixed representation:
+
+- A client that wants JSON gets an RFC 9457 problem document.
+- Anything else gets the HTML fragment.
+
+The choice trusts the resolved output type when it's `json` or `html`, and only sniffs `Accept` when it's neither. That fallback requires `application/json` **and** no `text/html`, so everything ambiguous — an absent `Accept`, `*/*`, a browser-style list naming both — keeps getting HTML: a plain `curl` and a browser are indistinguishable at that point, and HTML is the representation that's safe to render in either. An application wanting otherwise declares it per action through the output type.
+
+Content your application supplies is still rendered as-is; only its `Content-Type` is corrected for a JSON client rather than left as HTML.
 
 :::caution[A throwing validator is a 500, not a 400]
 A validator (or a manual `validate*()` hook) that **throws** is not treated as "the user submitted something invalid" — it's logged at error level and rethrown, reaching `ErrorHandlingMiddleware` and becoming a 500 (see [Error handling](/architecture/error-handling/)), not a graceful 400. A validator crashing is a framework/app bug; conflating it with an ordinary validation failure would also skip the pruning that normally scrubs unvalidated data before the exception is caught. Return `false` (or use the validator's own failure mechanism) for an expected validation failure — reserve exceptions for genuinely unexpected errors.

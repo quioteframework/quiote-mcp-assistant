@@ -24,7 +24,7 @@ Every middleware defaults to on and can be disabled with a `middleware.*` `<use 
 |---|---|---|
 | 1 | ErrorHandlingMiddleware | `core.developer_exceptions` |
 | 2 | TelemetryMiddleware | `telemetry.*` (see [Telemetry](/architecture/telemetry/)) |
-| 3 | SessionMiddleware | — (storage via `factories`) |
+| 3 | SessionMiddleware | — (backend via the `session` role in `factories`) |
 | 4 | TimingMiddleware | `middleware.timing.emit_header` |
 | 5 | TraceMiddleware | `middleware.trace.emit_header`, `middleware.trace.header_name` |
 | 6 | PayloadParsingMiddleware | `QUIOTE_JSON_STRICT` env |
@@ -89,9 +89,18 @@ Its behaviour is driven entirely by the `telemetry.*` settings (and by whether t
 
 ## SessionMiddleware
 
-Starts/persists session storage and guarantees an `ExecutionState` request attribute exists. Skipped for JWT-authenticated requests. Runs by default.
+`Quiote\Middleware\SessionMiddleware` runs at `bootstrap` priority 900 — early, before security. It:
 
-**No settings of its own.** Whether the session actually persists depends on the `storage` role in your [`factories` config](/architecture/configuration/) — `SessionStorage`, `PdoSessionStorage`, or `NullStorage`. That is storage configuration, not middleware configuration.
+- guarantees an `ExecutionState` request attribute exists;
+- loads or creates this request's session from the incoming cookie and installs it on the context as the [`SessionBagInterface`](/basics/sessions/#reading-and-writing-session-data), so the `User` hierarchy, CSRF token storage, OIDC state and application code all reach the same session;
+- flushes request state — notably the authenticated user — on the way out, *before* the session is serialized;
+- persists the session and bakes the `Set-Cookie` onto the response.
+
+Requests marked `auth.sessionless` or `jwt.skip_session` skip the session entirely and persist no user state, so a token-derived identity is never written into an unrelated session the client may still carry.
+
+**No settings of its own.** Whether a session persists at all depends on the `session` role in your [`factories` config](/architecture/configuration/#factories). With no `session` role configured, the context keeps answering a `NullSessionBag` and this middleware does nothing beyond the `ExecutionState` guarantee. That is session configuration, not middleware configuration — see [Sessions](/basics/sessions/).
+
+Distinct from `Quiote\Session\SessionMiddleware`, which is standalone PSR-15 wiring for an application driving `SessionManager` outside this pipeline. The pipeline one additionally owns the `ExecutionState` guarantee and the request-state flush.
 
 ## TimingMiddleware
 
@@ -201,7 +210,14 @@ Wraps the response to inject CSRF tokens into HTML forms, a `<meta>` tag, and th
 
 Rejects unsafe-method requests with 403 unless a valid token is present. Runs by default; gated by `core.csrf.enabled`.
 
-Two classes of request are exempted from the check automatically, with no per-route opt-out needed, because they fall outside CSRF's threat model (an attacker riding a victim's ambient session cookie): a request carrying an `Authorization` header (not forgeable cross-site the way a cookie is), and — the one worth reading twice — **any request with no session cookie at all**. That second exemption fires on every single request in an app whose `storage` role is `Quiote\Storage\NullStorage`, since no session cookie is ever issued: CSRF validation silently never runs, even though the token field is still injected into forms. See [Authentication & authorization: the NullStorage trap](/advanced/authentication-authorization/#automatic-exemptions--and-the-nullstorage-trap).
+Two classes of request are exempted from the check automatically, with no per-route opt-out needed, because they fall outside CSRF's threat model (an attacker riding a victim's ambient session cookie):
+
+- A request an authenticator already resolved from a **caller-supplied credential**, signalled by the `auth.stateless`, `auth.sessionless` or `jwt.skip_session` request attributes. Note this is deliberately *not* "an `Authorization` header is present" — that header can be attached alongside a session cookie, so presence alone proved nothing.
+- A request with **no session cookie and no foreign `Origin`**. The `Origin` condition is what keeps a cross-site login POST — which also arrives without a session — from being exempted.
+
+The session cookie name comes from the configured `SessionManager` (`QSID` by default), not from ext/session's `session_name()`; ext/session is the fallback only when no `session` slot is configured. A route can force the check despite an exemption with a `_csrf => true` route default.
+
+With no `session` slot at all there is nowhere to store a token, so same-origin unsafe requests are exempt (logged once per process as a warning) and cross-origin browser requests can never pass. See [Sessions: the slot is optional](/basics/sessions/#the-slot-is-optional) and [Authentication & authorization: automatic exemptions](/advanced/authentication-authorization/#automatic-exemptions).
 
 Both CSRF middleware read the same settings:
 
@@ -213,6 +229,7 @@ Both CSRF middleware read the same settings:
 | `core.csrf.header_name` | `'X-CSRF-Token'` | Header that XHR/fetch/API clients send the token in. |
 | `core.csrf.cookie_name` | `'XSRF-TOKEN'` | Readable (non-HttpOnly) cookie delivering the token to SPA clients. |
 | `core.csrf.safe_methods` | `['GET','HEAD','OPTIONS','TRACE']` | Methods that skip validation (compared case-insensitively). |
+| `core.csrf.trusted_origins` | `[]` | Origins that don't count as foreign for the sessionless exemption. Compared host-only, so a TLS-terminating proxy's scheme and port rewriting doesn't reject same-site requests. |
 
 #### PHP
 

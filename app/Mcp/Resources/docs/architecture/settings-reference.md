@@ -11,7 +11,7 @@ This page is the catalog: every setting Quiote actually reads, its default, and 
 Quiote configuration comes from four distinct places. Each setting below states which applies:
 
 1. **`Config` settings** — dotted keys (`core.*`, and a few `routing.*` / `validation.*`) read via `Config::get()`, set in your [`settings` config](/architecture/configuration/) (PHP/YAML/XML).
-2. **Factory parameters** — `<ae:parameter>` children on a `factories` or `databases` entry, passed to a class's `initialize()`. Used by storage, response, database, user, and translation classes.
+2. **Factory parameters** — `<ae:parameter>` children on a `factories` or `databases` entry, passed to a class's `initialize()`. Used by the session, response, database, user, and translation roles.
 3. **Environment variables / PHP constants** — a handful of `QUIOTE_*` vars and constants read directly, mostly for bootstrap and worker mode.
 4. **Programmatic** — logging and the DI container have no config-file surface at all; they are wired in PHP (see [Logging](/architecture/logging/) and [The DI container](/architecture/container/)).
 
@@ -106,9 +106,20 @@ Scaffolded apps also carry `core.use_logging`; logging itself is configured prog
 |---|---|---|
 | `core.cache_enabled` | `false` | Master switch for action/view caching. |
 | `core.use_cache` | `false` | Whether a cache instance is built for the request. **Caching needs both this and `core.cache_enabled`.** |
-| `core.cache_backend` | filesystem | Set to `'apcu'` to use APCu (only if `apcu_enabled()` at runtime; otherwise silently falls back to filesystem). |
+| `core.cache_backend` | `'filesystem'` | Set to `'apcu'` to use APCu (only if `apcu_enabled()` at runtime; otherwise silently falls back to filesystem), or `'redis'` to use a Redis pool. |
+| `core.redis_dsn` | `'redis://127.0.0.1:6379'` | Connection DSN used when `core.cache_backend` is `'redis'`. See [Redis backends](/plugins/official-packages/#redis-backends). |
+| `core.config_check_freshness` | `true` | When `false`, trusts a compiled config cache file unconditionally instead of stat-checking the source against it. Set `false` in production **after `quiote cache:warmup`** — mirrors Symfony's `debug=false` ConfigCache. Leave `true` in development so edited config/validators/routes are picked up without a manual warmup. |
+| `core.routing.trust_compiled_ir` | `false` | With attribute-based routing (`AttributeRouting`), skips the live `#[Route]` attribute scan and loads a pre-compiled routing IR dumped by `quiote cache:warmup` instead. Only takes effect when the routing subclass hasn't overridden `moduleDirs()` to something custom (the compiled artifact only covers the scanner's own default module-dir inputs) — falls back to a live scan otherwise. Requires re-running `cache:warmup` after adding, removing or moving any `#[Route]`-attributed action. |
 
-Both keys are read by [DispatchMiddleware](/architecture/middleware-reference/#dispatchmiddleware). This is the general-purpose PSR-16 cache — separate from the APCu *config-cache* prewarm (`core.apcu_prewarm` / `QUIOTE_APCU_PREWARM`), which caches compiled config.
+`core.cache_enabled` and `core.use_cache` are read by [DispatchMiddleware](/architecture/middleware-reference/#dispatchmiddleware). This is the general-purpose PSR-16 cache — separate from the APCu *config-cache* prewarm (`core.apcu_prewarm` / `QUIOTE_APCU_PREWARM`), which caches compiled config.
+
+#### Trusting compiled artifacts in production
+
+The last two keys are production-only build-time trust switches. Both trade "always correct" for "never re-check", and both are only safe when a build step runs on every deploy.
+
+Every config resolution (settings, factories, output_types, each module's `module.xml`, each action's `validators.xml`, databases, translation) normally stat-checks its source file against the compiled cache on every request — cheap once memoized per worker, but a stat-per-config-per-request cost under classic PHP-FPM, where there is no persistent worker to memoize across. Setting `core.config_check_freshness` to `false` skips that stat pair entirely once a cache file exists. Only do this after running `quiote cache:warmup`, and only in an environment where config genuinely doesn't change without a redeploy.
+
+`AttributeRouting::build()` likewise scans every module's `Actions/` tree on each (re)build — a recursive directory walk plus reflection-based attribute reads per action class. `cache:warmup` can dump that scan's result (the *routing IR*) as a PHP artifact; setting `core.routing.trust_compiled_ir` to `true` loads it instead of re-scanning. The stale-artifact risk is the same shape: this is a build-time snapshot, so a route added or removed after the last `cache:warmup` run won't be seen until the next warmup. Don't enable it unless `cache:warmup` runs on every deploy. See [`cache:warmup`](/getting-started/cli/#cachewarmup--precompiling-config-and-routing).
 
 ### HTTP and response headers
 
@@ -123,6 +134,35 @@ Both keys are read by [DispatchMiddleware](/architecture/middleware-reference/#d
 | `core.correlation_id.expose` | `true` | Whether the correlation id is echoed back on the response under the same header. |
 
 The response-header keys (`disable-framework-headers`, `cache-hit-header`, `send-nosniff-header`) are read by [DispatchMiddleware](/architecture/middleware-reference/#dispatchmiddleware).
+
+### Worker runtime
+
+Which runtime hosts the app, and how it behaves once it does. Full context — the runtime comparison matrix, and what changes when you leave the SAPI — is on [Deployment](/architecture/deployment/).
+
+| Key | Default | Effect |
+|---|---|---|
+| `core.worker_runtime` | `'auto'` | Which worker runtime hosts the app: `auto` (detect), `sapi`, `frankenphp`, or an alias a package registered (`roadrunner`, `swoole`). Also settable via `$QUIOTE_WORKER_RUNTIME`, or the `worker_runtime` option to `Kernel::create()`, which take precedence in that order. An explicitly named runtime that isn't hosting the process is a startup error, not a silent fallback. |
+| `core.worker.max_requests` | `0` | Requests one worker process handles before the loop stops and lets the supervisor start a fresh one. `0` disables the budget, which is what RoadRunner and Swoole want — they recycle workers themselves (`pool.max_jobs`, `worker.swoole.max_request`), and a PHP-side stop mid-pool looks to them like a crashed worker. |
+| `core.worker.cleanup_interval` | `1000` | How often `WorkerManager` runs its deep-cleanup pass. `$QUIOTE_MAX_REQUESTS` overrides it (and has always driven this rather than terminating the loop). |
+| `core.worker.stray_output` | `'append'` | What to do with output the app writes outside the response body, on a runtime with no SAPI output channel: `append` it to the body (what a SAPI would have done), `discard` it with a log line, or `throw`. |
+| `core.proxy.trust_forwarded_headers` | `true` | Whether `X-Forwarded-Proto`/`-Host`/`-Port`, `X-Original-Host` and RFC 7239 `Forwarded` are applied to the request. Set `false` when the app is reachable directly from the internet — there is no trusted-proxy allowlist, so these headers are otherwise trusted unconditionally. |
+
+The two off-SAPI runtimes ship as packages and add their own settings: `worker.roadrunner.chunk_size`, and the `worker.swoole.*` family. Both are documented on their package pages — [`worker-roadrunner`](/plugins/official-packages/#quioteframeworkworker-roadrunner) and [`worker-swoole`](/plugins/official-packages/#quioteframeworkworker-swoole).
+
+### OpenAPI generation
+
+Read by `quiote openapi:generate` (see [OpenAPI generation](/advanced/openapi/)). They only affect the generated document — nothing here changes runtime behaviour.
+
+| Key | Default | Effect |
+|---|---|---|
+| `core.openapi.title` | `core.app_name`, else `API` | `info.title` of the generated document. |
+| `core.openapi.version` | `'1.0.0'` | `info.version` — your API's version, not the framework's. |
+| `core.openapi.description` | *(unset)* | `info.description`. |
+| `core.openapi.servers` | `[]` | Server URLs. Either a bare list of URLs or a list of `{url, description}` maps. |
+| `core.openapi.exclude_routes` | `[]` | `fnmatch()` patterns of route names to leave out (e.g. `internal.*`). |
+| `core.openapi.modules` | `[]` | Only describe these modules (case-insensitive). Empty means all. |
+| `core.openapi.problem_responses` | `true` | Emit the RFC 9457 error responses the pipeline actually returns (400 where an action declares validators, 500 always) plus the `ProblemDetails` component schema. |
+| `core.openapi.use_action_docblocks` | `true` | Use each action class's docblock as its operation summary/description. Turn off if your action docblocks are internal notes. |
 
 ### Security and validation
 
@@ -146,6 +186,7 @@ A few settings deliberately live outside `core.` — in XML they need a `<settin
 | `validation.reject_unknown_parameters` | `'throw'` | Compile-time handling of an unknown validator parameter: `'throw'`, `'warn'`, or `'off'`. See [Input validation](/basics/validation/) and [Advanced validation](/advanced/advanced-validation/). |
 | `telemetry.*` | off | OpenTelemetry tracing/metrics — `telemetry.enabled`, `telemetry.exporter`, `telemetry.sampling.*`, `telemetry.spans.*`, and more. The full table is on the [Telemetry](/architecture/telemetry/) page. |
 | `mcp.*` | off | Expose the app as a Model Context Protocol server — `mcp.enabled`, `mcp.transports`, `mcp.expose_actions`, `mcp.auth`/`mcp.auth_token`, and more (requires `quioteframework/mcp`). The full table is on [Exposing your app as an MCP server](/advanced/mcp-server/#settings-reference). |
+| `filesystem.*` | `local` disk | [File storage](/basics/filesystem/#settings-reference) — `filesystem.default_disk`, `filesystem.disks.local.root`, plus `filesystem.disks.{s3,gcs,azure}.*` published by the corresponding packages. Requires `Quiote\Filesystem\FilesystemPlugin`. |
 | `plugins` | `[]` | The registry `Config/plugins.*` and `PluginManager::add()` write to at boot. Not a supported `settings.*` key to write directly — declare plugins in `Config/plugins.php`/`.xml`/`.yaml` instead. See [Plugins and extensibility](/architecture/plugins/). |
 
 ### Telemetry
@@ -198,19 +239,34 @@ Set during bootstrap. `core.app_dir` is **required** (supplied by the front cont
 
 These are `<ae:parameter>` children on a `factories` (or `databases`) entry — not `core.*` keys. See [Configuration: factories](/architecture/configuration/#factories).
 
-### Storage (`storage` role)
+### Session (`session` role)
 
-`SessionStorage` (PHP-native sessions):
+The role is **optional** — omit it and the context answers a `NullSessionBag`. There is no setting that turns sessions on or off; configuring the slot *is* the switch. Its parameters reach both the cookie layer and the chosen backend, so both live in one place.
+
+Cookie parameters, honoured by every backend:
 
 | Parameter | Default | Effect |
 |---|---|---|
-| `session_name` | `'Quiote'` | Session cookie name. |
-| `session_cookie_lifetime` | php.ini | Cookie lifetime (seconds, or a `strtotime` string). |
-| `session_cookie_secure` | `true` | HTTPS-only cookie (secure by default; the code will not emit a non-secure cookie). |
-| `session_cookie_httponly` | php.ini | HttpOnly flag. |
-| `session_cache_limiter` / `session_cache_expire` / `session_save_path` / `session_module_name` | php.ini | Applied only if present. |
+| `cookie_name` | `'QSID'` | Session cookie name. |
+| `session_cookie_lifetime` | `0` | Cookie lifetime in seconds. `0` is a browser-session cookie. |
+| `session_cookie_secure` | `true` | HTTPS-only cookie. |
+| `session_cookie_httponly` | `true` | HttpOnly flag. |
+| `session_cookie_samesite` | `'Lax'` | SameSite attribute; `null` omits it. |
+| `session_migration_grace_seconds` | `5` | How long a rotated-away session id keeps resolving to its replacement. See [Sessions: session fixation](/basics/sessions/#session-fixation-and-regeneration). |
 
-`SameSite=Lax` is applied automatically when not already set in php.ini. `PdoSessionStorage` adds `db_table` (**required**), `database`, `db_id_col`, `db_data_col`, `db_time_col`, `data_as_lob`, and `date_format`. `NullStorage` takes no parameters.
+Backend parameters, by factory:
+
+| Factory | Parameters |
+|---|---|
+| `FileSessionFactory` | `dir` (`%core.app_dir%/cache/sessions`), `idle_ttl` (`1440`), `gc_probability` (`1`), `gc_divisor` (`100`) |
+| `PdoSessionFactory` | `database` (the default connection), `table` (`'session'`) |
+| `RedisSessionFactory` | `dsn` (`redis://127.0.0.1:6379`), `prefix` (`'session:'`), `ttl` (`1440`) |
+| `S3SessionFactory` | `region` (`us-east-1`), `bucket`, `access_key_id`, `secret_access_key`, `key_prefix` (`'sessions/'`), `endpoint` |
+| `GcsSessionFactory` | `bucket`, `access_key`, `secret_key`, `object_prefix` (`'sessions/'`), `endpoint` |
+| `AzureBlobSessionFactory` | `account_name`, `account_key`, `container` (`'quiote-sessions'`), `endpoint` |
+| `AzureTableSessionFactory` | `account_name`, `account_key`, `table` (`'sessions'`), `endpoint` |
+
+See [Sessions](/basics/sessions/) for the full treatment.
 
 ### Database (`databases` entries)
 
@@ -236,7 +292,7 @@ The Doctrine (`DoctrineDatabase`, `Doctrine2*`) and `PropelDatabase` connectors 
 | Parameter | Default | Effect |
 |---|---|---|
 | `definitions_file` | `` `{config_dir}/rbac_definitions.xml` `` | RBAC role/permission definitions file. |
-| `storage_namespace` | `'org.quiote.user.User'` | Namespace for user attributes in storage. |
+| `storage_namespace` | `'org.quiote.user.User'` | Namespace under which user attributes are keyed in the session bag. |
 
 ## Environment variables and PHP constants
 
@@ -244,14 +300,15 @@ The Doctrine (`DoctrineDatabase`, `Doctrine2*`) and `PropelDatabase` connectors 
 |---|---|---|
 | `QUIOTE_ENV` | `'prod'` | Environment name, read into `core.environment`. Note: the scaffolded `pub/index.php` passes `'development'` explicitly, so the effective default depends on your front controller. |
 | `QUIOTE_CONTEXT` | `'web'` | Primary context to create/prime. |
-| `QUIOTE_MAX_REQUESTS` | `1000` | FrankenPHP worker requests before a deep cleanup. |
+| `QUIOTE_MAX_REQUESTS` | `1000` | Worker requests before a deep cleanup (overrides `core.worker.cleanup_interval`). |
+| `QUIOTE_WORKER_RUNTIME` | unset | Forces a worker runtime (`sapi`, `frankenphp`, `roadrunner`, `swoole`), overriding `core.worker_runtime`. **Required** to select Swoole — it is the one runtime that is never auto-detected. |
 | `QUIOTE_JSON_STRICT` | strict on | Set to `0` to tolerate malformed JSON bodies instead of returning 400. See [PayloadParsingMiddleware](/architecture/middleware-reference/#payloadparsingmiddleware). |
 | `QUIOTE_APCU_PREWARM` | unset | With APCu config-cache active, forces config prewarm (`1`/`true`/`yes`/`on`). |
 | `QUIOTE_APP_DIR` | — | CLI app-dir fallback when `--app-dir` is not passed. |
 | `QUIOTE_USE_APCU_CONFIG_CACHE` (PHP constant) | — | If defined truthy, compiled config is cached in APCu instead of on disk. |
 | `NO_COLOR` | — | Standard no-color signal honoured by `AnsiTextStreamSink`. |
 
-Worker mode itself is not configurable — the kernel selects `FrankenPhpWorkerAdapter` when `frankenphp_handle_request()` exists, otherwise `SingleRequestAdapter`.
+Worker mode *is* configurable — see [Worker runtime](#worker-runtime) above and [Deployment](/architecture/deployment/) for how a runtime is selected.
 
 ## The Config API
 

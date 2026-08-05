@@ -247,10 +247,10 @@ return [
     'response'           => ['class' => \Quiote\Response\WebResponse::class,        'params' => []],
     'routing'            => ['class' => \SampleApp\Routing\AppRouting::class,       'params' => []],
     'request'            => ['class' => \Quiote\Request\WebRequest::class,          'params' => []],
-    'storage'            => ['class' => \Quiote\Storage\NullStorage::class,         'params' => []],
-    'user'               => ['class' => \Quiote\User\User::class,                   'params' => []],
+    'user'               => ['class' => \Quiote\User\RbacSecurityUser::class,       'params' => []],
     'database_manager'   => ['class' => \Quiote\Database\DatabaseManager::class,    'params' => []],
     'validation_manager' => ['class' => \Quiote\Validator\ValidationManager::class, 'params' => []],
+    'session'            => ['class' => \Quiote\Session\FileSessionFactory::class,  'params' => ['dir' => '%core.app_dir%/cache/sessions']],
 ];
 ```
 
@@ -270,11 +270,8 @@ routing:
 request:
   class: Quiote\Request\WebRequest
   params: []
-storage:
-  class: Quiote\Storage\NullStorage
-  params: []
 user:
-  class: Quiote\User\User
+  class: Quiote\User\RbacSecurityUser
   params: []
 database_manager:
   class: Quiote\Database\DatabaseManager
@@ -282,6 +279,13 @@ database_manager:
 validation_manager:
   class: Quiote\Validator\ValidationManager
   params: []
+
+# File-backed sessions: no database required. Swap the class for a PDO, Redis
+# or object-storage factory to share sessions across hosts.
+session:
+  class: Quiote\Session\FileSessionFactory
+  params:
+    dir: '%core.app_dir%/cache/sessions'
 ```
 
 #### XML
@@ -296,17 +300,25 @@ validation_manager:
         <response class="Quiote\Response\WebResponse"/>
         <routing class="SampleApp\Routing\AppRouting"/>
         <request class="Quiote\Request\WebRequest"/>
-        <storage class="Quiote\Storage\NullStorage"/>
-        <user class="Quiote\User\User"/>
+        <user class="Quiote\User\RbacSecurityUser"/>
         <database_manager class="Quiote\Database\DatabaseManager"/>
         <validation_manager class="Quiote\Validator\ValidationManager"/>
+        <session class="Quiote\Session\FileSessionFactory">
+            <ae:parameter name="dir">%core.app_dir%/cache/sessions</ae:parameter>
+        </session>
     </ae:configuration>
 </ae:configurations>
 ```
 
 `output_types` declares the `html` output type, its PHP renderer, and its layout. `Config/databases.xml` declares a database connection (unused here because `core.use_database` is `false`). Both are shown in [Output types](/basics/output-types-and-content-negotiation/) and [Databases](/basics/databases/).
 
-Notice `storage` above is `Quiote\Storage\NullStorage` — fine for this tutorial, but **it also means no session cookie is ever sent, which silently disables CSRF protection for the whole app** even though every form still gets a `_csrf_token` field. Before building anything with real forms or logins, read [Sessions and storage](/basics/sessions/#storage-backends) and switch to `SessionStorage`.
+Two of these roles are worth a second look.
+
+**`session` is `Quiote\Session\FileSessionFactory`**, pointed at `cache/sessions`. It needs no database and nothing installed, and it is what gives the app a session cookie — which is what CSRF tokens are stored in. Delete the role and no session cookie is ever sent, so same-origin unsafe requests take the [sessionless CSRF exemption](/advanced/authentication-authorization/#automatic-exemptions) while cross-origin ones can never produce a valid token. Read [Sessions](/basics/sessions/) before changing it.
+
+**`user` is `Quiote\User\RbacSecurityUser`**, not the bare `User`. It degrades safely with no `rbac_definitions.xml` present — no roles, no permissions, nothing granted — so the scaffold gets you the role-aware user class without also generating RBAC configuration you may not want. Swap it for `Quiote\User\User` if you will never need roles, or add the definitions file when you do; see [Authentication and authorization](/advanced/authentication-authorization/).
+
+`core.use_security` stays `false` in the scaffold. That's a functional default rather than a security one: the generated app has no protected actions and no login or secure system actions, so enabling security would make a fresh app fail its first forward rather than make it safer.
 
 ## 7. Run it
 

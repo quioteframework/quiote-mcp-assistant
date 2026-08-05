@@ -86,14 +86,20 @@ final class ScaffoldPrompts
         return $this->user(<<<MD
             Write a Quiote plugin "{$name}".
 
-            1. Implement `Quiote\\Plugin\\PluginInterface`: a `name()` returning a stable string,
-               and `register(PluginRegistrar \$r)` (called once at boot).
+            1. Implement `Quiote\\Plugin\\PluginInterface`: **only** `register(PluginRegistrar \$r)`
+               (called once at boot). The interface declares no `name()` method -- carry
+               `#[Quiote\\Plugin\\Attribute\\Plugin(name: '...')]` on the class instead. That
+               attribute is required here, not decorative: a plugin activated by class-string
+               without it is silently refused (logged, not thrown).
             2. In `register()`, contribute through the fluent `PluginRegistrar` seams only
                (`configDefault`, `service`, `middleware`/`attributedMiddleware`, `listen`,
-               `moduleDirectory`, `command`, `httpClient`, `databaseDriver`, `mcp*`). Config
-               defaults and services are set-if-absent, so keep them safe.
-            3. Enable it by adding `{$name}::class` to the `plugins` config key in
-               `Config/settings.php`.
+               `moduleDirectory`, `command`, `httpClient`, `databaseDriver`,
+               `developerExceptionRenderer`) -- that is the whole surface, and it has no `mcp*`
+               methods. Config defaults and services are set-if-absent, so keep them safe.
+            3. Activate it in `Config/plugins.php` -- a dedicated, auto-discovered file, NOT a
+               `plugins` key inside `Config/settings.php`. Each entry is
+               `['class' => {$name}::class]` (with an optional `'enabled' => false`), not a bare
+               class-string.
 
             {$this->cards('plugins', 'di')}
             MD);
@@ -125,13 +131,16 @@ final class ScaffoldPrompts
 
             1. Add the `#[Mcp\\Capability\\Attribute\\McpTool]` attribute (from the framework's MCP
                integration) to the action class that already carries `#[Route]`.
-            2. Set `mcp.expose_actions = true` and `mcp.enabled = true` in settings, and add
-               `Quiote\\Mcp\\McpPlugin` to the `plugins` key.
+            2. Set `mcp.expose_actions = true` and `mcp.enabled = true` in `Config/settings.php`,
+               and activate `Quiote\\Mcp\\McpPlugin` in `Config/plugins.php` (entries are
+               `['class' => ...]`, not a `plugins` key inside settings).
             3. The action's DI, verb dispatch, and validators are reused automatically; the tool's
                `inputSchema` is derived from those validators (scoped to the verb the route
                dispatches to), falling back to a looser shape only where a rule can't map to JSON
                Schema -- validation still runs for real on dispatch either way. For a *plain*
-               (non-action) tool instead, register it manually via `PluginRegistrar::mcpTool()`.
+               (non-action) tool instead, register it manually with
+               `Quiote\\Mcp\\McpCatalog::addTool([Handler::class, 'method'], name: ...)` --
+               `PluginRegistrar` has no `mcpTool()` method.
 
             {$this->cards('mcp', 'actions')}
             MD);

@@ -79,6 +79,19 @@ Events::dispatch(new OrderPlaced($order->id));
 
 Extend `Quiote\Event\StoppableEvent` to let a listener halt propagation (subsequent listeners are skipped). `ActionBeforeEvent` is stoppable, for example. Dispatch honours `isPropagationStopped()` per PSR-14.
 
+### Deferring event construction until something listens
+
+`emit()` still allocates the event object before it can check whether anything listens — fine for a cheap event, wasteful for one that carries an expensive-to-build payload. `Events::emitLazy()` checks `hasListeners()` **first** and only invokes your factory closure (and therefore only constructs the event) when a listener actually exists:
+
+```php
+use Quiote\Event\Events;
+use App\Event\OrderPlaced;
+
+Events::emitLazy(OrderPlaced::class, fn() => new OrderPlaced($order->id, $order->computeExpensiveSummary()));
+```
+
+Note that the first argument is the event **class name**, not an instance — that's what lets the listener check happen before the factory runs. It returns the dispatched event, or `null` if nothing listened (in which case the factory never ran). Listener exceptions are handled the same way `emit()` handles them — logged, not propagated. This is what the framework's own lifecycle emit sites use internally (route matched, action before/after, response sending, worker request completed).
+
 ## `dispatch()` vs `emit()` — who absorbs a bad listener
 
 The facade has two dispatch methods, and the distinction matters:
@@ -86,7 +99,9 @@ The facade has two dispatch methods, and the distinction matters:
 - **`Events::dispatch($event)`** — PSR-14, **fail-loud**: a listener that throws propagates to the caller. Use this for your own events where you want to know a listener broke.
 - **`Events::emit($event)`** — dispatches only if a listener exists, and **swallows** listener exceptions (logging them instead). The framework uses `emit()` at its lifecycle sites so a buggy listener can never take down a request or the boot — the same "never crash the request" posture as telemetry.
 
-`Events::hasListeners($class)` lets you guard expensive event construction; `Events::dispatcher()` returns the underlying `EventDispatcher` (a PSR-14 `EventDispatcherInterface`); `Events::reset()` clears the registry (for tests).
+- **`Events::emitLazy($class, $factory)`** — as `emit()`, but constructs the event only if a listener exists. See [Deferring event construction](#deferring-event-construction-until-something-listens) above.
+
+`Events::hasListeners($class)` lets you check whether anything is listening without dispatching; prefer `Events::emitLazy()` when the point of checking is to skip constructing an expensive event. `Events::dispatcher()` returns the underlying `EventDispatcher` (a PSR-14 `EventDispatcherInterface`); `Events::reset()` clears the registry (for tests).
 
 ## What events are *not*
 

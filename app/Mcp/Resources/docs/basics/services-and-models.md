@@ -39,6 +39,71 @@ final class OrderService
 
 That is a complete, usable service. When something asks the container for `OrderService`, the container inspects the constructor, resolves `OrderRepository` and `ClockInterface`, and builds it.
 
+### Using it from an action
+
+This is the part that's easy to leave implicit: **an action is built the same way a service is.** `Controller::createActionInstance()` builds every action through `Container::make()`, so an action's constructor is autowired exactly like `OrderService`'s — declare the dependency, and it's there. Nothing to register, no `factories` entry, no base-class hook.
+
+```php
+<?php
+namespace App\Modules\Shop\Actions;
+
+use App\Service\OrderService;
+use Quiote\Action\Action;
+use Quiote\Request\WebRequest;
+
+class PlaceOrderAction extends Action
+{
+    public function __construct(private readonly OrderService $orders) {}
+
+    public function executeWrite(WebRequest $rd)
+    {
+        $cart = Cart::fromRequest($rd);   // read the submitted items, however your app does that
+        $order = $this->orders->placeOrder($cart);
+
+        $this->setAttribute('order', $order);
+
+        return 'Success';
+    }
+}
+```
+
+Walk through what happens on a request to this action:
+
+1. Routing resolves the request to module `Shop`, action `PlaceOrder`.
+2. `Controller::createActionInstance()` calls `Container::make(PlaceOrderAction::class)`.
+3. The container reflects the constructor, sees a `OrderService $orders` parameter, and resolves it — which means **resolving `OrderService`'s own constructor first**: `OrderRepository` and `ClockInterface` are autowired transitively, with no more effort than the single-parameter case. One `use` statement pulled in a whole dependency graph.
+4. The executor calls `initialize()` (the framework context — see [the two-phase pattern](/architecture/actions-and-views/#the-two-phase-pattern)), then dispatches to `executeWrite()`, which is just an ordinary method call on an object that already has everything it needs.
+
+That's the whole mechanism — there's no separate "action DI" to learn beyond [autowiring](/architecture/container/#autowiring) itself.
+
+**A view injects exactly the same way.** If the view rendering the result needs its own collaborator — a formatter, a different repository — declare it the same way:
+
+```php
+<?php
+namespace App\Modules\Shop\Views;
+
+use App\Service\PriceFormatter;
+use Quiote\View\View;
+
+class PlaceOrderSuccessView extends View
+{
+    public function __construct(private readonly PriceFormatter $formatter) {}
+
+    public function executeHtml(): void
+    {
+        $order = $this->getAttribute('order');
+        $this->setAttribute('formattedTotal', $this->formatter->format($order->total));
+    }
+}
+```
+
+Two things worth knowing once this is working:
+
+- **The action and the service don't share a lifetime.** `Container::make()` never caches, so `PlaceOrderAction` is a brand-new instance on every dispatch regardless of anything. `OrderService` follows *its own* scope — transient by default (see [marking a service](#marking-a-service) below) — so two actions injecting it in the same request may get the same instance or two different ones depending on what you declared. This only matters if the service holds state between calls; a stateless service (the common case) behaves identically either way.
+- **Need a specific implementation, or a literal value, instead of autowiring by type?** `#[Inject('id')]` and `#[Autowire($value)]` work on an action's constructor parameters exactly as they do on a service's — see [autowiring](/architecture/container/#autowiring) for the full resolution order.
+
+**Testing this action** means resolving the same graph a request would, then either exercising the action directly or driving a full request through the pipeline — see [the fluent HTTP client](/advanced/testing/#the-fluent-http-client) and the [`UnitTestCase`](/advanced/testing/#the-foundation-unittestcase) example, which tests `OrderService` itself the same way `getContext()->getService(OrderService::class)` would inside the action.
+
 ### Marking a service
 
 Two optional markers make intent explicit and control lifetime:
@@ -55,11 +120,22 @@ Two optional markers make intent explicit and control lifetime:
 
 - **`Quiote\Service\ServiceInterface`** — an empty marker interface. Implementing it lets the container tell a service apart from an arbitrary autowireable class.
 
-Neither is required to be injectable, but they matter for one reason: **scope**. A class carrying `#[Service]` uses the scope you declare. A class that only implements `ServiceInterface` defaults to **transient**. Everything else the container autowires defaults to singleton. That default is deliberate — silently promoting a stateful service to a process-wide singleton under [worker mode](/architecture/deployment/) is a cross-request bug waiting to happen, so services lean toward transient.
+Neither is required to be injectable, but they matter for one reason: **scope**. A bare `#[Service]` (no `scope:` argument) and `ServiceInterface` both default to **transient** — the two ways of declaring a service agree. A class the container autowires without either marker defaults to **request** scope, not singleton: an ordinary, unvetted class defaulting to process lifetime under [worker mode](/architecture/deployment/) is exactly the cross-request leak the [captive-dependency guard](/architecture/container/#a-singleton-cannot-depend-on-request-scoped-state) exists to catch elsewhere, so nothing gets promoted to singleton by default. Singleton is only ever what you ask for explicitly:
+
+```php
+#[Service(scope: Container::SCOPE_SINGLETON)]
+final class OrderService { /* ... */ }
+```
+
+:::caution[Adding `#[Service]` to an existing class is not a no-op if you specify a scope]
+The attribute takes precedence over `ServiceInterface` when both are present. Since a *bare* `#[Service]` now agrees with `ServiceInterface` on transient, adding one to an existing service purely for discoverability changes nothing. But writing `#[Service(scope: Container::SCOPE_SINGLETON)]` on a class that used to fall through to the request-scope default does change its lifetime — make that claim only once you've confirmed the class holds no per-request state.
+:::
 
 :::caution[Scope discipline under worker mode]
 A worker process is long-lived, so a singleton service that stores request data leaks it into the next request. Register anything holding per-request state as `SCOPE_REQUEST` (torn down at each request boundary) or `SCOPE_TRANSIENT` (fresh every time). Reserve singleton for verified-stateless services. See [The DI container](/architecture/container/#scopes).
 :::
+
+A **singleton** service needing the request or the current user can't hold either directly — the container refuses that wiring outright. Inject `Quiote\Request\RequestState` or `Quiote\User\CurrentUser`, which resolve per call instead of capturing a snapshot. See [a singleton cannot depend on request-scoped state](/architecture/container/#a-singleton-cannot-depend-on-request-scoped-state) for why, and [Authentication and authorization](/advanced/authentication-authorization/#the-user-hierarchy) for the user hierarchy itself.
 
 ### Reaching a service without injection
 

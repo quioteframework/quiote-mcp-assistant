@@ -81,14 +81,20 @@ final class ConventionCards
             'config' => [
                 'title' => 'Configuration & file formats',
                 'body' => <<<'MD'
-                    One app mixes three config formats, one per file:
+                    One app mixes several config formats, one per file:
 
-                    - **`Config/settings.php`** — a PHP array of `core.*` settings and the
-                      `plugins` list. Keys: `core.app_name`, `core.namespace_prefix`,
-                      `core.debug`, `core.use_database`, `core.use_logging`, `core.use_security`,
+                    - **`Config/settings.php`** — a PHP array of `core.*` settings (and the
+                      `*.` keys packages publish, e.g. `queue.*`, `filesystem.*`). Keys:
+                      `core.app_name`, `core.namespace_prefix`, `core.debug`,
+                      `core.use_database`, `core.use_logging`, `core.use_security`,
                       `core.default_context`, etc. (settings may also be `.yaml`/`.xml`).
+                      Plugins are **not** listed here — see `Config/plugins.php` below.
+                    - **`Config/plugins.php`** — the plugin activation list; entries are
+                      `{class, enabled?}`. See the `plugins` card.
                     - **`Config/factories.yaml`** — YAML mapping factory roles (`controller`,
-                      `routing`, `request`, `response`, `user`, …) to `{class, params}`.
+                      `routing`, `request`, `response`, `user`, `session`, …) to
+                      `{class, params}`. The `session` role selects the session backend and is
+                      optional (omit it and the context answers a `NullSessionBag`).
                     - **`Config/databases.xml`** and **`Config/output_types.xml`** — XML.
 
                     Read settings at runtime with `Quiote\Config\Config::get('key', $default)`;
@@ -120,9 +126,15 @@ final class ConventionCards
             'plugins' => [
                 'title' => 'Plugins & PluginRegistrar',
                 'body' => <<<'MD'
-                    A plugin implements `Quiote\Plugin\PluginInterface`: `name()` + a
-                    `register(PluginRegistrar $r)` called **once at boot**. It adds no new
-                    mechanism — each `PluginRegistrar` method (fluent) routes to an existing seam:
+                    A plugin implements `Quiote\Plugin\PluginInterface`: **only**
+                    `register(PluginRegistrar $r)`, called **once at boot**. There is no
+                    `name()` method on the interface — carry `#[Plugin(name: '…')]` instead
+                    (required for a plugin activated by class-string: one without it is
+                    silently refused, logged rather than thrown). Implement `NamedPlugin` only
+                    when the name genuinely can't be a compile-time constant.
+
+                    It adds no new mechanism — each `PluginRegistrar` method (fluent) routes to
+                    an existing seam:
 
                     - `configDefault($key, $value)` — set-if-absent config default
                     - `service($id, $concrete, $scope, ...$aliases)` — DI service
@@ -132,9 +144,31 @@ final class ConventionCards
                     - `command($fqcn)` — a console command
                     - `httpClient($name, $configurator)` — a named HTTP client
                     - `databaseDriver($alias, $adapterClass)` — a DB adapter alias
-                    - `mcpTool(...)` / `mcpResource(...)` / `mcpPrompt(...)` — MCP capabilities
+                    - `developerExceptionRenderer($factory)` — the debug error renderer
 
-                    Enable a plugin by listing its class-string in the `plugins` config key.
+                    That is the **whole** surface. In particular there is no `mcpTool()`/
+                    `mcpResource()`/`mcpPrompt()` — those wrappers were removed from core by
+                    the `quioteframework/mcp` split; register MCP capabilities against
+                    `Quiote\Mcp\McpCatalog` instead (see the `mcp` card).
+
+                    Activate a plugin in **`Config/plugins.{php,yaml,yml,xml}`** — a dedicated,
+                    auto-discovered file, NOT a `plugins` key inside `settings.php`. Each entry
+                    is `{class, enabled?}` (enabled defaults to true), not a bare class-string:
+
+                    ```php
+                    // Config/plugins.php
+                    return [
+                        ['class' => \Quiote\Queue\QueuePlugin::class],
+                        ['class' => \App\Plugin\HealthPlugin::class, 'enabled' => false],
+                    ];
+                    ```
+
+                    A module may ship its own `%core.module_dir%/<Module>/Config/plugins.xml`,
+                    contributing without touching the app-level file.
+
+                    **Ordering is load-bearing:** service contributions are applied
+                    *register-if-absent*, so whichever plugin binds an id **first** wins. To
+                    override a package's default binding, declare your own plugin *before* it.
 
                     See `quiote-docs://architecture/plugins`.
                     MD,
@@ -186,6 +220,33 @@ final class ConventionCards
                     `isNotEmpty`, `isSet`, `group`, `raw`. Chain `->error()`, `->trim()`,
                     `->export()`, etc. To skip validation entirely, return true from `isSimple()`.
 
+                    **Third way — `#[MapRequest]` DTOs.** Mark a constructor-promoted class
+                    `#[MapRequest]`, annotate properties with
+                    `Quiote\Request\Attribute\Constraint\*`, and add it as a second parameter to
+                    one `execute*` method. No other registration step:
+
+                    ```php
+                    #[MapRequest]
+                    final readonly class ContactDto
+                    {
+                        public function __construct(
+                            #[StringLength(min: 2, max: 20)] public string $title,
+                            #[Email] public ?string $authorEmail = null,
+                        ) {}
+                    }
+
+                    public function executeWrite(WebRequest $rd, ContactDto $dto): string { … }
+                    ```
+
+                    Constraints: `NotBlank`, `StringLength`, `Range`, `Email`, `Choice`,
+                    `Regexp`, `BooleanType`, `JsonType`, `DateTimeType` (all take `message:`).
+                    Required-ness is read from the **constructor signature** — non-nullable with
+                    no default is required. Properties need a single named type (no unions).
+                    The DTO binds to that one method; other verbs declare their own shape.
+
+                    All three styles compile to the same validators, so failures, MCP
+                    `inputSchema` and OpenAPI parameters are derived identically.
+
                     See `quiote-docs://basics/validation` and `quiote-docs://advanced/advanced-validation`.
                     MD,
             ],
@@ -193,15 +254,35 @@ final class ConventionCards
                 'title' => 'Exposing an app over MCP',
                 'body' => <<<'MD'
                     The framework exposes a Quiote app as an MCP server via `Quiote\Mcp\McpPlugin`
-                    (add it to `plugins`) + `mcp.enabled = true`. Transports: stdio (`mcp:serve`)
-                    and Streamable HTTP.
+                    (activate it in `Config/plugins.php`) + `mcp.enabled = true`. Transports:
+                    stdio (`mcp:serve`) and Streamable HTTP.
 
                     Register capabilities **manually** in a plugin's `register()` — there is no
-                    attribute discovery for plain handler classes:
+                    attribute discovery for plain handler classes. Register against the static
+                    `Quiote\Mcp\McpCatalog`, **not** `$registrar`:
 
-                    - `$r->mcpTool($fqcn, $method, $name, $description, $inputSchema, $outputSchema)`
-                    - `$r->mcpResource($fqcn, $uri, $method, $name, $description, $mimeType)`
-                    - `$r->mcpPrompt($fqcn, $method, $name, $description)`
+                    ```php
+                    use Quiote\Mcp\McpCatalog;
+
+                    McpCatalog::addTool([GreetTool::class, 'greet'], name: 'greet', description: '…', inputSchema: [...]);
+                    McpCatalog::addResource([DocsResource::class, 'read'], 'docs://x', name: '…', mimeType: 'text/markdown');
+                    McpCatalog::addPrompt([Prompts::class, 'review'], name: 'review', description: '…');
+                    ```
+
+                    - `addTool($handler, ?$name, ?$title, ?$description, ?$inputSchema, ?$outputSchema)`
+                    - `addResource($handler, $uri, ?$name, ?$title, ?$description, ?$mimeType)`
+                    - `addPrompt($handler, ?$name, ?$title, ?$description)`
+
+                    `$handler` is **one** `[class-string, method]` pair (or a `\Closure`, or a
+                    class-string with `__invoke`) — not separate `$fqcn`/`$method` arguments. Note
+                    `$title` sits between `$name` and `$description`, so pass the rest as named
+                    arguments.
+
+                    :warning: `PluginRegistrar` has **no** `mcpTool()`/`mcpResource()`/
+                    `mcpPrompt()`. Those wrappers existed on core's registrar and forwarded here,
+                    but the `quioteframework/mcp` monorepo split removed them (core can't depend
+                    on the now-optional MCP package) without replacements — calling them is a
+                    fatal error.
 
                     Handlers are resolved through the DI container; the handler method's params map
                     from the call arguments by name (resource handlers also receive `uri`). A tool
@@ -215,6 +296,295 @@ final class ConventionCards
                     and the tool's advertised schema.
 
                     See `quiote-docs://architecture/plugins`. This very app is the reference example.
+                    MD,
+            ],
+            'sessions' => [
+                'title' => 'Sessions (PSR-7 native, 3.0+)',
+                'body' => <<<'MD'
+                    **3.0 replaced the session subsystem.** There is no `session_start()`, no
+                    `$_SESSION`, and no save handler. The id rides a cookie on the PSR-7
+                    request, data lives in a backend named in config, and `Set-Cookie` rides the
+                    PSR-7 response — which is what makes sessions correct under worker runtimes.
+
+                    **Pick a backend** with the `session` factory slot in
+                    `Config/factories.{yaml,xml,php}`:
+
+                    ```yaml
+                    session:
+                      class: Quiote\Session\FileSessionFactory
+                      params:
+                        dir: '%core.app_dir%/cache/sessions'
+                    ```
+
+                    Backends: `Quiote\Session\FileSessionFactory` and `PdoSessionFactory` (core),
+                    plus `Redis\RedisSessionFactory` (`session-redis`),
+                    `Quiote\Storage\S3\S3SessionFactory` (`session-s3`),
+                    `Gcs\GcsSessionFactory` (`session-gcs`), `Azure\AzureBlobSessionFactory` /
+                    `AzureTableSessionFactory` (`session-azure`). Cookie settings live on the
+                    same slot: `cookie_name`, `session_cookie_lifetime`, `session_cookie_secure`,
+                    `session_cookie_httponly`, `session_cookie_samesite`,
+                    `session_migration_grace_seconds`.
+
+                    **The slot is optional.** Omit it and the context answers a `NullSessionBag`
+                    (reads return the default, writes discarded, `exists()` false) — right for a
+                    console command, queue worker or stateless API. But note: with no session
+                    cookie, `CsrfValidationMiddleware` treats *every* request as CSRF-exempt
+                    while injection still adds the field, so it only looks protected.
+
+                    **Read/write through the bag**, `$context->getSessionBag()`:
+
+                    ```php
+                    $bag = $this->getContext()->getSessionBag();
+                    $bag->get($k, $default);  $bag->set($k, $v);   $bag->has($k);
+                    $bag->remove($k);         $bag->exists();      $bag->getId();
+                    $bag->regenerate(true);   $bag->destroy();
+                    ```
+
+                    `get()` normalizes "missing" to `$default`. `exists()` answers "does a
+                    session already exist?" — consult it before persisting default/empty state
+                    so an anonymous request doesn't acquire a session it never asked for; a
+                    deliberate write (login, preference) should not consult it.
+
+                    Anonymous requests no longer create a session or emit a cookie.
+                    `setAuthenticated(false)` now discards contents and rotates the id.
+
+                    See `quiote-docs://basics/sessions` and, for migrating a 2.x app,
+                    `quiote-docs://getting-started/upgrading-to-3`.
+                    MD,
+            ],
+            'queues' => [
+                'title' => 'Background jobs & queues',
+                'body' => <<<'MD'
+                    `quioteframework/queue` adds a job abstraction; `queue-db` / `queue-redis`
+                    add the persistent backends. A job implements `Quiote\Queue\Job` — one
+                    `handle(): void`. It is instantiated fresh per attempt via
+                    `Container::make()`, so constructor-injected services autowire and only the
+                    job's own arguments travel through the queue.
+
+                    ```php
+                    $queue = $container->get(\Quiote\Queue\QueueManager::class);
+                    $queue->push(SendWelcomeEmail::class, ['userId' => 5]);
+                    $queue->push(SendWelcomeEmail::class, ['userId' => 5], delaySeconds: 300);
+                    ```
+
+                    Implement `RetryableJob` (extends `Job`) to override retry per job with
+                    `maxAttempts(): int` and `backoffSeconds(int $attempt): int`; otherwise the
+                    config defaults apply (`queue.retry.max_attempts` 3,
+                    `queue.retry.backoff_seconds` 5).
+
+                    **Drivers.** `queue.default_driver` defaults to `sync`, which runs the job
+                    **inline in the pushing request** with blocking retries — fine for dev/test,
+                    wrong for production. `db` (queue-db) and `redis` (queue-redis) give a real
+                    backlog drained by `queue:work --driver=db` (`--max-jobs`, `--sleep`,
+                    `--stop-when-empty`). `$params` must be JSON-serializable for a persistent
+                    driver. Neither `db` table is created automatically — run the DDL from
+                    `DbQueueDriver::schema()` / `DbFailedJobStore::schema()`.
+
+                    **Dead letters.** Exhausted retries go to `FailedJobStoreInterface`,
+                    defaulting to `LogFailedJobStore` (logs and drops — nothing to query).
+                    `queue-db`'s `DbFailedJobStore` is registered but **not** bound as the
+                    default; bind it yourself to get a queryable store and the
+                    `queue:failed:list|retry|forget` commands.
+
+                    See `quiote-docs://advanced/queues`.
+                    MD,
+            ],
+            'scheduling' => [
+                'title' => 'Scheduled tasks (cron)',
+                'body' => <<<'MD'
+                    `quioteframework/scheduler` declares *what* runs and *when* in one class;
+                    the OS crontab runs `schedule:run` once a minute. Adding or moving a task is
+                    a code change, not a crontab change. It layers on `quioteframework/queue`.
+
+                    ```php
+                    final class AppSchedule extends Schedule
+                    {
+                        protected function define(): void
+                        {
+                            $this->job(SendDigestEmails::class)->dailyAt('06:00');
+                            $this->job(RebuildSearchIndex::class, ['full' => false])->cron('*/15 * * * *');
+                            $this->call(fn(Container $c) => $c->get(Reaper::class)->gc())
+                                 ->hourly()->withoutOverlapping();
+                        }
+                    }
+                    ```
+
+                    `->job()` **dispatches** onto `QueueManager` (the default, and the one that
+                    gets retries/dead-lettering); `->call()` runs a closure in-process and
+                    receives the DI `Container`. Cron specs: `->cron('*/5 * * * *')`,
+                    `everyMinute()`, `hourly()`, `daily()`, `dailyAt('06:30')`. **No cron call
+                    at all defaults to every minute.**
+
+                    `withoutOverlapping(ttlSeconds: 3600)` skips (does not queue) a due
+                    invocation while the lock is held. It is built on the PSR-16 cache, which
+                    has no atomic add-if-absent — best-effort, **not** a distributed lock.
+
+                    **Registering:** `SchedulerPlugin` registers a no-op default `Schedule`.
+                    Because service contributions are register-if-absent, bind your subclass
+                    from a small app plugin declared **before** `SchedulerPlugin` in
+                    `Config/plugins.php`, or the no-op wins.
+
+                    Crontab, one line per app:
+                    `* * * * * php /path/to/app/bin/quiote schedule:run --app-dir=/path/to/app`.
+                    `schedule:run` is not a daemon — it evaluates, runs the due tasks, exits
+                    (non-zero if any threw; one failure doesn't block the rest).
+
+                    See `quiote-docs://advanced/scheduling`.
+                    MD,
+            ],
+            'filesystem' => [
+                'title' => 'File storage',
+                'body' => <<<'MD'
+                    `Quiote\Filesystem` is a read/write/list abstraction over a named **disk**,
+                    so a local directory in dev and an object store in production differ only by
+                    config. It is deliberately separate from sessions and the cache — this is for
+                    files the app owns (reports, uploads, exports).
+
+                    It lives in core but is a **plugin**: activate
+                    `Quiote\Filesystem\FilesystemPlugin` in `Config/plugins.php` or
+                    `FilesystemManager` won't exist.
+
+                    ```php
+                    $fs = $this->getContext()->getContainer()->get(FilesystemManager::class);
+                    $fs->write('reports/q3.csv', $csv);
+                    $csv = $fs->read('reports/q3.csv');
+                    $fs->exists('reports/q3.csv');
+                    $fs->delete('reports/q3.csv');
+
+                    $fs->disk()->size('reports/q3.csv');          // default disk
+                    $fs->disk('s3')->write('exports/big.zip', $b); // a named disk
+                    ```
+
+                    `FilesystemAdapterInterface`: `read`, `write`, `delete`, `exists`, `size`,
+                    `lastModified`, `listContents` (relative paths, **non-recursive**). Errors
+                    are `FilesystemStorageException`, with `FileNotFoundStorageException` for
+                    the missing-file case.
+
+                    The core `local` disk resolves every path against a root
+                    (`filesystem.disks.local.root`, default `storage/app`), rejects `..` and
+                    absolute paths, and writes atomically via temp-file rename. Cloud disks:
+                    `s3`, `gcs`, `azure` (one package + plugin each, each needing a PSR-18
+                    client bound).
+
+                    **`listContents()` throws unconditionally on all three cloud disks** — the
+                    clients have no list operation. Keep your own listing in the database.
+
+                    Out of scope by design: visibility/ACLs, MIME detection, streaming, copy/move,
+                    checksums.
+
+                    See `quiote-docs://basics/filesystem`.
+                    MD,
+            ],
+            'sse' => [
+                'title' => 'Server-Sent Events (streaming)',
+                'body' => <<<'MD'
+                    Everything else in the response pipeline is string-buffered.
+                    `Quiote\Http\Sse\SseStreamingAction` is the one deliberate exception.
+                    Implement it on an ordinary action and yield from `streamEvents()`:
+
+                    ```php
+                    class TickerAction extends Action implements SseStreamingAction
+                    {
+                        public function isSimple(): bool { return true; }
+
+                        public function streamEvents(WebRequest $request): iterable
+                        {
+                            for ($i = 0; $i < 10; $i++) {
+                                yield SseEvent::of(['tick' => $i], event: 'tick');
+                                sleep(1);
+                            }
+                        }
+                    }
+                    ```
+
+                    Return any `iterable` of `SseEvent` or plain `string` (a string is wrapped as
+                    a data-only event) — a **generator** is what makes events arrive one at a
+                    time rather than all at the end.
+
+                    `SseEvent::of(string|array $data, ?string $event, ?string $id, ?int $retryMs)`
+                    JSON-encodes an array argument. The response sets `Content-Type:
+                    text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`, and
+                    `X-Accel-Buffering: no` (without which nginx/Caddy buffer the whole stream).
+
+                    This is a **parallel dispatch path**, not an output type:
+                    `DispatchMiddleware` detects the interface and short-circuits, so a streaming
+                    action bypasses the View layer entirely (no View, no Template, no output
+                    type), caching, and validation-decision bridging — read the request object
+                    directly if the stream is parameterised.
+
+                    See `quiote-docs://advanced/server-sent-events`.
+                    MD,
+            ],
+            'openapi' => [
+                'title' => 'Generating an OpenAPI spec',
+                'body' => <<<'MD'
+                    `quiote openapi:generate` writes an **OpenAPI 3.1** document that is
+                    *derived*, not maintained — there is no second description to drift.
+
+                    | Part | Derived from |
+                    |---|---|
+                    | Paths and verbs | the route table |
+                    | Parameters / request bodies | each action's **validators** |
+                    | Success media type | the route's output type |
+                    | Error responses | `Quiote\Http\ProblemDetails` |
+                    | Summary/description | the action class's docblock |
+
+                    ```bash
+                    vendor/bin/quiote openapi:generate -o openapi.json
+                    quiote openapi:generate --format=yaml --module=Orders --exclude='internal.*'
+                    ```
+
+                    Parameter placement follows what the pipeline actually reads: path
+                    placeholders become path parameters; on `GET`/`HEAD`/`DELETE`/`OPTIONS`/
+                    `TRACE` the rest become **query** parameters; otherwise a `requestBody`
+                    offered as both `application/json` and `application/x-www-form-urlencoded`.
+
+                    Four honest limits: **response bodies aren't described** (an action returns a
+                    view name — only the media type is stated); an action with **no validators**
+                    yields an operation with no parameters (absence of knowledge, not a claim);
+                    **optional path placeholders become required** path parameters with a default
+                    (OpenAPI has no optional-path concept); and **action docblocks are published**
+                    as operation prose — disable with `core.openapi.use_action_docblocks: false`
+                    or `--no-docblocks` if yours are internal notes.
+
+                    This is the same `ActionInputSchemaResolver` derivation that gives an MCP tool
+                    its `inputSchema`, `#[MapRequest]` DTOs included.
+
+                    See `quiote-docs://advanced/openapi`.
+                    MD,
+            ],
+            'cli' => [
+                'title' => 'The quiote command-line tool',
+                'body' => <<<'MD'
+                    `vendor/bin/quiote`, built on Symfony Console. All app-bootstrapping commands
+                    take `--app-dir` and `--env`.
+
+                    - `new <dir>` — scaffold a whole application (`--force`, `--namespace`,
+                      `--config-format=php|yaml|xml`)
+                    - `serve` — local dev server
+                    - `make:module`, `make:action`, `make:middleware`, `make:job` — scaffold
+                      **inside** an existing app; all take `--force`/`-f` and validate names as
+                      PHP class-name segments before writing
+                    - `routes:list`, `about` — inspect
+                    - `routes:compile`, `cache:warmup` — compile caches ahead of time
+                    - `openapi:generate` — derive an API spec
+                    - `queue:work`, `queue:failed:list|retry|forget` (with `quioteframework/queue`)
+                    - `schedule:run` (with `quioteframework/scheduler`)
+                    - `mcp:serve` (with `Quiote\Mcp\McpPlugin`)
+
+                    ```bash
+                    vendor/bin/quiote make:module Blog --with-index
+                    vendor/bin/quiote make:action Post --module=Blog --methods=GET,POST --output-types=html,json
+                    vendor/bin/quiote make:middleware RequestId --phase=before_action --priority=10
+                    vendor/bin/quiote make:job SendWelcomeEmail --retryable
+                    ```
+
+                    Plugins contribute further commands via `PluginRegistrar::command()`.
+
+                    Note: this MCP server's own `scaffold_*` tools cover module/action/plugin/
+                    db-connection generation without shelling out.
+
+                    See `quiote-docs://getting-started/cli`.
                     MD,
             ],
         ];

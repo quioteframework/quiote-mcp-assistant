@@ -141,15 +141,6 @@ final class ScaffoldTemplatesTest extends TestCase
         );
     }
 
-    #[Test]
-    public function templateContentGeneratesValidPhp(): void
-    {
-        // A template file starts in HTML mode and switches into PHP inline,
-        // so it's linted as its own standalone file content, not embedded
-        // inside a class body.
-        self::assertValidPhp(ScaffoldTemplates::templateContent('Index'));
-    }
-
     private static function assertValidPhp(string $content): void
     {
         $tmpFile = tempnam(sys_get_temp_dir(), 'scaffold-template-test-');

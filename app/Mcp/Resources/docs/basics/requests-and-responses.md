@@ -108,6 +108,26 @@ $request->setParameter('total', $total);
 $request = $request->setParameter('total', $total);
 ```
 
+### URL metadata
+
+Seven older setters write the request's URL metadata: `setUrlScheme()`, `setUrlHost()`, `setUrlPort()`, `setRequestUri()`, `setUrlPath()`, `setUrlQuery()` and `setProtocol()`. All seven still work, keep their `void` signature, and now also rewrite the wrapped PSR-7 URI — previously they didn't, so after `setUrlHost('other.test')` a check reading `getUrlHost()` and one reading `getUri()->getHost()` disagreed, and a host- or scheme-based guard passed or failed depending on which the caller happened to read.
+
+They're deprecated in favour of `with*()` counterparts that return a new instance, consistent with the rest of the write API:
+
+| Deprecated | Preferred |
+|---|---|
+| `$r->setUrlScheme('https')` | `$r = $r->withUrlScheme('https')` |
+| `$r->setUrlHost('h')` | `$r = $r->withUrlHost('h')` |
+| `$r->setUrlPort(8443)` | `$r = $r->withUrlPort(8443)` |
+| `$r->setRequestUri('/p?a=b')` | `$r = $r->withRequestUri('/p?a=b')` |
+| `$r->setUrlPath('/p')` | `$r = $r->withUrlPath('/p')` |
+| `$r->setUrlQuery('a=b')` | `$r = $r->withUrlQuery('a=b')` |
+| `$r->setProtocol('HTTP/1.0')` | `$r = $r->withProtocol('HTTP/1.0')` |
+
+:::caution[Don't rename these mechanically]
+A `set` → `with` rewrite that drops the return value turns a working call into a silent no-op. Convert with the assignment, or leave the setter alone.
+:::
+
 ### Reassigning isn't always enough: sync back to Context
 
 `Context::getRequest()` is how the rest of the framework — templates, later middleware, the next pipeline stage — reaches "the current request". Reassigning your own local `$request` variable doesn't change what `Context::getRequest()` hands back to anyone else; if the new value needs to be visible beyond the current method, sync it explicitly:
@@ -151,7 +171,19 @@ $response->setHttpHeader('Cache-Control', 'no-store');
 $response->addHttpHeader('Vary', 'Accept');     // append rather than replace
 ```
 
-`setHttpStatusCode()` validates the code against the HTTP status table and throws on an invalid one.
+`setHttpStatusCode()` accepts any code in **100–599** and throws on anything outside that range (`Quiote\Http\HttpStatus` is the authority). It deliberately doesn't check membership of a table of known codes: a per-protocol whitelist made ordinary codes like 422, 429, 308, 451, 507 and 511 unsettable, so code composing a response through `WebResponse` could not emit them at all.
+
+If you want a narrower range, declare it in a subclass — the framework never sets `$httpStatusCodes` itself:
+
+```php
+class StrictResponse extends WebResponse
+{
+    /** @var ?array<int, string> */
+    protected $httpStatusCodes = ['200' => 'OK', '404' => 'Not Found'];
+}
+```
+
+`$http10StatusCodes` and `$http11StatusCodes` are deprecated and no longer consulted. They remain as protected properties for subclasses that read them.
 
 ### Cookies
 
@@ -171,6 +203,32 @@ return \Quiote\View\View::NONE;          // "I produced the response myself"
 ```
 
 When an action handles the response itself — a redirect, a streamed file — return `View::NONE` (`null`) so the framework doesn't also try to render a view. On send, a redirect forces `Content-Length: 0` and sets the `Location` header.
+
+### The PSR-7 view of the response
+
+A view or action can reach a PSR-7 wrapper around the response with `getPsrResponse()`, which hands back a `Quiote\Http\PsrResponseAdapter`. It is a **real immutable PSR-7 response**: `with*()` clones and leaves both the adapter and the underlying `WebResponse` untouched, as `ResponseInterface` requires.
+
+That means the PSR-7 idiom does nothing useful unless you keep the clone — and since the response that actually gets sent is the `WebResponse`, the clone is usually not what you want:
+
+```php
+// Does nothing — the clone is discarded, and the sent response is untouched.
+$this->getInitContext()->getPsrResponse()->withHeader('X-Thing', '1');
+
+// Write to the response that gets sent.
+$this->getResponse()->setHttpHeader('X-Thing', '1');
+```
+
+From code holding an adapter rather than a view, `getLegacy()` is the mutable response underneath:
+
+```php
+$adapter->getLegacy()->setHttpHeader('X-Thing', '1');
+```
+
+`withStatus()` validates its argument and throws `InvalidArgumentException` as PSR-7 mandates, and `getReasonPhrase()` returns the real phrase.
+
+:::caution[Upgrading]
+These `with*()` methods used to mutate the wrapped `WebResponse` and return `$this`, so the idiom above worked by side effect — and a caller holding the original to compare against found it altered. Grep for `->with` on anything reached through `getPsrResponse()`: a discarded return value is now a no-op rather than a hidden mutation.
+:::
 
 ## Forwarded headers and trusted hosts
 

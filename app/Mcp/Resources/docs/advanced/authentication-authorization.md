@@ -12,11 +12,15 @@ Three classes, each adding capability, in `Quiote\User`:
 
 | Class | Adds |
 |---|---|
-| `User` | Base user, attribute storage |
+| `User` | Base user, attribute storage, dirty tracking |
 | `SecurityUser` | Authentication state + credentials |
 | `RbacSecurityUser` | Role-based access control on top of credentials |
 
 You choose which one your app uses by pointing the `user` factory role at it (see [Configuration](/architecture/configuration/)):
+
+:::note[Reaching the user from a singleton service]
+Everything below assumes you're inside an action, a view, or something else built fresh per execution — those can hold the user directly. A **singleton** service can't: the container refuses to autowire `User`/`SecurityUser`/`ISecurityUser` there, since a captured instance would leak one request's identity into every later one under a worker. Inject `Quiote\User\CurrentUser` instead — see [a singleton cannot depend on request-scoped state](/architecture/container/#a-singleton-cannot-depend-on-request-scoped-state).
+:::
 
 #### PHP
 
@@ -57,15 +61,40 @@ interface ISecurityUser
 }
 ```
 
-Authentication state and credentials persist in session storage. Two security-relevant behaviours are built in:
+Authentication state and credentials persist in the [session bag](/basics/sessions/#reading-and-writing-session-data). Three security-relevant behaviours are built in:
 
-- **`setAuthenticated(true)` regenerates the session id** on the unauthenticated-to-authenticated transition, defeating session fixation.
-- **`isAuthenticated()` reads the value loaded once at init** and does not re-read storage mid-request, avoiding a class of fail-open bugs.
+- **`setAuthenticated(true)` regenerates the session id** on the unauthenticated-to-authenticated transition, defeating [session fixation](/basics/sessions/#session-fixation-and-regeneration).
+- **`setAuthenticated(false)` discards the session and rotates the id**, so a logged-out session id is neither replayable nor inheritable. Session data does not survive a logout — anything that must outlive one belongs elsewhere.
+- **`isAuthenticated()` reads the value loaded once at init** and does not re-read the session mid-request, avoiding a class of fail-open bugs.
 
 Two more hooks exist specifically for the token/service-identity path used by `quioteframework/auth-jwt` and `auth-oauth` (see below):
 
 - **`isTokenDerived()` / `markTokenDerived(bool)`** — a persisted marker meaning "this identity's credentials are re-derived from a token or the database every request, not read back from the session." When set, `initialize()` skips rehydrating stale session credentials/roles, since `AuthenticationManager` re-grants them fresh from the token on every request. It's cleared on `setAuthenticated(false)` and `reset()`.
 - **`restoreIdentityFromStorage()`** plus the `CORE_IDENTITY_KEYS` class constant — a hook for worker-mode cold starts, where a fresh `SecurityUser` is built via `restoreContext()` rather than `initialize()`. A subclass opts in by declaring `protected const CORE_IDENTITY_KEYS = ['legacy_user_id', ...];` and calling the hook explicitly; nothing calls it automatically.
+
+### Subclassing: go through the mutators, or call `markDirty()`
+
+The `User` hierarchy tracks whether a request actually changed anything and writes nothing when it did not — that is what keeps a read-only request from touching the session backend at all.
+
+Dirty tracking lives in the mutators. A subclass that writes to `$attributes`, `$credentials` or `$roles` **directly**, or overrides a mutator without calling `parent::`, is invisible to it and **will not persist — with no error**:
+
+```php
+// Invisible to dirty tracking; this write is silently dropped.
+$this->attributes[$ns]['userId'] = $id;
+
+// Either go through the mutator:
+$this->setAttribute('userId', $id, $ns);
+
+// or say so explicitly:
+$this->attributes[$ns]['userId'] = $id;
+$this->markDirty();
+```
+
+`markDirty()` is public and exists for exactly this. `isDirty()` and `markClean()` round out the API. If you subclass `User`, `SecurityUser` or `RbacSecurityUser`, audit for direct writes to those three properties.
+
+:::caution[Mutate the user above `SessionMiddleware`]
+User state is flushed inside `SessionMiddleware`, before the session is serialized and the response emitted. Code that mutates the user *below* `SessionMiddleware` in the pipeline — or in a worker-completed listener — runs after the flush and does not persist. See [Sessions: how it fits in a request](/basics/sessions/#how-it-fits-in-a-request).
+:::
 
 ### Credentials: AND / OR
 
@@ -352,14 +381,50 @@ $firewall = new Firewall('api', '^/api/', [$authenticator], new HttpChallengeEnt
 
 Adds `league/oauth2-client:^2.9`. No plugin ships with this package — nothing in it has a safe framework-wide default, since every piece needs app-specific secrets or endpoints. Everything here makes Quiote the *client*; validating an incoming token is `auth-jwt`'s job (see the decision guide above), and minting tokens for someone else isn't something either package does — see the "not shipped as a package" note above if that's what you're actually after.
 
-Neither `OidcClient` nor `ClientCredentialsClient` does OIDC discovery (fetching `/.well-known/openid-configuration`) — `league/oauth2-client`'s `GenericProvider` just takes the endpoint URLs directly. Look the provider's endpoints up once (from their discovery document or docs) and put them in config; there's no runtime discovery call to go stale or fail.
+#### OIDC discovery — one issuer URL instead of four endpoints
+
+`OidcDiscoveryClient` fetches a provider's metadata from `{issuer}/.well-known/openid-configuration` ([OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) §4), so one issuer URL replaces the four-to-five endpoint strings you'd otherwise copy into config by hand and re-copy when the provider moves them.
+
+It is PSR-18 + PSR-17 — discovery is a plain GET, so it doesn't go through `league/oauth2-client` — and takes an optional PSR-6 pool, the same kind of pool `CachedKeySet` already needs for the JWKS in this same auth stack:
+
+```php
+// Wiring from one issuer URL instead of four hand-copied endpoints:
+$discovery = new OidcDiscoveryClient($psr18Client, $psr17Factory, $cachePool, cacheTtl: 3600);
+$document  = $discovery->discover("https://login.microsoftonline.com/{$tenant}/v2.0");
+
+$client = OidcClient::fromDiscovery($document, $clientId, $clientSecret, $redirectUri, ['openid', 'profile']);
+
+$idTokenValidator = new JwtTokenValidator(
+    new CachedKeySet($document->getJwksUri(), $psr18Client, $psr17Factory, $cachePool),
+    issuer: $document->getIssuer(),
+    audience: $clientId,
+);
+```
+
+**Two checks are not optional.** The document's own `issuer` must match the one you asked for (Discovery §4.3 — without it, a redirect or a compromised well-known path could substitute another provider's endpoints for the one you meant to trust), and the issuer must be HTTPS unless you pass `requireHttps: false` for a local test provider.
+
+**Missing endpoints fail loudly or return null, by category.** Endpoints a flow cannot work without — `authorization_endpoint`, `token_endpoint`, `jwks_uri` — throw `AuthenticationException` when the provider doesn't advertise them, rather than returning a null that becomes an empty endpoint URL inside `GenericProvider` one hop later. Genuinely optional ones (`getUserinfoEndpoint()`, `getIntrospectionEndpoint()`, `getRevocationEndpoint()`, `getEndSessionEndpoint()`) return `null`. Anything with no dedicated accessor is still reachable via `get('member_name')` / `getMetadata()`.
+
+Three `fromDiscovery()` factories consume the document:
+
+| Factory | Wires | Refuses when |
+|---|---|---|
+| `OidcClient::fromDiscovery()` | authorization + token endpoints | The provider advertises `code_challenge_methods_supported` **without** `S256` |
+| `ClientCredentialsClient::fromDiscovery()` | token endpoint | No `token_endpoint` |
+| `IntrospectionClient::fromDiscovery()` | introspection endpoint | No `introspection_endpoint` |
+
+`OidcClient::fromDiscovery()`'s S256 pre-flight check is worth understanding: PKCE S256 is hardcoded because OAuth 2.1 mandates it, so it's better to fail at wiring time than to have the provider reject the authorization request later. A provider that doesn't advertise the member *at all* is treated as unknown-but-allowed, since it's OPTIONAL metadata. And since `introspection_endpoint` is RFC 8414 metadata that plenty of OIDC providers omit, that third factory tells you so instead of POSTing to an empty URL.
+
+:::note[Manual endpoints are still supported, not deprecated]
+Discovery is a network call at wiring time. The manual-endpoint constructors are unchanged: if you'd rather have no boot-time dependency on the provider being reachable, keep passing the endpoint URLs directly (the per-provider tabs below list them for three real providers) — that path is fully supported. If you *do* use discovery, cache the document (`cacheTtl` defaults to an hour), especially under PHP-FPM where nothing else persists between requests.
+:::
 
 #### Relying party — sending a human to their identity provider
 
 Use this for "log in with Entra ID / Google / Okta" — a browser-based flow where a human authenticates *at the IdP*, not at Quiote.
 
 - `OidcClient` wraps `GenericProvider` for the Authorization Code flow. PKCE S256 is **hardcoded**, not app-configurable — OAuth 2.1 mandates it. `buildAuthorizationRequest()` generates the state/PKCE-verifier/nonce and the redirect URL; `exchangeCode()` performs the token exchange.
-- `OidcAuthorizationState` / `OidcAuthorizationRequest` are value objects for the state round-trip; `OidcStateStorage` persists a single in-flight state in session storage, keyed by its own `state` value, and `consume()` removes it on read (one-time use).
+- `OidcAuthorizationState` / `OidcAuthorizationRequest` are value objects for the state round-trip; `OidcStateStorage` persists a single in-flight state in the session bag, keyed by its own `state` value, and `consume()` removes it on read (one-time use).
 - `OidcAuthenticator` is the **callback leg only** — `supports()` matches the callback path plus the presence of `code`/`state`. It verifies `state` in constant time, exchanges the code, validates the ID token via an injected `TokenValidatorInterface` (reusing `auth-jwt`'s validator rather than a second JWT stack) plus its own `nonce` check, then resolves identity via `UserProviderInterface::loadByToken()`. It does **not** initiate the flow — building the authorization redirect with `OidcClient::buildAuthorizationRequest()` is left to your own login-initiation action. `at_hash` is deliberately not checked: per OIDC Core §3.1.3.6 it's only *required* when an access token comes back from the authorization endpoint (implicit/hybrid flows), and `OidcAuthenticator` only implements the Authorization Code exchange at the token endpoint, where it's optional — and computing it would need the ID token's signing algorithm, which isn't exposed through `TokenValidatorInterface`'s return shape.
 
 The full round trip — a login action that initiates, and a firewall whose authenticator handles the callback:
@@ -381,7 +446,7 @@ $authenticator = new OidcAuthenticator($client, $idTokenValidator, $userProvider
 $firewall = new Firewall('sso', '^/callback$', [$authenticator], new LoginRedirectEntryPoint('/login'));
 ```
 
-`$authorizeUrl`, `$tokenUrl`, `$jwksUri`, and `$issuer` are the four values every provider's `/.well-known/openid-configuration` document publishes as `authorization_endpoint`, `token_endpoint`, `jwks_uri`, and `issuer`. Three real providers, so you don't have to go find them yourself:
+`$authorizeUrl`, `$tokenUrl`, `$jwksUri`, and `$issuer` are the four values every provider's `/.well-known/openid-configuration` document publishes as `authorization_endpoint`, `token_endpoint`, `jwks_uri`, and `issuer` — which is exactly what [`OidcDiscoveryClient`](#oidc-discovery--one-issuer-url-instead-of-four-endpoints) fetches for you. If you'd rather hardcode them, here are three real providers so you don't have to go find them yourself:
 
 #### Azure Entra ID
 
@@ -544,19 +609,32 @@ CSRF protection ships in the **[`quioteframework/csrf`](/plugins/official-packag
 - **`CsrfInjectionMiddleware`** injects a hidden token field into every non-GET HTML form, adds a `<meta name="csrf-token">` tag, and sets a readable `XSRF-TOKEN` cookie for SPA clients.
 - **`CsrfValidationMiddleware`** rejects unsafe-method requests (non GET/HEAD/OPTIONS/TRACE) with 403 unless a valid token is present in the form field or the `X-CSRF-Token` header.
 
-### Automatic exemptions — and the NullStorage trap
+### Automatic exemptions
 
 CSRF exists to stop an attacker site from riding a victim's ambient, automatically-attached session cookie. `CsrfValidationMiddleware` exempts two classes of request from that check automatically, with no per-route opt-out needed:
 
-- **A request carrying an `Authorization` header** — a cross-site attacker page can't read or attach the caller's bearer/basic credential the way a browser auto-attaches a session cookie, so token/signature-authenticated callers are never forgeable.
-- **A request with no session cookie at all.** With no ambient session-backed credential present, the middleware reasons there's nothing for an attacker to ride, and skips validation.
+- **A request an authenticator already resolved from a caller-supplied credential** — a JWT, an API key, an OAuth2 bearer token. Such a caller's identity does not come from an ambient cookie, so it isn't forgeable cross-site.
+- **A request with no session cookie *and* no foreign `Origin`.** With no ambient session-backed credential there's nothing for an attacker to ride — but that reasoning only holds for the request itself, so the exemption additionally requires that this isn't a browser request from another origin.
 
-That second exemption is the trap:
+Both conditions are narrower than they look, and deliberately so:
 
-:::danger[NullStorage silently disables CSRF protection for your entire app]
-If your `storage` factory role is `Quiote\Storage\NullStorage` — **the scaffolded app's default**, see [Sessions and storage](/basics/sessions/) — no session is ever persisted, so no session cookie is ever sent, on *any* request. Every unsafe request then satisfies the "no session cookie" exemption above and sails through `CsrfValidationMiddleware` unchecked, regardless of whether it submits a `_csrf_token` field or a valid header. The `_csrf_token` hidden field still gets injected into every form by `CsrfInjectionMiddleware` — it looks like protection is active — but nothing ever validates it.
+:::caution[Neither exemption is "an `Authorization` header is present"]
+Header presence proves nothing — an attacker page can attach `Authorization: Bearer <garbage>` alongside the victim's session cookie, and the request then authenticates via the *cookie* while looking credential-authenticated. The exemption is driven by the `auth.stateless`, `auth.sessionless` and `jwt.skip_session` request attributes, which are set only **after** an authenticator has validated a caller-supplied credential. `StatelessAuthenticationMiddleware` sets `auth.stateless` whenever it produces a passport, so a JWT-authenticated request is covered.
+:::
 
-This is a consequence of your app's own session configuration, not a framework bug: the exemption logic is deliberate (see above), and it's just as deliberately wrong for an app that has real state-changing forms but hasn't turned on real sessions. If your app has any form or endpoint an attacker could forge a cross-site request against, switch `storage` to `SessionStorage` (or the PDO-backed session package) before relying on CSRF protection — see [Sessions and storage: Storage backends](/basics/sessions/#storage-backends). `NullStorage` is the right choice only for genuinely stateless apps/APIs, where the CSRF threat model (riding an ambient session cookie) doesn't apply in the first place.
+The sessionless half needs the `Origin` condition because *a login POST also arrives without a session*. Exempting it on that basis made login CSRF work: an attacker's page posts their own credentials to `/login`, the victim's browser has no session to ride so the check is skipped, and the victim ends up authenticated as the attacker with everything they then do recorded in the attacker's account. So a cross-origin browser request is never exempt. A non-browser caller sends no `Origin` and stays exempt; an `Origin` matching the request host, or one listed in `core.csrf.trusted_origins`, isn't foreign.
+
+The session cookie is recognised by asking the configured `SessionManager` for its cookie name (`QSID` by default, or your `cookie_name` slot parameter). ext/session's `session_name()` is consulted only when no `session` factory slot is configured at all, which is the legacy native-`$_SESSION` path where it's the right answer. A stray `PHPSESSID` from something else on the domain does not count as a session.
+
+**Forcing the check.** A route that needs validating despite one of the exemptions can force it with a `_csrf => true` route default — the mirror image of the `_csrf => false` opt-out below.
+
+:::caution[No `session` slot means there is nowhere to keep a token]
+The [`session` factory slot is optional](/basics/sessions/#the-slot-is-optional), and CSRF tokens live in the session (`SessionTokenStorage` writes through the session bag). With no slot configured, the bag is a `NullSessionBag` that discards writes, so:
+
+- Same-origin and non-browser unsafe requests take the sessionless exemption and are not checked. The framework logs a warning **once per process** when CSRF is enabled and no session mechanism exists, which is the state that used to be silent.
+- A cross-origin browser request *is* checked, and can never pass — there's no stored token for a submitted one to match, so it's a 403.
+
+Neither is what you want for an app with real state-changing forms. The scaffold ships a `FileSessionFactory` slot for exactly this reason; if you remove it, read [Sessions](/basics/sessions/#the-session-slot) first. Omitting the slot is the right choice only for genuinely stateless apps and APIs, where a caller-supplied credential is the identity and the CSRF threat model doesn't apply.
 :::
 
 Server-rendered forms get tokens automatically. Two things to remember:

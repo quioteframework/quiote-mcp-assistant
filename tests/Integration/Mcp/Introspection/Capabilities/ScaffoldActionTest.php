@@ -66,34 +66,19 @@ final class ScaffoldActionTest extends TestCase
      * native `Quiote\Renderer\PhpRenderer` (see Config/output_types.xml).
      * When it's configured with anything else -- PHPTAL, Twig, XSLT, ... --
      * this tool must not write a `.php` template the app's real template
-     * resolution would never look at. Swaps the live Controller's cached
-     * "html" renderer instance for a real `Quiote\Renderer\Phptal\PhptalRenderer`
-     * (`quioteframework/phptal`, a require-dev dependency) to exercise that
-     * path against the real, bootstrapped app rather than a guess -- the
-     * fix only ever calls `Renderer::getDefaultExtension()`, so PHPTAL's
-     * own template engine never actually needs to run.
+     * resolution would never look at, and it now doesn't have to guess at
+     * that renderer's syntax either: `Renderer::getStarterTemplate()` lets
+     * each renderer author its own minimal starter. Swaps the live
+     * Controller's cached "html" renderer instance for a real
+     * `Quiote\Renderer\Phptal\PhptalRenderer` (`quioteframework/phptal`, a
+     * require-dev dependency) to exercise that path against the real,
+     * bootstrapped app rather than a guess.
      */
     #[Test]
-    public function skipsTheTemplateWhenHtmlRendersThroughAnEngineThisToolCannotAuthor(): void
+    public function writesThePhptalAuthoredTemplateWhenHtmlRendersThroughPhptal(): void
     {
-        $controller = Context::getInstance('web')->getController();
-        $outputTypesProp = new ReflectionProperty($controller, 'outputTypes');
-        /** @var array<string, object> $outputTypes */
-        $outputTypes = $outputTypesProp->getValue($controller);
-        $htmlOutputType = $outputTypes['html'];
-
-        $phptalRenderer = new PhptalRenderer();
-
-        $rendererProp = new ReflectionProperty($htmlOutputType, 'renderers');
-        /** @var array<string, array{instance: ?Renderer, parameters: array<string, mixed>}> $rendererConfig */
-        $rendererConfig = $rendererProp->getValue($htmlOutputType);
-        $restore = $rendererConfig;
-
-        try {
-            $rendererConfig['php']['instance'] = $phptalRenderer;
-            $rendererProp->setValue($htmlOutputType, $rendererConfig);
-
-            $result = ScaffoldAction::run(
+        $result = self::withHtmlRenderer(new PhptalRenderer(), function () {
+            return ScaffoldAction::run(
                 'web',
                 '/irrelevant-app-dir',
                 'Default',
@@ -102,20 +87,88 @@ final class ScaffoldActionTest extends TestCase
                 formats: ['html'],
                 dryRun: true,
             );
+        });
 
-            self::assertIsArray($result['files']);
-            self::assertCount(2, $result['files']); // action + view, no template
-            self::assertArrayHasKey('skipped_templates', $result);
-            $skippedTemplates = $result['skipped_templates'];
-            self::assertIsArray($skippedTemplates);
-            self::assertArrayHasKey(0, $skippedTemplates);
-            $skipped = $skippedTemplates[0];
-            self::assertIsArray($skipped);
-            self::assertSame('html', $skipped['format']);
-            self::assertIsString($skipped['expected_file']);
-            self::assertStringEndsWith('PhpunitCapabilityPreviewSuccess.tal', $skipped['expected_file']);
-            self::assertIsString($skipped['reason']);
-            self::assertStringContainsString('.tal', $skipped['reason']);
+        self::assertIsArray($result);
+        self::assertIsArray($result['files']);
+        self::assertCount(3, $result['files']); // action + view + .tal template
+        self::assertArrayNotHasKey('skipped_templates', $result);
+        $files = $result['files'];
+        $template = $files[2];
+        self::assertIsArray($template);
+        self::assertIsString($template['path']);
+        self::assertStringEndsWith('PhpunitCapabilityPreviewSuccess.tal', $template['path']);
+        self::assertIsString($template['diff']);
+        self::assertStringContainsString('tal:content', $template['diff']);
+    }
+
+    /**
+     * A renderer with no starter to offer (the base `Renderer` class's
+     * `getStarterTemplate()` default) must still be reported back via
+     * `skipped_templates` rather than silently producing no template and no
+     * explanation.
+     */
+    #[Test]
+    public function skipsTheTemplateWhenTheRendererHasNoStarterToOffer(): void
+    {
+        $noStarterRenderer = new class extends Renderer {
+            public function render($layer, array &$attributes = [], array &$slots = [], array &$moreAssigns = [])
+            {
+                return '';
+            }
+        };
+
+        $result = self::withHtmlRenderer($noStarterRenderer, function () {
+            return ScaffoldAction::run(
+                'web',
+                '/irrelevant-app-dir',
+                'Default',
+                'PhpunitCapabilityPreview',
+                verbs: ['read'],
+                formats: ['html'],
+                dryRun: true,
+            );
+        });
+
+        self::assertIsArray($result);
+        self::assertIsArray($result['files']);
+        self::assertCount(2, $result['files']); // action + view, no template
+        self::assertArrayHasKey('skipped_templates', $result);
+        $skippedTemplates = $result['skipped_templates'];
+        self::assertIsArray($skippedTemplates);
+        self::assertArrayHasKey(0, $skippedTemplates);
+        $skipped = $skippedTemplates[0];
+        self::assertIsArray($skipped);
+        self::assertSame('html', $skipped['format']);
+        self::assertIsString($skipped['reason']);
+        self::assertStringContainsString('no starter template to offer', $skipped['reason']);
+    }
+
+    /**
+     * Swaps this app's live "html" output type's cached renderer instance
+     * for `$renderer` for the duration of `$callback`, then restores it --
+     * lets tests exercise `ScaffoldTemplateResolver` against the real,
+     * bootstrapped app without needing a second target app fixture per
+     * renderer.
+     */
+    private static function withHtmlRenderer(Renderer $renderer, callable $callback): mixed
+    {
+        $controller = Context::getInstance('web')->getController();
+        $outputTypesProp = new ReflectionProperty($controller, 'outputTypes');
+        /** @var array<string, object> $outputTypes */
+        $outputTypes = $outputTypesProp->getValue($controller);
+        $htmlOutputType = $outputTypes['html'];
+
+        $rendererProp = new ReflectionProperty($htmlOutputType, 'renderers');
+        /** @var array<string, array{instance: ?Renderer, parameters: array<string, mixed>}> $rendererConfig */
+        $rendererConfig = $rendererProp->getValue($htmlOutputType);
+        $restore = $rendererConfig;
+
+        try {
+            $rendererConfig['php']['instance'] = $renderer;
+            $rendererProp->setValue($htmlOutputType, $rendererConfig);
+
+            return $callback();
         } finally {
             $rendererProp->setValue($htmlOutputType, $restore);
         }

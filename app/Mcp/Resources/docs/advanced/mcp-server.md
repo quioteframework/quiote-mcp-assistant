@@ -5,7 +5,7 @@
 `quioteframework/mcp` turns a Quiote app into a [Model Context Protocol](https://modelcontextprotocol.io) server, so an AI agent can call your app's capabilities as **tools**, read its data as **resources**, and use **prompts**. It's built on the official [PHP MCP SDK](https://github.com/modelcontextprotocol/php-sdk) (`mcp/sdk`) rather than reimplementing the protocol — Quiote owns the binding (transports, DI, attribute discovery, auth), the SDK owns the wire format.
 
 <Aside type="caution" title="Partially implemented">
-This is a newer, actively-developed capability. stdio and HTTP transports, manual registration, plain-class attribute discovery (with a warmable cache), and the actions-as-tools bridge with validator-derived input schemas are implemented and tested. OTel spans per call, OAuth 2.1, RBAC-gated tool listing, rate limiting, resource/prompt attribute discovery, and the stateless `2026-07-28` transport mode are not — see [What isn't built yet](#what-isnt-built-yet).
+This is a newer, actively-developed capability. stdio and HTTP transports, manual registration, plain-class attribute discovery (with a warmable cache), and the actions-as-tools bridge with validator-derived input schemas are implemented and tested. OAuth2 resource-server auth is implemented too. OTel spans per call, RBAC-gated tool listing, rate limiting, resource/prompt attribute discovery, and the stateless `2026-07-28` transport mode are not — see [What isn't built yet](#what-isnt-built-yet).
 </Aside>
 
 The [Quiote Assistant MCP](/getting-started/mcp-assistant/) is a full reference app built on this package — read it alongside this page if you want a complete, working example rather than just the mechanism.
@@ -104,9 +104,11 @@ class PostAction extends Action
 
 `Quiote\Mcp\Compiler\ActionToolScanner` finds every route-carrying action additionally decorated with `#[McpTool]`. Each match is wired via `Quiote\Mcp\Bridge\ActionToolAdapter`, which drives a synthetic request through **`Context::handle()`** — the same entry point a real HTTP request goes through, not `ActionExecutor::execute()` directly — so the tool call gets the exact same DI resolution, verb dispatch (`executeRead`/`executeWrite`/…), and validation a normal request would get, for free. Path parameters are split from extra arguments using the route's own compiled path variables; extra arguments ride as query params (`GET`/`HEAD`) or a JSON body otherwise. A non-2xx response or any exception surfaces as a tool error (`isError: true`), not a JSON-RPC protocol error.
 
+**A forwarded request fails the tool call.** Status alone isn't enough to tell success from failure here: a security forward renders the login or secure system action and returns **HTTP 200**, so a tool call against a protected action used to report success and hand the connected model the login page's markup as though it were the action's output — plausibly with a "session expired" narrative the model would then act on. The adapter attaches its own `ExecutionState` to the synthetic request, which the pipeline mutates in place, and raises a `ToolCallException` naming the action actually reached if the request was forwarded. Any forward fails the call, not only a security one: if the action you asked for is not the action that ran, the body is not that action's output.
+
 ### Input schema, derived from your validators
 
-`Quiote\Mcp\Compiler\ValidatorSchemaMapper` turns the action's existing `{module}/Validate/{action}.xml` validator rules — scoped to whichever verb the route actually dispatches to — into the tool's `inputSchema`, so a schema-violating `tools/call` is rejected before your action ever runs:
+`Quiote\Validator\Compiler\JsonSchema\ValidatorSchemaMapper` turns the action's existing validator rules — scoped to whichever verb the route actually dispatches to — into the tool's `inputSchema`, so a schema-violating `tools/call` is rejected before your action ever runs:
 
 | Validator | Maps to |
 |---|---|
@@ -118,7 +120,13 @@ class PostAction extends Action
 | Boolean, Json, DateTime, IsNotEmpty | mapped |
 | `required` flag | reflected in the schema's `required` list |
 
-This is deliberately **descriptive, not a faithful re-encoding** — the schema always keeps `additionalProperties: true`, operator groups (`and`/`or`/`not`/`xor`) flatten to a union of their fields rather than `allOf`/`anyOf`, and anything unmappable (a negative/flagged regex, an unrecognized validator class) degrades to a looser description instead of being dropped. Real enforcement still happens when the action's validators run again during dispatch — this schema is a pre-dispatch filter, not a replacement for it. If an action has no XML validator file (e.g. it validates via a hand-written fluent builder), parsing fails, or nothing describable comes out, the tool falls back to a permissive `{"type":"object","properties":{},"additionalProperties":true}` schema. Output schema, if you want one, comes through as-is from `#[McpTool(outputSchema: ...)]` — nothing is derived automatically from the route's `outputType`.
+:::note[The mapper lives in core now]
+It moved from `Quiote\Mcp\Compiler\ValidatorSchemaMapper` to `Quiote\Validator\Compiler\JsonSchema\ValidatorSchemaMapper` once [OpenAPI generation](/advanced/openapi/) became a second consumer of the same derivation — validator IR to JSON Schema was never MCP-specific. The MCP class remains as a deprecated forwarding shim, so existing callers keep working; reference the core class in new code.
+
+The resolver above it, `ActionInputSchemaResolver`, also reads **both** validator conventions — the XML file convention *and* the fluent `register{Method}Validators()` hook, [`#[MapRequest]` DTOs](/basics/validation/#request-dtos--maprequest) included — so an action that declares its input fluently gets a derived tool schema too.
+:::
+
+This is deliberately **descriptive, not a faithful re-encoding** — the schema always keeps `additionalProperties: true`, operator groups (`and`/`or`/`not`/`xor`) flatten to a union of their fields rather than `allOf`/`anyOf`, and anything unmappable (a negative/flagged regex, an unrecognized validator class) degrades to a looser description instead of being dropped. Real enforcement still happens when the action's validators run again during dispatch — this schema is a pre-dispatch filter, not a replacement for it. If an action declares no validators at all, parsing fails, or nothing describable comes out, the tool falls back to a permissive `{"type":"object","properties":{},"additionalProperties":true}` schema. Output schema, if you want one, comes through as-is from `#[McpTool(outputSchema: ...)]` — nothing is derived automatically from the route's `outputType`.
 
 ## Transports
 
@@ -175,7 +183,21 @@ The HTTP endpoint is safe by default: with no `mcp.auth_token` configured, `Quio
 
 `mcp.auth_token` is an ordinary setting, so it can also live in `Config/settings.yaml` or `Config/settings.xml` (see [Configuration](/architecture/configuration/)) — reading it from an environment variable, as above, is a PHP idiom the other formats don't offer.
 
-For a trusted network, or a reverse proxy that already authenticates, `mcp.auth = 'none'` is the explicit opt-out — a deliberate, last-resort override that also skips registering `McpAuthMiddleware` entirely. There's no OAuth 2.1 or RBAC-gated tool listing yet — see below.
+For a trusted network, or a reverse proxy that already authenticates, `mcp.auth = 'none'` is the explicit opt-out — a deliberate, last-resort override that also skips registering `McpAuthMiddleware` entirely.
+
+### `mcp.auth = 'oauth2'`
+
+The third mode makes the endpoint an OAuth2 **resource server**: bearer tokens are validated as JWTs against the issuer's JWKS, and RFC 9728 protected-resource metadata is served at the well-known path so a client can discover where to get a token.
+
+| Key | Effect |
+|---|---|
+| `mcp.oauth.issuer` | The authorization server's issuer URL. JWKS is discovered from it via OIDC. |
+| `mcp.oauth.audience` | The audience this resource server accepts. |
+| `mcp.oauth.jwks_uri` | Explicit JWKS URI, when discovery isn't available or wanted. |
+| `mcp.oauth.scopes_supported` | Advertised in the protected-resource metadata. |
+| `mcp.oauth.cache_ttl` | How long a fetched JWKS is cached. |
+
+This composes the MCP SDK's own OIDC discovery, JWKS provider, token validator and authorization middleware rather than adding validation code of its own, so enforcement lives inside the SDK transport's middleware stack — which is why `McpAuthMiddleware` is *not* registered in this mode. There's still no RBAC-gated tool listing; see [what isn't built yet](#what-isnt-built-yet).
 
 ## How an MCP HTTP request is handled
 
@@ -215,8 +237,13 @@ This only affects plain-class attribute discovery — the actions-as-tools scan 
 | `mcp.stateless` | `true` | Reserved for the `2026-07-28` stateless HTTP mode — not yet implemented. |
 | `mcp.server_name` | `'quiote-app'` | Advertised server name. |
 | `mcp.server_version` | `'1.0.0'` | Advertised server version. |
-| `mcp.auth` | `'bearer'` | `'bearer'` or `'none'`. |
+| `mcp.auth` | `'bearer'` | `'bearer'`, `'oauth2'`, or `'none'`. |
 | `mcp.auth_token` | `null` | Required for `'bearer'` auth to accept any request. |
+| `mcp.oauth.issuer` | `null` | `'oauth2'` only — the authorization server's issuer URL; JWKS is discovered from it. |
+| `mcp.oauth.audience` | `null` | `'oauth2'` only — the audience this resource server accepts. |
+| `mcp.oauth.jwks_uri` | `null` | `'oauth2'` only — explicit JWKS URI, bypassing discovery. |
+| `mcp.oauth.scopes_supported` | `[]` | `'oauth2'` only — advertised in the RFC 9728 metadata. |
+| `mcp.oauth.cache_ttl` | `3600` | `'oauth2'` only — how long a fetched JWKS is cached, in seconds. |
 | `mcp.expose_actions` | `false` | Scan `#[Route]` actions for `#[McpTool]`. |
 | `mcp.module_dirs` | `[]` | Extra scan roots; defaults to `core.module_dir` + plugin module directories. |
 | `mcp.discover_attributes` | `false` | Scan plain (non-`#[Route]`) classes under `{Module}/Mcp/` for SDK attributes. |
@@ -227,7 +254,6 @@ This only affects plain-class attribute discovery — the actions-as-tools scan 
 Being direct about the gaps, since this feature is still filling in:
 
 - **OTel spans per tool/resource/prompt call** and bridging MCP `logging` notifications to `Quiote\Logging\Log` — not implemented.
-- **OAuth 2.1 resource-server auth** (the enterprise auth story) — only bearer-token auth exists today.
 - **RBAC-gated tool listing** — a caller's roles don't yet filter which tools `tools/list` returns.
 - **Rate limiting** on the HTTP endpoint — not implemented.
 - **Resource/prompt attribute discovery** — attribute discovery (§ above) covers tools; resources and prompts still require manual `McpCatalog` registration.

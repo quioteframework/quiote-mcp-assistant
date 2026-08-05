@@ -81,7 +81,7 @@ Both use explicit `before:`/`after:` anchors rather than `phase`/`priority` tuni
 
 **TelemetryMiddleware** — when telemetry is enabled, opens the root request span and records the resource metrics (time, CPU, memory); a pass-through no-op when off. See [Telemetry](/architecture/telemetry/).
 
-**SessionMiddleware** — starts/attaches the session storage for the request so downstream middlewares (CSRF, security) can read and write it.
+**SessionMiddleware** — loads or creates this request's session and installs it on the context as the [session bag](/basics/sessions/), so downstream middlewares (CSRF, security) and the action all reach the same session. On the way out it persists the user, then the session, and bakes the `Set-Cookie` onto the response.
 
 **TimingMiddleware / TraceMiddleware** — optional diagnostics, both on by default and common to turn off in production (see [Enabling and disabling middlewares](#enabling-and-disabling-middlewares)). `TimingMiddleware` records total request time; `TraceMiddleware` records a running trace of executed middleware. Their response headers are off by default and configured through ordinary `settings.*` keys (`middleware.timing.emit_header`, `middleware.trace.emit_header`/`header_name`) — see the [Middleware reference](/architecture/middleware-reference/#timingmiddleware).
 

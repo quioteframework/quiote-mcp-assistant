@@ -5,9 +5,9 @@
     "license": "MIT",
     "require": {
         "php": ">=8.5",
-        "quioteframework/quiote": "^1.2",
-        "quioteframework/mcp": "^1.2",
-        "mcp/sdk": "^0.6.0"
+        "quioteframework/quiote": "^4.0",
+        "quioteframework/mcp": "^4.0",
+        "mcp/sdk": "^0.7.0"
     },
     "autoload": {
         "psr-4": {
@@ -33,9 +33,9 @@
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^13.0",
         "phpstan/phpstan-phpunit": "^2.0",
-        "quioteframework/phptal": "^1.2",
-        "quioteframework/xslt": "^1.2",
-        "quioteframework/twig": "^1.2"
+        "quioteframework/phptal": "^4.0",
+        "quioteframework/xslt": "^4.0",
+        "quioteframework/twig": "^4.0"
     },
     "scripts": {
         "test": "phpunit",

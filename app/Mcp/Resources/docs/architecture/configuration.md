@@ -156,7 +156,7 @@ return [
     'response'           => ['class' => \Quiote\Response\WebResponse::class,        'params' => []],
     'routing'            => ['class' => \MyApp\Routing\AppRouting::class,           'params' => []],
     'request'            => ['class' => \Quiote\Request\WebRequest::class,          'params' => []],
-    'storage'            => ['class' => \Quiote\Storage\NullStorage::class,         'params' => []],
+    'session'            => ['class' => \Quiote\Session\FileSessionFactory::class,  'params' => ['dir' => '%core.app_dir%/cache/sessions']],
     'user'               => ['class' => \Quiote\User\RbacSecurityUser::class,       'params' => []],
     'database_manager'   => ['class' => \Quiote\Database\DatabaseManager::class,    'params' => []],
     'validation_manager' => ['class' => \Quiote\Validator\ValidationManager::class, 'params' => []],
@@ -179,9 +179,10 @@ routing:
 request:
   class: Quiote\Request\WebRequest
   params: []
-storage:
-  class: Quiote\Storage\NullStorage
-  params: []
+session:
+  class: Quiote\Session\FileSessionFactory
+  params:
+    dir: '%core.app_dir%/cache/sessions'
 user:
   class: Quiote\User\RbacSecurityUser
   params: []
@@ -205,7 +206,9 @@ validation_manager:
         <response class="Quiote\Response\WebResponse"/>
         <routing class="MyApp\Routing\AppRouting"/>
         <request class="Quiote\Request\WebRequest"/>
-        <storage class="Quiote\Storage\NullStorage"/>
+        <session class="Quiote\Session\FileSessionFactory">
+            <ae:parameter name="dir">%core.app_dir%/cache/sessions</ae:parameter>
+        </session>
         <user class="Quiote\User\RbacSecurityUser"/>
         <database_manager class="Quiote\Database\DatabaseManager"/>
         <validation_manager class="Quiote\Validator\ValidationManager"/>
@@ -215,7 +218,7 @@ validation_manager:
 
 In PHP and YAML, include `params` for every role — an empty `[]` is fine, but the key must be present (it is passed to each role's constructor). In XML, role elements are direct children of `<ae:configuration>`, and params are `<ae:parameter>` children of a role element (omit them for none). You swap a role's implementation by changing its `class` — e.g. pointing `user` at your own `RbacSecurityUser` subclass, or `routing` at your app's `Routing` subclass. This is the primary extension seam for the framework's core objects.
 
-The `storage` role above is shown as `NullStorage` because it's the scaffolded default — see [Sessions and storage](/basics/sessions/#storage-backends) before shipping with it, since it also means no session cookie is ever sent, which silently disables CSRF protection app-wide.
+The `session` role is the one exception to "every role needs an entry": it is **optional**. Omit it and the context answers a `NullSessionBag` — reads return their default, writes are discarded — which is the right shape for a console command, a queue worker or a stateless API. It also means no session cookie is ever sent, which silently disables CSRF protection app-wide, so read [Sessions](/basics/sessions/#the-slot-is-optional) before omitting it from a web app. Unlike the other roles, `session` names a *factory* (`Quiote\Session\SessionFactoryInterface`) rather than the object itself; see [Sessions: available backends](/basics/sessions/#available-backends) for the full list.
 
 ## Reading config at runtime
 
@@ -233,6 +236,33 @@ if (Config::has('core.custom_flag')) {
 
 Keys are always the dotted strings you see in `settings` — the format you wrote them in does not change how you read them.
 
+Alongside `get()`/`has()` there are typed accessors that save you a cast and fail loudly on a value of the wrong shape: `getString()`, `getNullableString()`, `getInt()`, `getFloat()`, `getBool()`, `getArray()` and `getStringList()`. `set()`, `remove()`, `fromArray()`, `toArray()` and `clear()` complete the API.
+
+### The repository behind the facade
+
+`Config` is a facade over `Quiote\Config\ConfigRepository`, an ordinary object holding the same behaviour. The static API is unchanged, but the underlying array is **private** — there is no `Config::$config` to read or write:
+
+| Instead of | Use |
+|---|---|
+| `Config::$config['k'] = $v` | `Config::set('k', $v)` |
+| `unset(Config::$config['k'])` | `Config::remove('k')` |
+| `Config::$config['k'] ?? $d` | `Config::getString('k', $d)` (or the matching typed accessor) |
+| `isset(Config::$config['k'])` | `Config::has('k')` |
+| `foreach (Config::$config as ...)` | `foreach (Config::toArray() as ...)` |
+
+Two things the object buys you. A service can [declare the dependency](/architecture/container/#type-hinting-a-contract-instead-of-a-class) instead of reaching for the facade — the container binds the repository under `config` and its class name. And a test can install a configuration of its own and put back what was there:
+
+```php
+$previous = Config::useRepository(new ConfigRepository(['core.debug' => true]));
+try {
+    // ...
+} finally {
+    Config::useRepository($previous);
+}
+```
+
+`fromArray()`'s precedence, while we're here: a read-only directive wins first, then the imported data, then an existing directive the import doesn't mention.
+
 ## Environments and contexts
 
 `Kernel::create(['env' => 'production'])` sets the environment. Config files can carry environment- and context-specific overlays (`development.*`, `testing.*`, `production.*`), which are merged over the base values when that environment or context is active. This is how one config file serves dev, test, and prod without duplication.
@@ -240,3 +270,49 @@ Keys are always the dotted strings you see in `settings` — the format you wrot
 ## Caching
 
 Config is compiled and cached so it is not re-parsed on every request. Under persistent workers (FrankenPHP), an APCu-backed cache is used when the extension is enabled; otherwise a file cache. PHP-array configs are already opcache-friendly, so the format that needs the least caching machinery is also the fastest.
+
+### A framework upgrade invalidates the cache
+
+Freshness used to be decided purely by comparing the source config file's mtime against the cache file's. A framework upgrade changes neither, so a cache compiled by an older version was reused indefinitely — even when the handler that produced it now generates a completely different shape. The failure landed at boot and reported whatever the stale contents happened to break first, rather than the staleness.
+
+Every cache key — both `ConfigCache`'s filenames and `APCuConfigCache`'s keys — now includes a short **framework fingerprint**, derived from `quiote.version` plus Composer's installed reference for `quioteframework/quiote`. That reference is the dist reference for a released install and the **commit hash** for a `dev-` install, so it changes on every framework commit — which is what covers developing against an unreleased framework, something a version string alone does not. A framework upgrade therefore recompiles automatically. Old cache files are left on disk unused — harmless, and cleared by deleting the cache directory whenever you care to.
+
+`core.config_cache_fingerprint` is mixed in when set, so a build pipeline can force a rebuild without touching a config file. One layout isn't covered automatically: a framework installed under a different package name — a path repository, a vendor-less checkout — where Composer can't be asked for a reference. Set `core.config_cache_fingerprint` yourself in that case.
+
+:::note[Upgrading from before this existed]
+The fingerprint cannot retroactively invalidate a cache compiled before it existed. Delete the cache directory (`core.cache_dir`, plus the system-temp fallback if that's unset) or run `cache:warmup` once. From then on it's automatic.
+:::
+
+### Compiled configuration is data, not code
+
+Every config handler — `settings`, `factories`, `databases`, `output_types`, `translation`, `module`, `plugins`, `middleware`, `validators`, and any handler you write yourself — compiles to a **declaration**: plain data, not executable PHP. Nothing in the configuration cache runs a cached file's statements to apply it; a class shipped with the framework or your package reads the data back and acts on it.
+
+That distinction used to matter in an unpleasant way for the handlers that mutate global state. A compiled `factories` file used to be executable PHP `include`d *inside* `Context::initialize()`, and included code takes on the scope it's included into — so it had full private access to the context and assigned directly to its properties, with nothing declaring which ones it was allowed to touch. Renaming or retyping any of them broke a *cached* file at runtime, in the boot path, with an error naming the property rather than the stale cache. And a poisoned cache entry that is code is remote code execution; APCu made that worse, since a poisoned shared-memory entry never touches disk, so no file-integrity monitoring or audit trail observes it.
+
+**The source formats are untouched** — `factories.{xml,yaml,php}`, `settings.xml`, `validators.xml`, and friends are written exactly as they always were. This section only matters if you read a compiled file directly, or if you write your own config handler.
+
+### Reading a compiled value: two paths
+
+Every handler's compiled artifact is available through `Quiote\Config\CompiledConfig::value($path, $context = null)`, which returns the declaration itself — a fetch from shared memory under APCu, or an `include` of the compiled file otherwise, with the choice made once at bootstrap so a read can't disagree with itself mid-request. This is how `DatabaseManager`, `TranslationManager`, `ValidationService`, `RbacSecurityUser`, and `Controller`'s module/output-type handling all read their configuration: each builds its own runtime objects straight from the array, so there's nothing generic to "apply".
+
+A handler that instead needs to **mutate framework-global state** — `settings` writing into `Config`, `plugins` and `middleware` registering themselves, `module` flipping `modules.*.enabled` — goes through `Quiote\Config\ConfigCache::load($path)`, which reads the value the same way and then calls `apply($declaration, $sourceRef)` on the handler. That method comes from `Quiote\Config\IDeclarationConfigHandler`:
+
+```php
+interface IDeclarationConfigHandler
+{
+    public function apply(mixed $declaration, string $sourceRef): void;
+}
+```
+
+`apply()` is a trust boundary as much as an application step: the declaration arrives from a cache entry or a hand-authored source file, so implementations validate its shape and throw `Quiote\Exception\ConfigurationException` rather than assuming what the compiler produced.
+
+### Writing your own config handler
+
+A handler you write implements `IXmlConfigHandler`, `IArrayConfigHandler`, or the legacy `ILegacyConfigHandler` exactly as before, but its `execute()`/`executeArray()` method now **returns the declaration** — `mixed`, not a string of generated PHP. `Quiote\Config\BaseConfigHandler::generate()`, which used to wrap a handler's `var_export()`ed data in cache-file boilerplate, is gone; return the value and let the cache serialize it.
+
+- If your handler will be read with `CompiledConfig::value()` — because the caller builds its own objects from the array, the way `SecurityConfigHandler` does for `FirewallFactory` — that's the whole change. Return data instead of a string.
+- If your handler will be registered for `ConfigCache::load($path)` — because it needs to mutate global state itself — it must also implement `IDeclarationConfigHandler` and move whatever the old generated statements did into `apply()`. `load()` rejects a handler that doesn't implement the interface, naming it.
+
+:::caution[Clear the config cache when upgrading to this]
+An artifact compiled by an older version of the framework emits PHP statements — the format `load()` no longer executes. The [config-cache framework fingerprint](#a-framework-upgrade-invalidates-the-cache) recompiles it automatically going forward, but a cache compiled *before* the fingerprint existed needs the one-time clear described there.
+:::

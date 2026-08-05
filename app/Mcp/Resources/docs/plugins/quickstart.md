@@ -121,6 +121,77 @@ An attribute (`#[Plugin]` / `#[Middleware]`) makes a class *eligible*; a config 
 
 See [Databases: Propulsion](/basics/databases/#propulsion) for the full reference.
 
+## Use the `queue-db` plugin
+
+`quioteframework/queue` alone runs jobs in-process via the `sync` driver — fine for dev/test, but it blocks the request that pushed the job. `queue-db` adds a persistent `db` driver, backed by the app's own database, so jobs are processed later by a separate `queue:work` process instead.
+
+1. **Install both packages:**
+
+   ```bash
+   composer require quioteframework/queue quioteframework/queue-db
+   ```
+
+2. **Enable both plugins** in `Config/plugins.php` (or `.xml`/`.yaml`/`.yml`):
+
+   
+   
+#### PHP
+
+   ```php
+   // Config/plugins.php
+   return [
+       ['class' => \Quiote\Queue\QueuePlugin::class, 'enabled' => true],
+       ['class' => \Quiote\Queue\Db\QueueDbPlugin::class, 'enabled' => true],
+   ];
+   ```
+
+   
+   
+#### YAML
+
+   ```yaml
+   # Config/plugins.yaml
+   - class: Quiote\Queue\QueuePlugin
+     enabled: true
+   - class: Quiote\Queue\Db\QueueDbPlugin
+     enabled: true
+   ```
+
+   
+   
+#### XML
+
+   ```xml
+   <!-- Config/plugins.xml -->
+   <ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                       xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+       <ae:configuration>
+           <plugin class="Quiote\Queue\QueuePlugin" />
+           <plugin class="Quiote\Queue\Db\QueueDbPlugin" />
+       </ae:configuration>
+   </ae:configurations>
+   ```
+
+   
+   
+
+3. **Point `queue.default_driver` at `db`** (or pass `--driver=db` to `queue:work` explicitly):
+
+   ```php
+   // Config/settings.php
+   'queue.default_driver' => 'db',
+   ```
+
+4. **Create the backing tables** — neither is created automatically; run the DDL `Quiote\Queue\Db\DbQueueDriver::schema()` and `DbFailedJobStore::schema()` return as a migration (portable across PostgreSQL and SQLite).
+
+5. **Run a worker** to process the backlog:
+
+   ```bash
+   php bin/quiote queue:work
+   ```
+
+Without step 2, `queue.default_driver = 'db'` fails to resolve — core only ships the `sync` alias by default. See [Background jobs & queues](/advanced/queues/) for the full reference, including retry/backoff, dead-letter inspection (`queue:failed:*`), and config keys.
+
 ## Use the Whoops (developer exception) plugin
 
 This is **not middleware** — it's an exception-*renderer* plugin that plugs into the existing, always-on `ErrorHandlingMiddleware`. Two switches must both be on for it to actually render anything; either one alone leaves you on the safe, no-detail renderer.

@@ -39,6 +39,10 @@ An action extends `Quiote\Action\Action`. The base class defines **no** `execute
 
 `isSimple()` is stronger than "skip validation." When it returns `true`, `ActionExecutor`/`SlotDispatcher` never call `ActionResolver::execute()` at all — no `execute*()` method, no `validate()`/`validate{Method}()`, no `registerValidators()`. `getDefaultViewName()` is used directly as the view token, and rendering proceeds straight to the view. There is no code path left inside a simple action that could read attacker-controlled (or even developer-supplied) input, because that code path never executes — reach for it for actions that are genuinely static or purely presentational, most commonly [slots](/basics/templates-and-rendering/#slots-embedding-one-action-in-another). An action that needs its `execute*()` to run — even just to read arguments with nothing else going on — must not override `isSimple()` to return `true`.
 
+### Actions that stream instead of rendering
+
+One kind of action deliberately steps outside the Action/View pairing entirely: an action implementing `Quiote\Http\Sse\SseStreamingAction` produces a `text/event-stream` response incrementally, with no View, no output type, and no caching. `DispatchMiddleware` detects the interface and short-circuits before any of the normal render path runs. See [Server-Sent Events](/advanced/server-sent-events/).
+
 ### Which method runs
 
 Quiote maps the HTTP verb to an `execute*` method. The mapping is defined once, in `Quiote\Execution\HttpMethodMapper`:
@@ -175,3 +179,5 @@ Keeping the three names aligned — action, view, template — is what lets the 
 ## The two-phase pattern
 
 Both actions and views are created bare and then handed their execution context via `initialize()`. This is deliberate: the **constructor** is for injected services (see [The DI container](/architecture/container/)), and **`initialize()`** is for the per-request framework context. Keeping them separate means adding a constructor dependency to an action never interferes with how the framework wires its context.
+
+Concretely: `Controller::createActionInstance()` (and its view counterpart) builds the class through `Container::make()`, so the constructor is autowired exactly like any other service — declare a dependency, and the container resolves it, transitively, with nothing to register. See [using a service from an action](/basics/services-and-models/#using-it-from-an-action) for a complete, worked example: a service with its own dependencies, an action injecting it, and a view injecting a second service to format the result.

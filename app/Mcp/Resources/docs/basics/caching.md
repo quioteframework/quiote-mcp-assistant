@@ -20,7 +20,7 @@ The action/view cache is gated by **two** settings — both must be true for it 
 return [
     'core.cache_enabled' => true,          // master switch (default false)
     'core.use_cache'     => true,          // required companion flag (default false)
-    'core.cache_backend' => 'filesystem',  // 'filesystem' (default) or 'apcu'
+    'core.cache_backend' => 'filesystem',  // 'filesystem' (default), 'apcu', or 'redis'
     'core.cache_dir'     => __DIR__ . '/../cache',
 ];
 ```
@@ -49,10 +49,19 @@ core.cache_dir: ./cache
 |---|---|---|
 | `core.cache_enabled` | `false` | Master switch for the action/view cache. |
 | `core.use_cache` | `false` | Companion flag; **both** it and `cache_enabled` must be true. |
-| `core.cache_backend` | `filesystem` | `filesystem` or `apcu`. `apcu` only takes effect if `apcu_enabled()`. |
+| `core.cache_backend` | `filesystem` | `filesystem`, `apcu`, or `redis`. `apcu` only takes effect if `apcu_enabled()`. |
+| `core.redis_dsn` | `redis://127.0.0.1:6379` | Connection DSN, when `core.cache_backend` is `redis`. |
 | `core.cache_dir` | `<app>/cache` | Base directory; the PSR cache pool lives under `<cache_dir>/psr-cache`. |
 
 There is no `core.cache_ttl` — time-to-live is set per action (below).
+
+### Choosing a backend
+
+`filesystem` and `apcu` are both **node-local**: a multi-node deployment gets one cache per node, and an entry written on one is invisible to the others. That is usually fine for an output cache and a real problem for anything you need to invalidate consistently. `redis` is the shared option — the cache is visible to every worker and every node.
+
+Set `core.cache_backend` to `redis` and `core.redis_dsn` to the connection string. It needs a Redis client available (`ext-redis`, `ext-relay`, or `predis/predis`) and raises a clear exception naming the setting if none is — it does not silently fall back. See [Redis backends](/plugins/official-packages/#redis-backends).
+
+Note that `apcu` *does* silently fall back to `filesystem` when `apcu_enabled()` is false at runtime, which is easy to hit on a CLI SAPI with `apc.enable_cli=0`.
 
 ## Making an action cacheable
 
@@ -139,7 +148,7 @@ if ($value === null) {
 }
 ```
 
-The full PSR-16 surface is available (`get`/`set`/`has`/`delete`/`clear`, and the `*Multiple` variants). The backend is the one selected by `core.cache_backend` — Symfony's filesystem adapter by default, APCu when configured and available.
+The full PSR-16 surface is available (`get`/`set`/`has`/`delete`/`clear`, and the `*Multiple` variants). The backend is the one selected by `core.cache_backend` — Symfony's filesystem adapter by default, APCu or Redis when configured and available.
 
 :::note[`FileCache` is not the default backend]
 The framework ships a `Quiote\Cache\FileCache` (a minimal PSR-16 file cache), but the live default is Symfony's `FilesystemAdapter`. `FileCache` is available if you want to inject a specific implementation via `CacheManager::setCache()`, not something you get automatically.

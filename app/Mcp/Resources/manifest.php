@@ -55,12 +55,40 @@ return array (
     'title' => 'Migrating from Agavi',
     'description' => 'What carries over from Agavi, what changed, and a practical order to move an application across.',
   ),
+  'quiote-docs://advanced/openapi' => 
+  array (
+    'file' => 'advanced/openapi.md',
+    'path' => 'advanced/openapi',
+    'title' => 'Generating an OpenAPI spec',
+    'description' => 'Deriving an OpenAPI 3.1 document from the route table and each action\'s validators with openapi:generate — what is derived, what deliberately isn\'t, and the core.openapi.* settings.',
+  ),
+  'quiote-docs://advanced/queues' => 
+  array (
+    'file' => 'advanced/queues.md',
+    'path' => 'advanced/queues',
+    'title' => 'Background jobs & queues',
+    'description' => 'Pushing and processing background jobs — Job/RetryableJob, the sync and DB-backed drivers, retry/backoff, dead-letter handling, and the queue:work/queue:failed:* commands.',
+  ),
+  'quiote-docs://advanced/scheduling' => 
+  array (
+    'file' => 'advanced/scheduling.md',
+    'path' => 'advanced/scheduling',
+    'title' => 'Scheduled tasks',
+    'description' => 'Cron-expression task scheduling with quioteframework/scheduler — defining a Schedule, dispatching jobs or inline callbacks, overlap prevention, and the schedule:run command.',
+  ),
+  'quiote-docs://advanced/server-sent-events' => 
+  array (
+    'file' => 'advanced/server-sent-events.md',
+    'path' => 'advanced/server-sent-events',
+    'title' => 'Server-Sent Events',
+    'description' => 'Streaming a text/event-stream response from an action with SseStreamingAction and SseEvent, and how streaming differs per worker runtime.',
+  ),
   'quiote-docs://advanced/testing' => 
   array (
     'file' => 'advanced/testing.md',
     'path' => 'advanced/testing',
     'title' => 'Testing your application',
-    'description' => 'Unit-testing actions and services, driving the full pipeline, and process isolation for worker-safe tests.',
+    'description' => 'Unit-testing actions and services, driving the full pipeline with HttpTestCase, and process isolation for worker-safe tests.',
   ),
   'quiote-docs://architecture/actions-and-views' => 
   array (
@@ -88,7 +116,7 @@ return array (
     'file' => 'architecture/deployment.md',
     'path' => 'architecture/deployment',
     'title' => 'Worker mode & deployment',
-    'description' => 'Running Quiote under FrankenPHP worker mode — the worker loop, per-request reset, state-leak hazards, environment variables, and Docker.',
+    'description' => 'Running Quiote under a persistent worker runtime — FrankenPHP, RoadRunner, Swoole or the plain SAPI — the worker loop, per-request reset, what changes off-SAPI, state-leak hazards, and Docker.',
   ),
   'quiote-docs://architecture/error-handling' => 
   array (
@@ -167,6 +195,13 @@ return array (
     'title' => 'Databases',
     'description' => 'The database layer — PDO plus first-class Eloquent, Doctrine, Cycle, and Propulsion adapters.',
   ),
+  'quiote-docs://basics/filesystem' => 
+  array (
+    'file' => 'basics/filesystem.md',
+    'path' => 'basics/filesystem',
+    'title' => 'File storage',
+    'description' => 'The filesystem abstraction — one read/write/list contract, a local disk in core, and S3, GCS and Azure disks in their own packages.',
+  ),
   'quiote-docs://basics/http-client' => 
   array (
     'file' => 'basics/http-client.md',
@@ -220,8 +255,8 @@ return array (
   array (
     'file' => 'basics/sessions.md',
     'path' => 'basics/sessions',
-    'title' => 'Sessions and storage',
-    'description' => 'Session lifecycle, storage backends, cookie flags, and the worker-mode reset that keeps sessions from leaking.',
+    'title' => 'Sessions',
+    'description' => 'The session factory slot, the session bag your code writes through, cookie flags, and the fixation defences that run on every privilege transition.',
   ),
   'quiote-docs://basics/templates-and-rendering' => 
   array (
@@ -235,14 +270,21 @@ return array (
     'file' => 'basics/validation.md',
     'path' => 'basics/validation',
     'title' => 'Input validation',
-    'description' => 'Declaring validators with the fluent PHP builder and reading validated input.',
+    'description' => 'Declaring validators with the fluent PHP builder or #[MapRequest] DTOs, and reading validated input.',
+  ),
+  'quiote-docs://getting-started/changelog' => 
+  array (
+    'file' => 'getting-started/changelog.md',
+    'path' => 'getting-started/changelog',
+    'title' => 'Changelog',
+    'description' => 'Release history for the Quiote framework, newest first.',
   ),
   'quiote-docs://getting-started/cli' => 
   array (
     'file' => 'getting-started/cli.md',
     'path' => 'getting-started/cli',
     'title' => 'The command-line tool',
-    'description' => 'The quiote CLI — scaffold an application, list routes, and inspect the environment.',
+    'description' => 'The quiote CLI — scaffold an application and its modules/actions/jobs, run a dev server, list routes, warm caches, and inspect the environment.',
   ),
   'quiote-docs://getting-started/installation' => 
   array (
@@ -271,6 +313,27 @@ return array (
     'path' => 'getting-started/philosophy',
     'title' => 'Design philosophy',
     'description' => 'Why Quiote is deliberately unopinionated, and where opinionated defaults may live in the future.',
+  ),
+  'quiote-docs://getting-started/upgrading-to-3' => 
+  array (
+    'file' => 'getting-started/upgrading-to-3.md',
+    'path' => 'getting-started/upgrading-to-3',
+    'title' => 'Upgrading from 2.x to 3.0',
+    'description' => 'What changed in the 3.0 session overhaul, what you have to edit, and the one thing most likely to break you silently.',
+  ),
+  'quiote-docs://getting-started/upgrading-to-3-2' => 
+  array (
+    'file' => 'getting-started/upgrading-to-3-2.md',
+    'path' => 'getting-started/upgrading-to-3-2',
+    'title' => 'Upgrading to 3.2',
+    'description' => 'What breaks moving from Quiote 3.0/3.1 to 3.2 — the response, request, config, filesystem and object-store contracts that were quietly wrong.',
+  ),
+  'quiote-docs://getting-started/upgrading-to-4' => 
+  array (
+    'file' => 'getting-started/upgrading-to-4.md',
+    'path' => 'getting-started/upgrading-to-4',
+    'title' => 'Upgrading to 4.0',
+    'description' => '4.0 breaks Context into the collaborators it was standing in for — what changes for application code, and the one thing that fails hard.',
   ),
   'quiote-docs://getting-started/your-first-app' => 
   array (

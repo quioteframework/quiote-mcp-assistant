@@ -65,6 +65,24 @@ The check is **skipped** for `PluginManager::add(new HealthPlugin())` — passin
 | `databaseDriver($alias, $adapterClass)` | A database adapter alias | `DatabaseDriverRegistry` (see [Databases](/basics/databases/)) |
 | `developerExceptionRenderer($factory)` | The developer-mode exception renderer (set-if-absent) | `ExceptionRendererRegistry::setDeveloperRenderer()` |
 
+### Clearing your own state at the end of a request
+
+A plugin holding request-scoped state of its own — a per-request cache, a memo keyed on the current user — needs that state gone before the process serves the next request. Register a clear:
+
+```php
+use Quiote\Plugin\PluginManager;
+
+PluginManager::addRequestEndClear('my per-request cache', function (): void {
+    MyCache::forgetRequestState();
+});
+```
+
+`Quiote\ContextLifecycle` runs these at the end of every request, **after** the framework's own clears, so a plugin cannot displace the identity clears (session bag, user, request) that go first. Each clear is independently guarded: one that throws is logged and stepped over, every other clear still runs, and so does the re-arm afterwards — a broken clear cannot cost the next request its state-flush claim.
+
+Clears are keyed by label, so registering the same label twice replaces rather than clearing twice.
+
+Under classic per-request PHP this is harmless but unnecessary; under a [persistent worker](/architecture/deployment/) it's the difference between per-request state and a leak. See [the request lifecycle](/architecture/request-lifecycle/#the-request-boundary).
+
 ### How a plugin fits in a request
 
 A plugin does **not** run on every request — it runs **once at boot**, and its job is to wire contributions into seams the framework already uses. After that, requests flow through those contributions as if the framework had shipped them itself:

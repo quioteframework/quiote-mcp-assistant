@@ -27,5 +27,5 @@ return array (
   'mcp.transports' => array('stdio', 'http'),
   'mcp.auth_token' => getenv('QUIOTE_ASSISTANT_MCP_TOKEN') ?: null,
   'mcp.server_name' => 'quiote-assistant',
-  'mcp.server_version' => '0.1.0',
+  'mcp.server_version' => '1.1.0',
 );

@@ -33,7 +33,9 @@ The container is small on purpose — it's code Quiote owns rather than a third-
 
 The container is built once when a [context](/architecture/request-lifecycle/) boots, and three kinds of thing end up inside it:
 
-1. **Core framework objects** — the controller, request, routing, storage, user, database manager, and so on. These are built by the older `factories` config (see [Configuration](/architecture/configuration/#factories)), and then **bridged into the container** by `Context::registerCoreServicesInContainer()`, which registers each one under both its role name (e.g. `databaseManager`) and its concrete class. *(The `factories` config itself does not talk to the container — it builds the objects, and the context registers the results. That's the one wiring detail worth remembering.)*
+1. **Core framework objects** — the controller, request, routing, session bag, user, database manager, and so on. These are built by the older `factories` config (see [Configuration](/architecture/configuration/#factories)), and then **bridged into the container** by `Context::registerCoreServicesInContainer()`, which registers each one under its role name (e.g. `databaseManager`), its concrete class, **and the contracts it satisfies** — `ControllerInterface`, `WebResponseInterface`, `WebRequest`, `User`, `ISecurityUser`, `Routing`, `TranslationManager`, `DatabaseManager`. *(The `factories` config itself does not talk to the container — it builds the objects, and the context registers the results. That's the one wiring detail worth remembering.)*
+
+   Binding the base classes matters more than it looks. An application configures a `request` or `user` **subclass**, so with only the concrete class bound, the natural type-hint — `WebRequest`, `User` — was unregistered, and the container autowired a brand-new instance for it: a consumer asking for the request got an empty one carrying none of the request's parameters, headers or body, and one asking for the user got an unauthenticated stranger. Silently, in both cases. If you worked around that by resolving `'request'` by string or by type-hinting your own subclass, those still work and can now be simplified.
 2. **Plugin services** — anything a [plugin](/architecture/plugins/) contributes via `PluginRegistrar::service()` at boot (see [Registering services](#registering-services) below).
 3. **Your application's services** — resolved on demand, either by constructor injection or an explicit lookup.
 
@@ -58,6 +60,51 @@ Every service resolves under one of three scopes, which decide how long its inst
 :::tip[Rule of thumb]
 When unsure, choose **transient** or **request** scope. Reserve **singleton** for objects you've confirmed hold no per-request state.
 :::
+
+### What a class gets when nothing says otherwise
+
+Autowiring picks a default scope by checking, in order:
+
+1. A `#[Service(scope: ...)]` attribute — including the bare `#[Service]` form, whose own default is `SCOPE_TRANSIENT`.
+2. `Quiote\Service\ServiceInterface` — also `SCOPE_TRANSIENT`.
+3. Anything else — `SCOPE_REQUEST`.
+
+**Singleton is never a default; it's only ever a claim you make explicitly**, with `#[Service(scope: Container::SCOPE_SINGLETON)]` or an explicit `set()`. An ordinary, unvetted class autowired for the first time resolves as request-scoped rather than process-lifetime, so nothing gets silently promoted to a singleton that then leaks one request's state into the next under a worker. Since a bare `#[Service]` and `ServiceInterface` agree at transient, adding the attribute to an existing service purely for discoverability doesn't change its lifetime — only writing an explicit `scope:` does.
+
+### A singleton cannot depend on request-scoped state
+
+The container refuses that wiring rather than letting it fail silently later. A singleton is constructed once and keeps whatever it was handed forever, so `reset()` — which drops the container's own reference to a request-scoped instance — cannot reach inside it. Under a worker the singleton then serves request 1's instance to every later request, and for `request`, `user` and `sessionBag` that is a cross-user identity leak.
+
+So autowiring a singleton whose constructor asks for a request-scoped service throws a `ContainerException` at wiring time, naming the parameter, the service, and — for the request and the user — the accessor to inject instead:
+
+| Instead of | A singleton injects | Why |
+|---|---|---|
+| `WebRequest` | `Quiote\Request\RequestState` | `current()` / `publish()`, resolved per call |
+| `SecurityUser` / `User` | `Quiote\User\CurrentUser` | `get()` / `isAuthenticated()`, resolved per call |
+
+Both hold nothing themselves, so there is nothing to go stale — every call reaches through to `Context::getRequest()` / `getUser()` fresh, rather than memoizing what it saw first.
+
+```php
+final class AuditLogger
+{
+    public function __construct(private readonly CurrentUser $currentUser) {}
+
+    public function record(string $action): void
+    {
+        $user = $this->currentUser->get();   // User|ISecurityUser — check before calling SecurityUser-only methods
+        $actor = $user instanceof SecurityUser ? $user->getUsername() : 'anonymous';
+        // ...
+    }
+}
+```
+
+`get()` returns `User|ISecurityUser` — whichever concrete class your app's `user` factory role points at — so code that needs `SecurityUser`- or `RbacSecurityUser`-only methods (`getCredentials()`, `hasRole()`, …) checks with `instanceof` first, the same way it would after `$context->getUser()`.
+
+`isAuthenticated()` is a convenience beyond what the concrete classes offer: it answers `false` for a plain `User` that doesn't implement `ISecurityUser` at all — an app with no security layer configured has no authenticated users, rather than a method that doesn't exist to call. Calling `->isAuthenticated()` directly on `$context->getUser()`'s return value has no such guard; it only compiles at all when the configured `user` class implements `ISecurityUser`.
+
+**Anything built per execution — an action, a view, a validator — is not affected**, because `make()` never caches its result. Those can inject request-scoped collaborators directly, and should: inside an action or a view, the `WebRequest` handed to `execute*()` is current by construction, while a *held* request is a snapshot. Since `WebRequest` is immutable, every mutation produces a new instance — validation alone replaces it several times — so a construction-time snapshot is the *pre-validation* request, and reading a parameter from it bypasses the strict-validation whitelist.
+
+The user is different: it is replaced only at the worker request boundary, never mid-request, so an action or view may inject `SecurityUser` (or `User`, or `ISecurityUser`) and hold it for its own lifetime.
 
 ## Registering services
 
@@ -114,9 +161,9 @@ $c->alias(ClockInterface::class, 'clock');
 `set()` also takes a fourth argument: constructor values the container can't figure out from types alone (scalars, config strings), bound by parameter name:
 
 ```php
-$c->set(SessionStore::class, SessionStore::class, Container::SCOPE_REQUEST, [
-    'table' => 'sessions',
-    'mode'  => 'strict',
+$c->set(AuditLog::class, AuditLog::class, Container::SCOPE_REQUEST, [
+    'table'     => 'audit_entries',
+    'retention' => '90 days',
 ]);
 ```
 
@@ -131,7 +178,7 @@ $c->has(OrderService::class);             // is it registered? (PSR-11)
 ```
 
 - **`get()`** resolves aliases, returns the cached instance for singleton/request scopes (building and caching it the first time), and detects dependency cycles — a circular dependency throws `ContainerException` with the full resolution path so you can see what referred to what.
-- **`make()`** always builds a fresh, never-cached instance. This is the path the framework uses for **actions and views**, which are per-request and must never be reused. You can pass construction-time overrides: `make(FooAction::class, [SomeDependency::class => $value])`.
+- **`make()`** always builds a fresh, never-cached instance. This is the path the framework uses for **actions, views and validators**, which are per-request and must never be reused. You can pass construction-time overrides: `make(FooAction::class, [SomeDependency::class => $value])`. It's generic in the class it's given, so a caller naming a concrete class gets that type back rather than `object`.
 - **`has()`** reports only what has been *explicitly registered* — not everything that *could* be autowired. So a mistyped dependency fails loudly instead of a look-alike being silently constructed.
 
 ## Autowiring
@@ -183,6 +230,8 @@ The four attributes:
 The container refuses a `#[Required]` method named `initialize`, or one that type-hints an action/view init context (`ActionInitContext` / `ViewInitContext`) — those are per-request framework hooks the container doesn't own, so it won't call them.
 :::
 
+This example builds `OrderService` in isolation. For the other end — an action injecting it, calling it, and a view injecting a second service to format the result — see [using a service from an action](/basics/services-and-models/#using-it-from-an-action).
+
 ## The service layer
 
 A "service" in Quiote is just a plain object with injected dependencies — **not a base class you must extend**. Two opt-in markers exist:
@@ -200,6 +249,51 @@ Quiote historically used the word "model" for two unrelated things: long-lived s
 - **Models** — still resolved with `getModel()`. Transient data objects, typically built from a database row.
 
 New code injects **services**; `getModel()` remains for the DTO half.
+
+## Type-hinting a contract instead of a class
+
+Four interfaces let a service depend on a seam rather than an implementation, and all four are resolvable from the container:
+
+| Contract | Implemented by |
+|---|---|
+| `Quiote\ContextInterface` | `Context` (aliased to whatever `core.context_implementation` names) |
+| `Quiote\Controller\ControllerInterface` | `Controller` |
+| `Quiote\Response\WebResponseInterface` | `WebResponse` |
+| `Quiote\Validator\ValidatorInterface` | `Validator` |
+
+```php
+public function __construct(private readonly ContextInterface $context) {}
+```
+
+All of it is additive: no existing signature changed, and the interfaces declare no PHP return types where the implementations declare none, so subclasses stay compatible either way. `Quiote\ContextComponentInterface` types the `initialize()`/`startup()` pair that `WebRequest`, `User`, `Routing` and `DatabaseManager` share.
+
+The configuration repository is injectable too, so a service can declare it rather than reaching for the static facade:
+
+```php
+public function __construct(private readonly \Quiote\Config\ConfigRepository $config) {}
+```
+
+See [Configuration: reading config at runtime](/architecture/configuration/#reading-config-at-runtime).
+
+## Injecting instead of reaching through the context
+
+`Context` has historically been the way to reach framework state: `$context->getModel(…)`, `Context::getInstance('web')`, `$context->getRequest()`. Each of those now has a collaborator behind it, bound in the container, so new code can declare the dependency instead:
+
+| Instead of | Inject | Notes |
+|---|---|---|
+| `$context->getModel(…)` | `Quiote\Model\ModelLocator` | `get()`. `getModel()` still works and delegates here. |
+| `Context::getInstance('web')` | `Quiote\ContextRegistry` | `get()` / `has()` / `names()`. `getInstance()` still works and answers from the shared registry. |
+| `$context->getRequest()` / `setRequest()` | `Quiote\Request\RequestState` | `current()` / `publish()`. Resolves per call — [what a singleton needs](#a-singleton-cannot-depend-on-request-scoped-state). |
+| `$context->getUser()` | `Quiote\User\CurrentUser` | `get()` / `isAuthenticated()`. Likewise. |
+| — | `Quiote\ShutdownSequence` | Reached via `$context->getShutdownSequence()`. |
+| — | `Quiote\Runtime\ContextRequestHandler` | Reached via `$context->getRequestHandler()`. |
+| — | `Quiote\ContextLifecycle` | Reached via `$context->getLifecycle()`. |
+
+**Every accessor on `Context` still exists and still works.** This is about what new code should depend on, not a migration you have to perform: a class that declares `ModelLocator` says what it needs, while one that takes `Context` can reach anything and tells a reader nothing.
+
+The execution helpers — `getActionResolver()`, `getAssetRegistry()`, `getSlotDispatcher()` — resolve through the container too, with their lifetimes declared rather than maintained by hand: the action resolver is a process-lifetime singleton, and the asset registry and slot dispatcher are request-scoped, so the container drops them at the request boundary. All three are injectable by class or by short id (`actionResolver`, `assetRegistry`, `slotDispatcher`).
+
+Two things that used to be private are public API, because a test or an embedding host had no honest way to reach them: `Context::getShutdownSequence()` (with `append()`, `remove()`, `replaceRole()` and `all()`) and `Context::create()`, the named constructor `ContextRegistry` builds through. A subclass named by `core.context_implementation` must keep the constructor signature — that was always true, and is now declared.
 
 ## Reaching the container from a request
 

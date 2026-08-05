@@ -1,6 +1,6 @@
 # Testing your application
 
-> Unit-testing actions and services, driving the full pipeline, and process isolation for worker-safe tests.
+> Unit-testing actions and services, driving the full pipeline with HttpTestCase, and process isolation for worker-safe tests.
 
 Quiote targets long-lived codebases, so it ships a test harness built on **PHPUnit**. The framework's own test suite is the reference: it runs the real container, real config, and (for flow tests) the real middleware pipeline against PSR-7 requests. This page covers the patterns that suite actually uses.
 
@@ -9,7 +9,8 @@ Quiote targets long-lived codebases, so it ships a test harness built on **PHPUn
 Quiote gives you several test entry points. Pick by how much of the request you need to exercise:
 
 - **Testing a service, model, or any plain unit?** Extend [`UnitTestCase`](#the-foundation-unittestcase), resolve it from the context, and call it directly. This is the default — reach for it first.
-- **Testing a full request end to end** (routing, middleware, action, view, response)? [Compose the middleware stack yourself](#testing-the-full-pipeline) against a PSR-7 request. This is the most faithful test of dispatch.
+- **Testing a full request end to end** (routing, middleware, action, view, response)? Extend [`HttpTestCase`](#the-fluent-http-client) and call `$this->get('/orders')`. It drives the real pipeline through the same entry point production traffic uses.
+- **Need to control the exact middleware stack** for that end-to-end test? [Compose it yourself](#testing-the-full-pipeline) against a PSR-7 request.
 - **Testing just one action's view-name outcome?** [`ActionTestCase`](#the-fragment-harness) skips routing and dispatches a single action.
 - **A test that mutates global state** (locale, environment, default context)? Add [process isolation](#process-isolation) so it can't poison sibling tests.
 
@@ -58,9 +59,77 @@ $result  = $service->handle($request);
 
 This — a `UnitTestCase` that resolves the unit under test from the context and exercises it directly — is the dominant pattern in the framework's own suite, and the one to reach for first.
 
+## The fluent HTTP client
+
+To test a whole request — routing, middleware, action, view, response — extend `Quiote\Testing\HttpTestCase`. Unlike `ActionTestCase`, which dispatches a single action in isolation, this drives the request through `Context::handle()`: the same entry point production traffic uses, with the app's real middleware pipeline in place.
+
+```php
+use Quiote\Testing\HttpTestCase;
+
+final class OrdersTest extends HttpTestCase
+{
+    public function testCreatingAnOrderReturnsItsId(): void
+    {
+        $this->post('/orders', ['sku' => 'WIDGET-1', 'qty' => 3])
+            ->assertCreated()
+            ->assertJson(['sku' => 'WIDGET-1']);
+    }
+
+    public function testAnUnknownOrderIs404(): void
+    {
+        $this->get('/orders/99999')->assertNotFound();
+    }
+}
+```
+
+### Making requests
+
+| Method | Body |
+|---|---|
+| `get($uri, $headers = [])` | none |
+| `post` / `put` / `patch` / `delete($uri, $data = [], $headers = [])` | form-encoded (`application/x-www-form-urlencoded`) |
+| `json($method, $uri, $data = [], $headers = [])` | JSON (`application/json`) |
+
+`json()` takes the verb as its first argument, so `$this->json('PUT', '/orders/1', [...])` covers the JSON-body case for any method. In every case an explicit `Content-Type` in `$headers` wins over the default. Set `protected ?string $contextName` on the test class to dispatch through a non-default context.
+
+### Asserting on the response
+
+Each method returns a `Quiote\Testing\Http\TestResponse` wrapping the PSR-7 response. Every `assert*` method returns `$this`, so they chain:
+
+| Assertion | Checks |
+|---|---|
+| `assertStatus($code)` | Exact status code |
+| `assertOk()` / `assertCreated()` / `assertNoContent()` | 200 / 201 / 204 |
+| `assertUnauthorized()` / `assertForbidden()` / `assertNotFound()` | 401 / 403 / 404 |
+| `assertRedirect($uri = null)` | A 3xx, optionally to a specific `Location` |
+| `assertHeader($name, $value = null)` | Header present, optionally with an exact value |
+| `assertSee($needle)` / `assertDontSee($needle)` | Substring in the raw body |
+| `assertJsonEquals($array)` | Decoded body matches exactly |
+| `assertJson($array)` | Decoded body **contains** this as a subset |
+| `assertJsonFragment($array)` | Subset matches the body, *or* any one element of a list body |
+| `assertXml($xml)` | Body matches, canonicalized (so whitespace/attribute order don't matter) |
+| `assertHasXPath($expr)` | XPath expression matches something in the body |
+
+For anything the assertions don't cover, `getPsrResponse()`, `getStatusCode()`, `getHeaderLine()`, `getContent()`, `json()` and `xml()` give you the raw material.
+
+### App-specific assertions
+
+Rather than subclassing `TestResponse`, register your own assertions on it. `TestResponse::extend()` takes a name and a callable that is bound to the response, so `$this` inside it is the `TestResponse`:
+
+```php
+TestResponse::extend('assertApiError', function (string $code): TestResponse {
+    return $this->assertStatus(422)->assertJson(['error' => ['code' => $code]]);
+});
+
+// then, in any test:
+$this->post('/orders', [])->assertApiError('sku_required');
+```
+
+Extensions are process-global (register them in your suite bootstrap or a shared base class), `hasExtension()` tells you whether a name is taken, and `clearExtensions()` resets the registry. Calling a name that is neither a real method nor a registered extension throws with a "did you mean…?" suggestion rather than a bare `BadMethodCall`.
+
 ## Testing the full pipeline
 
-To test a request end to end — routing outcome, middleware, action, view, response — compose the middleware stack yourself against a PSR-7 request. This is how the framework's pipeline tests work and is the most faithful way to test dispatch:
+`HttpTestCase` uses the pipeline the app is actually configured with. When you need to control the middleware stack *exactly* — testing one middleware in isolation, or asserting on ordering — compose the stack yourself against a PSR-7 request. This is how the framework's own pipeline tests work:
 
 ```php
 use PHPUnit\Framework\TestCase;
@@ -103,6 +172,61 @@ Because this runs the actual middleware, it catches wiring problems a unit test 
 :::caution[Exercise the error path too, not just the happy path]
 A custom middleware that reads or modifies the response (adding a header, say) can pass every happy-path assertion and still silently do nothing on an error response, if it's positioned relative to `ErrorHandlingMiddleware` incorrectly — see [Writing custom middleware: ErrorHandlingMiddleware placement](/advanced/custom-middleware/#errorhandlingmiddleware-before-and-after-are-not-symmetric). When you write a flow test for a new middleware that touches the response, add a second case that dispatches to a route that throws and assert your middleware's effect still shows up on the resulting error response — not just the 200 case.
 :::
+
+## Sessions
+
+A test that needs a session installs one on the context. `Context::setSessionBag()` is public API and is the supported route — there is nothing to reach for by reflection:
+
+```php
+use Quiote\Session\{SessionManager, FileSessionPersistence, QuioteSessionBag};
+use Nyholm\Psr7\ServerRequest;
+
+$manager = new SessionManager(new FileSessionPersistence(sys_get_temp_dir() . '/qtest'));
+$request = new ServerRequest('GET', 'http://localhost/');
+$session = $manager->startFromRequest($request);
+
+$context->setSessionBag(new QuioteSessionBag($manager, $session, $request));
+```
+
+For a test that only needs to observe what the code under test wrote, a hand-rolled in-memory `SessionBagInterface` is usually simpler than a real backend — the interface is eight methods (`get`, `has`, `set`, `remove`, `exists`, `getId`, `regenerate`, `destroy`), so a `private array $data` double is a few lines.
+
+Passing `null` drops the bag, and the next `getSessionBag()` rebuilds the lazy default:
+
+```php
+$context->setSessionBag(null);
+
+$bag = $context->getSessionBag();   // Quiote\Session\NullSessionBag
+$bag->set('k', 'v');
+$this->assertNull($bag->get('k'));  // writes are discarded
+$this->assertFalse($bag->exists());
+$this->assertSame('', $bag->getId());
+```
+
+That is the shape a console command, a queue worker or a stateless API runs in, so it is worth asserting against directly if your code has a sessionless path.
+
+`Context::setSessionManager()` is the companion seam: it installs a manager without a configured `session` factory slot, which is what lets a test exercise anything that asks the manager for its cookie name — CSRF validation, most obviously.
+
+## Other seams worth knowing
+
+Four more things that used to need reflection and don't:
+
+| Need | Use |
+|---|---|
+| Install a configuration and restore the previous one | `Config::useRepository(new ConfigRepository([...]))`, which returns the one it replaced |
+| Drop a composed middleware pipeline after reconfiguring `MiddlewareCatalog` | `$context->getRequestHandler()->forgetPipeline()` |
+| Inspect or rearrange context shutdown | `$context->getShutdownSequence()` — `append()`, `remove()`, `replaceRole()`, `all()` |
+| Build a context directly | `Context::create()`, the named constructor `ContextRegistry` uses |
+
+```php
+$previous = Config::useRepository(new ConfigRepository(['core.debug' => true]));
+try {
+    // ... assert behaviour under this configuration
+} finally {
+    Config::useRepository($previous);
+}
+```
+
+`forgetPipeline()` matters because the pipeline is composed once and reused for the worker's lifetime — a test that registers middleware after a request has already been served would otherwise keep running against the stale one.
 
 ## The fragment harness
 
