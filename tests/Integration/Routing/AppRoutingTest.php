@@ -7,6 +7,7 @@ namespace QuioteMcpAssistant\Tests\Integration\Routing;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Quiote\Context;
+use Quiote\Routing\Routing;
 use QuioteMcpAssistant\Routing\AppRouting;
 
 final class AppRoutingTest extends TestCase
@@ -14,7 +15,7 @@ final class AppRoutingTest extends TestCase
     #[Test]
     public function exportRoutesReturnsTheLiveCollectionAndMeta(): void
     {
-        $routing = Context::getInstance('web')->getRouting();
+        $routing = Context::getInstance('web')->getContainer()->get(Routing::class);
         self::assertInstanceOf(AppRouting::class, $routing);
 
         [$routes, $meta] = $routing->exportRoutes();

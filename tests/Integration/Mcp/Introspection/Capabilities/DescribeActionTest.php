@@ -7,6 +7,7 @@ namespace QuioteMcpAssistant\Tests\Integration\Mcp\Introspection\Capabilities;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Quiote\Context;
+use Quiote\Controller\Controller;
 use Quiote\Renderer\Phptal\PhptalRenderer;
 use Quiote\Renderer\Renderer;
 use QuioteMcpAssistant\Mcp\Introspection\Capabilities\DescribeAction;
@@ -72,7 +73,7 @@ final class DescribeActionTest extends TestCase
         self::assertFileDoesNotExist($talFile);
         touch($talFile);
 
-        $controller = Context::getInstance('web')->getController();
+        $controller = Context::getInstance('web')->getContainer()->get(Controller::class);
         $outputTypesProp = new ReflectionProperty($controller, 'outputTypes');
         /** @var array<string, object> $outputTypes */
         $outputTypes = $outputTypesProp->getValue($controller);

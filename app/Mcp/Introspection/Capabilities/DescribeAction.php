@@ -53,7 +53,7 @@ final class DescribeAction
             throw new \InvalidArgumentException('Both "module" and "action" are required.');
         }
 
-        $controller = Context::getInstance($contextName)->getController();
+        $controller = Context::getInstance($contextName)->getContainer()->get(Controller::class);
 
         try {
             $instance = $controller->createActionInstance($module, $action);

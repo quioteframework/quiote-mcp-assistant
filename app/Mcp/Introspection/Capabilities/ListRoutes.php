@@ -5,6 +5,7 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Context;
 use Quiote\Introspection\AppIntrospectionCompiler;
+use Quiote\Routing\Routing;
 
 /**
  * `list_routes` -- every route the target app's bootstrapped Routing
@@ -45,7 +46,7 @@ final class ListRoutes
      */
     public static function run(string $contextName, ?string $module = null, ?string $action = null): array
     {
-        $routing = Context::getInstance($contextName)->getRouting();
+        $routing = Context::getInstance($contextName)->getContainer()->get(Routing::class);
         $collection = $routing->getRouteCollection();
 
         $artifact = (new AppIntrospectionCompiler())->compile($contextName);

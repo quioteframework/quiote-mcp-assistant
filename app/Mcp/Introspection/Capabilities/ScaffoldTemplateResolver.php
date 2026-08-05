@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Context;
+use Quiote\Controller\Controller;
 use Quiote\Renderer\Renderer;
 
 /**
@@ -72,7 +73,7 @@ final class ScaffoldTemplateResolver
     private static function rendererFor(string $contextName, string $format): ?Renderer
     {
         try {
-            return Context::getInstance($contextName)->getController()->getOutputType($format)->getRenderer();
+            return Context::getInstance($contextName)->getContainer()->get(Controller::class)->getOutputType($format)->getRenderer();
         } catch (\Throwable) {
             return null;
         }
