@@ -234,6 +234,11 @@ Note the XML tab: a `routing.*` key needs the `prefix` attribute on the enclosin
 The routing object generates URLs in reverse from a route name and parameters via `gen()`:
 
 ```php
-$url = $this->getContext()->getRouting()->gen('post', ['slug' => 'hello-world']);
+public function __construct(private readonly Routing $routing) {}
+
+// ...
+$url = $this->routing->gen('post', ['slug' => 'hello-world']);
 // resolves to /blog/hello-world
 ```
+
+`Quiote\Routing\Routing` is bound in the container, so any action, view or service that generates URLs declares it in its constructor.

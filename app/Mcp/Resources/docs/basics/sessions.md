@@ -7,7 +7,7 @@ Sessions in Quiote are PSR-7-native. There is no `session_start()`, no `$_SESSIO
 Two things to know before anything else:
 
 - You pick a backend by pointing the **`session` factory slot** at a factory class.
-- Your code reads and writes through the **session bag** on the context, `$context->getSessionBag()`.
+- Your code reads and writes through the **session bag**, `Quiote\Session\SessionBagInterface`, injected from the container.
 
 ## The `session` slot
 
@@ -225,21 +225,23 @@ Because `Secure` defaults to true, sessions won't be set over plain HTTP unless 
 
 ## Reading and writing session data
 
-Application code goes through `SessionBagInterface`, which the [`SessionMiddleware`](/architecture/middleware-reference/#sessionmiddleware) installs on the context for the current request:
+Application code goes through `SessionBagInterface`, which the [`SessionMiddleware`](/architecture/middleware-reference/#sessionmiddleware) binds in the container, request-scoped, for the current request. An action or a view declares it and gets this request's bag:
 
 ```php
+public function __construct(private readonly SessionBagInterface $session) {}
+
 public function executeWrite(WebRequest $rd)
 {
-    $session = $this->getContext()->getSessionBag();
-
-    $session->set('cart/items', $items);           // write
-    $items = $session->get('cart/items', []);      // read, with a default
-    $has   = $session->has('cart/items');          // presence check
-    $session->remove('cart/items');                // delete
+    $this->session->set('cart/items', $items);       // write
+    $items = $this->session->get('cart/items', []);  // read, with a default
+    $has   = $this->session->has('cart/items');      // presence check
+    $this->session->remove('cart/items');            // delete
 
     return 'Success';
 }
 ```
+
+The binding is request-scoped, so a **singleton** cannot hold the bag — the container refuses that wiring rather than letting one request's session serve the next under a worker. Resolve it per call there instead. See [a singleton cannot depend on request-scoped state](/architecture/container/#a-singleton-cannot-depend-on-request-scoped-state).
 
 The full contract:
 
@@ -356,4 +358,4 @@ The rule for your code is simply: **reach the session through the bag.** The fra
 
 ## Testing
 
-`Context::setSessionBag()` is public API and is the supported way to give a test a session. See [Testing](/advanced/testing/#sessions).
+Binding `SessionBagInterface` request-scoped into the container is the supported way to give a test a session (`Context::setSessionBag()` no longer exists as of 4.0). See [Testing](/advanced/testing/#sessions).

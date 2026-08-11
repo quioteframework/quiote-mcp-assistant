@@ -91,7 +91,7 @@ Config is deliberately **not** reset — it is treated as immutable for the work
 - Clears cached singleton model instances and the slot dispatcher.
 - Calls `flushRequestState()` as a **backstop**. Normally this is a no-op: `SessionMiddleware` already claimed the flush on the pipeline unwind, which is the point — by the time `reset()` runs the response has been emitted, and a session write then goes nowhere. The backstop covers requests that never reached the middleware.
 - Walks a shutdown sequence, skipping the user (owned by the flush above, and shutting it down twice would double-write). The database manager **recycles connections** (ping and drop dead ones) rather than fully closing — the manager stays warm to avoid re-init cost.
-- **Nulls the session bag.** A bag surviving the request boundary would serve request *N*'s session to request *N+1* — a cross-user leak. The next request's `SessionMiddleware` installs its own, and until it does `getSessionBag()` answers a `NullSessionBag`.
+- **Nulls the session bag.** A bag surviving the request boundary would serve request *N*'s session to request *N+1* — a cross-user leak. The next request's `SessionMiddleware` binds its own, and until it does `SessionBagInterface` resolves to a `NullSessionBag`.
 - Nulls `user` and `request`.
 - Resets the routing object — explicitly, to prevent route-cache corruption across requests. `Routing` implements `ResetInterface` for exactly this; without it, `Context::reset()`'s `instanceof ResetInterface` guard would silently skip it, leaking compatibility-shim state (input path, initialized flag) across requests.
 - Resets the translation manager — clears the cached locale, timezone, and currency, so a `setLocale()` call made while handling one request (e.g. a language switcher) can't leak into the next request on the same worker.
@@ -294,9 +294,28 @@ composer require quioteframework/worker-roadrunner
 composer require --dev spiral/roadrunner-cli && vendor/bin/rr get-binary
 ```
 
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Runtime\RoadRunner\WorkerRoadRunnerPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Runtime\RoadRunner\WorkerRoadRunnerPlugin
+  enabled: true
+```
+
+#### XML
+
 ```xml
-<!-- Config/plugins.xml -->
-<plugin class="Quiote\Runtime\RoadRunner\WorkerRoadRunnerPlugin"/>
+<!-- Config/plugins.xml — inside <ae:configuration> -->
+<plugin class="Quiote\Runtime\RoadRunner\WorkerRoadRunnerPlugin" />
 ```
 
 `quiote new --runtime=roadrunner` generates the two files it needs; for an existing app, add them by hand:
@@ -341,9 +360,28 @@ composer require quioteframework/worker-swoole
 
 `ext-swoole` is a Composer `suggest`, not a `require`, so the package installs and type-checks without it; the runtime raises an actionable error if you try to serve without the extension. Activate the plugin:
 
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Runtime\Swoole\WorkerSwoolePlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Runtime\Swoole\WorkerSwoolePlugin
+  enabled: true
+```
+
+#### XML
+
 ```xml
-<!-- Config/plugins.xml -->
-<plugin class="Quiote\Runtime\Swoole\WorkerSwoolePlugin"/>
+<!-- Config/plugins.xml — inside <ae:configuration> -->
+<plugin class="Quiote\Runtime\Swoole\WorkerSwoolePlugin" />
 ```
 
 `quiote new --runtime=swoole` generates `swoole.php` in the application root — the same shape as `worker.php` above with `'worker_runtime' => 'swoole'`. Then run `php swoole.php`, or `quiote swoole:serve` / `quiote serve --runtime=swoole`, both of which set `$QUIOTE_WORKER_RUNTIME=swoole` for you.

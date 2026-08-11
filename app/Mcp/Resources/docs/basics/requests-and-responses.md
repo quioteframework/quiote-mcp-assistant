@@ -155,10 +155,13 @@ When in doubt, sync anyway: an unnecessary `$this->getContext()->setRequest($req
 
 ## Shaping the response
 
-Actions usually return a view name and let a [view and template](/basics/templates-and-rendering/) produce the body. When you need to set headers, cookies, a status code, or a redirect directly, reach the response through the controller:
+Actions usually return a view name and let a [view and template](/basics/templates-and-rendering/) produce the body. When you need to set headers, cookies, a status code, or a redirect directly, reach the response through the controller — injected, like anything else in the container:
 
 ```php
-$response = $this->getContext()->getController()->getResponse();
+public function __construct(private readonly Controller $controller) {}
+
+// ...
+$response = $this->controller->getResponse();
 ```
 
 ### Body, status, headers

@@ -2,11 +2,7 @@
 
 > 4.0 breaks Context into the collaborators it was standing in for — what changes for application code, and the one thing that fails hard.
 
-4.0 breaks `Context` into the collaborators it was standing in for. **Nothing here requires application changes** — the accessors still exist and still work — with one exception, which is first because it fails hard.
-
-:::caution[In progress]
-4.0 is under development. This page tracks what has already landed; treat it as the running list rather than a final one.
-:::
+4.0 breaks `Context` into the collaborators it was standing in for, and **deletes the accessors that were standing in for them**. A class that needs the routing, the user, a model or a service says so in its constructor and lets the container hand it over. That is the change to plan for; `Quiote\Rector\Set\ContextDecompositionSetList` mechanically rewrites most of it.
 
 Coming from 3.0 or 3.1? Read [Upgrading to 3.2](/getting-started/upgrading-to-3-2/) first — that release is where the breaking contract changes are.
 
@@ -40,29 +36,68 @@ This generalizes [compiled configuration is data, not code](#compiled-configurat
 
 See [writing your own config handler](/architecture/configuration/#writing-your-own-config-handler) for the two paths and which one applies.
 
-## `Context` is growing seams, not losing accessors
+## BREAKING: `Context`'s accessors are gone
 
-Three collaborators are now separate classes, each bound in the container so new code can constructor-inject it instead of reaching through the context. Every accessor listed below still works.
+`ContextInterface` declares two methods — `getName()` and `getContainer()` — where 3.2 declared seventeen, and `Context` itself is down from 39 public methods to 17. Every accessor that answered "some other service" has been deleted.
 
-| Instead of | Inject |
-|---|---|
-| `$context->getModel(…)` | `Quiote\Model\ModelLocator` |
-| `Context::getInstance('web')` | `Quiote\ContextRegistry` |
-| `$context->getRequest()` / `setRequest()` | `Quiote\Request\RequestState` |
-| `$context->getUser()` | `Quiote\User\CurrentUser` |
+Each row's target is bound in the container under the class name shown, so `__construct(private readonly Routing $routing)` is the migration for most of them.
 
-See [injecting instead of reaching through the context](/architecture/container/#injecting-instead-of-reaching-through-the-context) for the full table, including `ShutdownSequence`, `ContextRequestHandler` and `ContextLifecycle`.
+| Deleted | Inject | Notes |
+|---|---|---|
+| `getRouting()` | `Quiote\Routing\Routing` | rebuilt on demand in a worker, as the accessor did |
+| `getController()` | `Quiote\Controller\Controller` | resolving one before `initialize()` throws, as before |
+| `getRequest()` / `setRequest()` | `Quiote\Request\RequestState` | `current()` / `publish()`; resolves per call — see [which one to inject](#which-one-to-inject-for-the-request-and-the-user) |
+| `getUser()` | `Quiote\User\User`, or `Quiote\User\CurrentUser` | which one depends on the holder's lifetime — same section |
+| `getService($id)` | the service's own class | the container resolves it; there is no by-name lookup left |
+| `getModel(…)` | `Quiote\Model\ModelLocator` | also `$context->getModelLocator()` |
+| `getDatabaseManager()` / `getDatabaseConnection()` | `Quiote\Database\DatabaseManager` | `getDatabase($name)->getConnection()` |
+| `getTranslationManager()` | `Quiote\Translation\TranslationManager` | |
+| `getSessionManager()` / `setSessionManager()` | `Quiote\Session\SessionManager` | `Container::set()` / `unset()` to replace or drop one |
+| `getSessionBag()` / `setSessionBag()` | `Quiote\Session\SessionBagInterface` | defaults to `NullSessionBag` when no session is configured |
+| `getSlotDispatcher()` | `Quiote\Execution\SlotDispatcher` | request-scoped |
+| `getAssetRegistry()` | `Quiote\Asset\AssetRegistry` | request-scoped |
+| `getActionResolver()` | `Quiote\Execution\ActionResolver` | process-lifetime singleton |
+| `getCurrentPsrRequest()` | `Quiote\Request\RequestState` | `current()` |
+| `createInstanceFor()` | `Container::make()` | generic in the class it is given |
+| `getFactoryInfo()` / `setFactoryInfo()` | — | the compiled factories declaration is internal now |
+| `handle()` | `getRequestHandler()->handle()` | see below |
+| `Context::getInstance('web')` | `Quiote\ContextRegistry` | `get()` / `has()` / `names()`; the static still exists |
 
-### `Context::handle()` moved behind a real PSR-15 handler
+What `Context` still answers is its own identity and lifecycle, which were never anyone else's: `getName()`, `getContainer()`, `getInstance()`, `create()`, `initialize()`, `shutdown()`, `reset()`, `resetWorkerState()`, `beginRequest()`, `flushRequestState()`, `getCorrelationId()`, `getRequestHandler()`, `getLifecycle()`, `getShutdownSequence()` and `getModelLocator()`.
 
-`Context::handle()` still works and is what every runtime calls. The per-request work — owning the middleware pipeline, resolving the correlation id, opening the ambient logging scope, arming the request-state flush, emitting `ResponseSendingEvent` — now lives in `Quiote\Runtime\ContextRequestHandler`, which **declares** `RequestHandlerInterface` rather than merely matching its signature.
+Anything that genuinely cannot be wired statically resolves through `getContainer()`.
+
+### Run the Rector set first
+
+`Quiote\Rector\Set\ContextDecompositionSetList` rewrites the common call shapes — the routing, the request, the user, the translation manager, the database manager and `getService()` — and reports every site it declines in a residue file for a human to look at. It ships as a dev dependency.
+
+### The two optional components explain their own absence
+
+`getTranslationManager()` and `getDatabaseManager()` answered null in a context that configures neither, so call sites guarded with `?->`. Both are now bound either way: to the component when the configuration declares one, and otherwise to a factory that throws naming what would have declared it —
+
+```
+Context "web" has no Quiote\Translation\TranslationManager: the factories configuration declares
+no translation_manager. A class depending on it cannot be built in this context.
+```
+
+That is what makes the injection safe. Both classes are instantiable with no required constructor arguments, so a container asked for an unbound one would otherwise have autowired a brand-new, uninitialized instance — a translation manager with no locales, a database manager with no connections — and a `?->` guard rewritten to a property fetch would have sailed straight past it.
+
+For a genuinely *optional* dependency, `Container::tryGet()` answers null rather than throwing. A surviving `?->` at a call site keeps working; the branch it guards has simply become unreachable.
+
+### `Context::handle()` is gone; take the PSR-15 handler instead
+
+```php
+$response = $context->getRequestHandler()->handle($request);
+```
+
+The per-request work — owning the middleware pipeline, resolving the correlation id, opening the ambient logging scope, arming the request-state flush, emitting `ResponseSendingEvent` — now lives in `Quiote\Runtime\ContextRequestHandler`, which **declares** `RequestHandlerInterface` rather than merely matching its signature.
 
 Two internals moved with it:
 
 - **`Context::$psrKernel` is gone.** Reach the pipeline with `$context->getRequestHandler()->pipeline()`, and drop a stale one with `forgetPipeline()` — needed by anything that reconfigures `MiddlewareCatalog` after a request has been served, since the pipeline is composed once and reused.
 - **`Context::$correlationId` is gone**; `getCorrelationId()` reads it from the handler.
 
-See [the request lifecycle](/architecture/request-lifecycle/#2-enter-the-pipeline--contexthandle).
+See [the request lifecycle](/architecture/request-lifecycle/#2-enter-the-pipeline--contextrequesthandler).
 
 ### The execution helpers are container-scoped
 
@@ -116,6 +151,21 @@ A bare `#[Service]` now defaults to `SCOPE_TRANSIENT`, agreeing with `ServiceInt
 
 **Breaking** only if your code carries a bare `#[Service]` attribute and relied on the old singleton default. Nothing in the framework, the bundled packages, or the reference application used the bare form, so no in-tree behaviour changed. See [Services and models](/basics/services-and-models/#marking-a-service).
 
+## Fixed: an omitted registration scope meant process lifetime
+
+`Container::set()`, `setFactory()` and `PluginRegistrar::service()` defaulted their `$scope` argument to `SCOPE_SINGLETON`, while an *unregistered* autowired class defaulted to something else entirely. Registering a class for the sake of an alias therefore changed its lifetime, silently, to the longest one available.
+
+The argument is nullable now, and omitting it asks the binding instead of assuming:
+
+| Bound thing | Scope |
+|---|---|
+| A class name | its own `#[Service(scope: …)]`, transient for a `ServiceInterface`, otherwise request — identical to what autowiring gives it |
+| A factory or closure | request — nobody declared a lifetime, and it is the answer that cannot outlive its inputs |
+| An already-built instance | singleton — one object was handed over, so there is no lifetime to choose, and it is what lets a singleton hold it |
+| A scalar or array | singleton — a bound value, not a service |
+
+**Breaking** for a registration that omitted the scope and relied on getting a singleton: a factory-backed service is now rebuilt each request, and a class-name registration follows what the class declares. Pass `Container::SCOPE_SINGLETON` where you meant it — see [what an omitted scope means](/architecture/container/#what-an-omitted-scope-means) and, for plugin authors, [say what scope your services have](/architecture/plugins/#say-what-scope-your-services-have).
+
 ## Fixed: injecting `WebRequest` or `User` gave you a fresh, empty one
 
 A defect, not a rename. The container bound each core service under its role name and its *concrete* class only. An application configures a `request` or `user` subclass, so the natural type-hint — `WebRequest`, `User` — was unregistered, and the container autowired a brand-new instance for it. A consumer asking for the request got one carrying none of the request's parameters, headers or body; one asking for the user got an unauthenticated stranger. Silently, in both cases.
@@ -130,6 +180,76 @@ If you worked around this — resolving `'request'` by string, or type-hinting t
 
 Identity is now cleared first and unconditionally, in a `finally`, and each remaining component reset is separately guarded. Nothing to do; worth knowing if you run workers.
 
+## Fixed: a JWT login could leave a session authenticated with no roles
+
+`markTokenDerived()` wrote its marker into the session on every stateless authentication, and only an explicit logout cleared it again. `RbacSecurityUser::initialize()` reads that marker to decide whether to rehydrate roles — so once a session had carried it, every later request on that cookie came back authenticated with **zero roles**, and stayed that way until the user logged out and back in. The visible symptom was a user who logs in through an SPA (one bearer-authenticated call) and then hits a 403 on every classic page.
+
+The marker is now scoped to the request that presented the token: it is neither read from nor written to the session. What it protected against is enforced where the token authenticates instead — `AuthenticationManager::apply()` revokes rehydrated roles and credentials before granting the passport's own. The reverse leak is closed too: a token-derived user writes back no authentication flag, credentials or roles, so a bearer call that carries a session cookie leaves that session exactly as it found it.
+
+- **`SecurityUser::TOKEN_DERIVED_NAMESPACE` is removed.** Nothing stores that key. Delete any reference to it; sessions written by an older version simply carry an ignored key.
+- **If you call `markTokenDerived()` yourself**, it is now in-memory state and does not survive the request. Nothing else to change.
+- **If you have an endpoint that turns a token into a browser session**, call `markTokenDerived(false)` before `setAuthenticated(true)` — see [Token identities and the session](/advanced/authentication-authorization/#token-identities-and-the-session).
+
+## New: middleware can clear per-request state at the request boundary
+
+Middleware objects are built once per worker and reused for every request that worker serves — they always were, and that is unchanged. What is new is a supported way to hold state anyway: implement `Symfony\Contracts\Service\ResetInterface`, and `MiddlewarePipeline::resetInstances()` clears it at the end of each request, alongside the session bag and the user.
+
+Worth an audit either way. A middleware that assigns a request value to `$this->` — a resolved user, a tenant, a memoized per-user lookup — serves it to the next request on that worker, possibly a different user's. See [One instance per worker, not per request](/advanced/custom-middleware/#one-instance-per-worker-not-per-request).
+
+## BREAKING: `ValidationService::xmlOnlyValidate()` is now `validateDeclaredOnly()`
+
+A rename. Same signature, same behaviour:
+
+```php
+$service->xmlOnlyValidate($action, $request, $module, $action, $method);      // 3.x
+$service->validateDeclaredOnly($action, $request, $module, $action, $method); // 4.0
+```
+
+The old name was wrong twice over. Validators haven't been XML-only for some time — a declaration can come from the fluent builder or a compiled declaration just as well — and "only" never referred to the declaration format anyway. What this method skips is the *other* kind of validation: the `validate()` / `validate{Method}()` methods an action implements in PHP. `validate()` runs both and reports one combined outcome; `validateDeclaredOnly()` leaves the manual methods to the caller, which is what lets `ValidationMiddleware` tell a client which of the two rejected the request.
+
+Nothing about which validators run, or when, is different. See [Validation](/basics/validation/).
+
+## BREAKING: four deprecated validation methods are gone
+
+| Deleted | Use instead |
+|---|---|
+| `ValidationError::setMessageIndex()` | `setName()` — the deleted method only forwarded to it |
+| `ValidationError::getMessageIndex()` | `getName()` — likewise |
+| `ValidationIncident::hasFieldError($field)` | `getArguments()`, keyed by `ValidationArgument::getHash()` |
+| `ValidationIncident::getFieldErrors($field)` | `getErrors()`, filtered on `ValidationError::hasArgument()` |
+
+Nothing in the framework called any of them.
+
+`ValidationManager::getFieldErrors()` is a **different** method with the same name and is unaffected — it collects `ValidationIncident::getErrors()` and never used the incident-level accessor. It is the first thing an upgrade search turns up, so check which class you are looking at before changing anything. `ValidationIncident::getFields()` also stays: still deprecated, but `ValidationManager` genuinely calls it.
+
+## BREAKING: `ViewResolver` and `ActionExecutionSession` are gone
+
+Two classes in `Quiote\Execution` that nothing constructed:
+
+- **`ViewResolver`** was a deprecated stub that emitted a deprecation warning and forwarded to `Quiote\Execution\ViewNameResolver`. Call `ViewNameResolver` directly — same `resolve()` signature.
+- **`ActionExecutionSession`** was a transitional wrapper never wired into dispatch. If you built one yourself, its two jobs were setting `ExecutionState::$viewModule`/`$viewName` from an `ActionExecutionContext` and reading `$context->content`; do both directly.
+
+## BREAKING: `QuioteException`'s exception-page helpers are gone
+
+Four public statics are deleted from `QuioteException`, and so from every exception that extends it:
+
+| Deleted | What it did |
+|---|---|
+| `QuioteException::getFixedTrace()` | Stack trace with the origin forced into the first frame |
+| `QuioteException::buildParamList()` | Formatted a frame's arguments for display |
+| `QuioteException::highlightFile()` | Syntax-highlighted a file, as HTML lines |
+| `QuioteException::highlightString()` | Syntax-highlighted a code string, as HTML lines |
+
+These were the Agavi error page's rendering machinery, and nothing has called them since that page was replaced. Rendering an exception is the job of `Quiote\Exception\Rendering\ExceptionRenderer` now: the default `SafeRenderer` deliberately reveals nothing — no message, no class name, no trace — and the developer-facing page comes from the opt-in [`quioteframework/whoops`](/plugins/official-packages/#quioteframeworkwhoops) package, which does its own frame and source rendering. `getOriginalCode()` and the `int|string` constructor code are untouched.
+
+**If you call them**, you are rendering your own error page: install `quioteframework/whoops` and register it, or implement `ExceptionRenderer` and register it with `ExceptionRendererRegistry` — both hand you the frames and source these methods assembled by hand. To keep the exact old output, copy the four methods out of a 3.x tag into your own class; they depend on nothing else in `QuioteException`. See [Error handling](/architecture/error-handling/#developer-vs-safe-rendering).
+
+## Fixed: `ViewTestCase`'s response assertions work
+
+Four helpers could never pass as documented, which is why nothing used them. `assertViewRedirectsTo()` compared a string against `getRedirect()`'s `{location, code}` record, `assertViewSetsHeader()` compared a string against the header's list of values, `assertViewSetsCookie()` compared a string against the whole cookie record — lifetime, path and flags included — and `runView()` handed the view the request's *parameter array*, a guaranteed `TypeError` against any view typed for a `WebRequest`.
+
+Each now compares the value its `@param` promises, and `runView()` passes the request itself, the way `ActionExecutor` invokes a view. Existing tests that worked around this by asserting on the raw response keep working. See [Testing: the fragment harness](/advanced/testing/#the-fragment-harness).
+
 ## Two things that were private are now public API
 
 Because a test or an embedding host had no honest way to reach them:
@@ -139,6 +259,8 @@ Because a test or an embedding host had no honest way to reach them:
 
 ## Checklist
 
+- [ ] Run `Quiote\Rector\Set\ContextDecompositionSetList`, then work through its residue file by hand
+- [ ] Search for the deleted `Context` accessors the set doesn't cover — `getModel()`, the session pair, `createInstanceFor()`, `handle()`
 - [ ] Clear the config cache once, or run `cache:warmup`
 - [ ] Check for anything reading a compiled config file, or the `*FactoryInfo` properties on `Context`
 - [ ] If you wrote a custom config handler: update its `execute()`/`executeArray()` to return the declaration, drop any use of `BaseConfigHandler::generate()`, and implement `IDeclarationConfigHandler` if it's registered for `ConfigCache::load()`
@@ -146,4 +268,11 @@ Because a test or an embedding host had no honest way to reach them:
 - [ ] Check singletons type-hinting `WebRequest`, `User` or `ISecurityUser` — those now throw at wiring time; inject `RequestState` / `CurrentUser`
 - [ ] Check anything relying on an unregistered, unannotated class behaving as a singleton — it's now request-scoped by default; register it explicitly if it must survive across requests
 - [ ] Check for a bare `#[Service]` (no `scope:` argument) that relied on the old singleton default
+- [ ] Check every `set()` / `setFactory()` / `service()` call that omitted the scope and meant a singleton
 - [ ] Register a request-end clear for any request-scoped state your own code holds
+- [ ] Search for `TOKEN_DERIVED_NAMESPACE`; drop it
+- [ ] Audit your middleware for request values assigned to instance properties
+- [ ] Rename `xmlOnlyValidate()` calls to `validateDeclaredOnly()`
+- [ ] Search for the four deleted validation methods — `setMessageIndex()`, `getMessageIndex()`, `ValidationIncident::hasFieldError()`, `ValidationIncident::getFieldErrors()` (not `ValidationManager::getFieldErrors()`, which stays)
+- [ ] Search for `ViewResolver` and `ActionExecutionSession`
+- [ ] Search for `getFixedTrace()`, `buildParamList()`, `highlightFile()`, `highlightString()` on any exception

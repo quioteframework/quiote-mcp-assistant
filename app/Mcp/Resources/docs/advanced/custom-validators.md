@@ -142,7 +142,7 @@ return function (ValidatorBuilder $v): void {
 
 ### In XML
 
-The file-based format lives at `Modules/{Module}/Validate/{Action}.xml`. Declare a reusable alias with `<validator_definition>` (default parameters and messages), then apply validators to arguments:
+The file-based format lives at `Modules/{Module}/Validate/{Action}.xml`. Unlike the `Config/*` kinds, a validator file is **XML or a PHP builder file — there is no YAML form**: `ValidatorConfigHandler` parses XML, and `Modules/{Module}/Validate/{Action}.php` (hand-written, or `.generated.php`) is the PHP half, loaded by the default `registerValidators()`. Both add to the same `ValidationManager`, so an action can use either or both. Declare a reusable alias with `<validator_definition>` (default parameters and messages), then apply validators to arguments:
 
 ```xml
 <ae:configurations

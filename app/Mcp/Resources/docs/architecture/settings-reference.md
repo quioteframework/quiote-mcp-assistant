@@ -129,11 +129,13 @@ Every config resolution (settings, factories, output_types, each module's `modul
 | `core.cache-hit-header` | `'X-Quiote-Cache-Hit'` | Header sent (value `1`) on a cache hit; empty value suppresses it. |
 | `core.send-nosniff-header` | `true` | Whether `X-Content-Type-Options: nosniff` is added when absent. |
 | `core.expose_quiote_version` | `ini_get('expose_php')` | If truthy, `X-Powered-By` includes the framework version; otherwise just the name. |
+| `core.stealth_mode` | `false` | When true, framework-identifying headers are stripped off every response — any `X-Quiote-*` header plus the names in `core.stealth_additional_headers`. See [StealthMiddleware](/architecture/middleware-reference/#stealthmiddleware). |
+| `core.stealth_additional_headers` | `['X-Powered-By']` | Header names to strip in addition to the `X-Quiote-*` prefix (array value). Replaces the default list rather than adding to it. |
 | `core.trusted_hosts` | `[]` (no restriction) | Host-header allowlist (array value). Entries wrapped in `/…/` are regexes; others match case-insensitively. A non-matching `Host` is replaced with the first literal entry. |
 | `core.correlation_id.header` | `'X-Correlation-Id'` | Inbound header adopted as the request's correlation id (sanitized, length-capped); if absent, one is generated. Echoed back on the response. See [Logging: Correlation IDs](/architecture/logging/#correlation-ids). |
 | `core.correlation_id.expose` | `true` | Whether the correlation id is echoed back on the response under the same header. |
 
-The response-header keys (`disable-framework-headers`, `cache-hit-header`, `send-nosniff-header`) are read by [DispatchMiddleware](/architecture/middleware-reference/#dispatchmiddleware).
+The response-header keys (`disable-framework-headers`, `cache-hit-header`, `send-nosniff-header`) are read by [DispatchMiddleware](/architecture/middleware-reference/#dispatchmiddleware); the two `stealth` keys by [StealthMiddleware](/architecture/middleware-reference/#stealthmiddleware), which runs outermost and removes headers on the way out rather than suppressing them at the source.
 
 ### Worker runtime
 

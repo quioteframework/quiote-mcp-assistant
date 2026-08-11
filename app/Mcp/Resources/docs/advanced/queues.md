@@ -186,9 +186,29 @@ return [
 
 Then point `queue.default_driver` at `db` (or pass `--driver=db` to `queue:work` explicitly):
 
+#### PHP
+
 ```php
 // Config/settings.php
-'queue.default_driver' => 'db',
+return [
+    'queue.default_driver' => 'db',
+];
+```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+queue.default_driver: db
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="queue.">
+  <setting name="default_driver">db</setting>
+</settings>
 ```
 
 ### Schema

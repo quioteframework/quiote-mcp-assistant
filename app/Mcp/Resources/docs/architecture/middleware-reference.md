@@ -4,7 +4,7 @@
 
 This is the lookup table for Quiote's default pipeline. Every middleware that ships with the framework gets its own section, **in execution order**, covering what it does, the settings it reads, and what those settings affect. Reach for this page when you need the exact key or default for one middleware; for the big-picture "what runs when and why," start with [The middleware pipeline](/architecture/middleware-pipeline/), and for adding your own, [Writing custom middleware](/advanced/custom-middleware/).
 
-Each middleware plays a fixed role in handling a request — the pipeline builds itself at worker start by scanning `#[Middleware]` attributes and ordering them, then every request flows through the resolved list (`ErrorHandling` → `Session` → `Routing` → CSRF/`Security` → `Validation` → `Dispatch` → back out). See [How it fits in a request](/architecture/middleware-pipeline/#how-it-fits-in-a-request) for the full chain.
+Each middleware plays a fixed role in handling a request — the pipeline builds itself at worker start by scanning `#[Middleware]` attributes and ordering them, then every request flows through the resolved list (`Stealth` → `ErrorHandling` → `Session` → `Routing` → CSRF/`Security` → `Validation` → `Dispatch` → back out). See [How it fits in a request](/architecture/middleware-pipeline/#how-it-fits-in-a-request) for the full chain.
 
 ## How middleware is configured
 
@@ -22,33 +22,80 @@ Every middleware defaults to on and can be disabled with a `middleware.*` `<use 
 
 | # | Middleware | Configurable |
 |---|---|---|
-| 1 | ErrorHandlingMiddleware | `core.developer_exceptions` |
-| 2 | TelemetryMiddleware | `telemetry.*` (see [Telemetry](/architecture/telemetry/)) |
-| 3 | SessionMiddleware | — (backend via the `session` role in `factories`) |
-| 4 | TimingMiddleware | `middleware.timing.emit_header` |
-| 5 | TraceMiddleware | `middleware.trace.emit_header`, `middleware.trace.header_name` |
-| 6 | PayloadParsingMiddleware | `QUIOTE_JSON_STRICT` env |
-| 7 | ContentNegotiationMiddleware | — |
-| 8 | RoutingMiddleware | — (uses `routing.http_method_map`) |
-| 9 | OutputTypeSyncMiddleware | — |
-| 10 | CsrfInjectionMiddleware | `core.csrf.*` |
-| 11 | CsrfValidationMiddleware | `core.csrf.*` |
-| 12 | SecurityMiddleware | `core.use_security` |
+| 1 | StealthMiddleware | `core.stealth_mode`, `core.stealth_additional_headers` |
+| 2 | ErrorHandlingMiddleware | `core.developer_exceptions` |
+| 3 | TelemetryMiddleware | `telemetry.*` (see [Telemetry](/architecture/telemetry/)) |
+| 4 | SessionMiddleware | — (backend via the `session` role in `factories`) |
+| 5 | TimingMiddleware | `middleware.timing.emit_header` |
+| 6 | TraceMiddleware | `middleware.trace.emit_header`, `middleware.trace.header_name` |
+| 7 | PayloadParsingMiddleware | `QUIOTE_JSON_STRICT` env |
+| 8 | ContentNegotiationMiddleware | — |
+| 9 | RoutingMiddleware | — (uses `routing.http_method_map`) |
+| 10 | OutputTypeSyncMiddleware | — |
+| 11 | CsrfInjectionMiddleware | `core.csrf.*` |
+| 12 | CsrfValidationMiddleware | `core.csrf.*` |
+| 13 | SecurityMiddleware | `core.use_security` |
 | — | StatelessAuthenticationMiddleware / SessionAuthenticationMiddleware *(optional, `quioteframework/auth`)* | — (no-op until a `FirewallMap` is registered) |
-| 13 | ValidationMiddleware | `core.expose_validation_errors_header`, `validation.*` |
-| 14 | SlotMiddleware | — |
-| 15 | DispatchMiddleware | `core.cache_enabled`, `core.use_cache`, response-header keys |
-| 16 | AssetAggregationMiddleware | — |
-| 17 | FormPopulationMiddleware | — (per-request state) |
-| 18 | ExecutionTimeMiddleware | — |
+| 14 | ValidationMiddleware | `core.expose_validation_errors_header`, `validation.*` |
+| 15 | SlotMiddleware | — |
+| 16 | DispatchMiddleware | `core.cache_enabled`, `core.use_cache`, response-header keys |
+| 17 | AssetAggregationMiddleware | — |
+| 18 | FormPopulationMiddleware | — (per-request state) |
+| 19 | ExecutionTimeMiddleware | — |
 
 All `core.*` and `validation.*`/`routing.*` keys can be written in any config format — see [Configuration](/architecture/configuration/). Examples below use `settings.php`.
 
 ---
 
+## StealthMiddleware
+
+Outermost middleware (phase `bootstrap`, priority 1200). Strips framework-identifying headers off the response on the way out when stealth mode is enabled; a pass-through when it isn't. The request is never touched.
+
+It sits *outside* `ErrorHandlingMiddleware` on purpose: `DispatchMiddleware` is terminal and never calls the next handler, so only middleware ordered outside the error handler sees error and 404 responses — the ones most likely to carry a diagnostic header — as well as successful ones.
+
+| Setting | Default | Effect |
+|---|---|---|
+| `core.stealth_mode` | `false` | Master switch. When `true`, every response header whose name starts with `X-Quiote-` (matched case-insensitively) is removed, along with each name in `core.stealth_additional_headers` that is present. |
+| `core.stealth_additional_headers` | `['X-Powered-By']` | Extra header names to strip, for headers that don't carry the `X-Quiote-` prefix. Setting this **replaces** the default list, so include `X-Powered-By` yourself if you still want it gone. |
+
+That prefix rule covers the framework's own diagnostics without listing them one by one — `X-Quiote-Timing`, `X-Quiote-Trace`, `X-Quiote-Cache-Hit`, `X-Quiote-Validation-Errors` and anything else emitted under the prefix.
+
+#### PHP
+
+```php
+// Config/settings.php
+'core.stealth_mode'               => true,
+'core.stealth_additional_headers' => ['X-Powered-By', 'X-App-Node'],
+```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+core.stealth_mode: true
+core.stealth_additional_headers: [X-Powered-By, X-App-Node]
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings>
+  <setting name="stealth_mode">true</setting>
+  <setting name="stealth_additional_headers">
+    <ae:parameter>X-Powered-By</ae:parameter>
+    <ae:parameter>X-App-Node</ae:parameter>
+  </setting>
+</settings>
+```
+
+Stripping happens at the edge of the pipeline, so the headers are still set and still readable by everything downstream — turning stealth mode on doesn't change what the rest of the stack does, only what leaves the process. Each strip is logged at debug level with the names removed.
+
+A header a web server or proxy adds *after* PHP hands the response over — nginx's or Apache's own `Server` header, for instance — is outside this middleware's reach; strip those in the server config.
+
 ## ErrorHandlingMiddleware
 
-Outermost middleware. Catches any throwable from anything downstream and renders an error response. Runs by default (attribute phase `bootstrap`, priority 1000 — first in the stack).
+Second in the stack (phase `bootstrap`, priority 1000), and the outermost middleware that handles a request rather than the response leaving. Catches any throwable from anything downstream and renders an error response. Runs by default — everything except `StealthMiddleware` sits inside it.
 
 | Setting | Default | Effect |
 |---|---|---|

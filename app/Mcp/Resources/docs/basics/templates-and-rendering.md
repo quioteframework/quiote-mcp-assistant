@@ -90,6 +90,12 @@ The PHP renderer does not auto-escape. Escape output yourself with `htmlspecialc
 
 The variable name is configurable per renderer (`var_name`, default `template`), as are `extract_vars` (extract attributes into individual variables), `slots_var_name`, and `default_extension`.
 
+Three things about that array are worth knowing:
+
+- **It is the attributes array itself, not a wrapper around it.** Reading a key the action never set is an ordinary undefined-key warning — which is how a typo in a template gets found, so the renderer does not soften it. Use `?? ''` where a value is genuinely optional, as the `title` above does.
+- **It is bound by reference**, so a template writing to `$template['x']` writes back to the attributes the view passed in — visible to the layers rendered after it.
+- **`moduleName` and `actionName` are filled in** from the layer being rendered, since the attributes carry neither. An attribute the action set under either name wins; this only fills a gap.
+
 ## Layouts and layers
 
 A view rarely renders a single file. A page is usually a **layout** made of **layers** — for example, an outer HTML shell wrapping an inner content layer. Layouts and their layers are declared in the output type:
@@ -219,7 +225,7 @@ class ChartSuccessView extends View
 }
 ```
 
-Unlike `setAttribute()`, there's no immutability or isolation footgun here — call it and move on, no reassignment needed. `addCss()`/`addJavascript()` reach `Context::getAssetRegistry()` directly rather than going through the view's own attribute holder, so they work identically whether the view is the page's top-level view or something rendered inside a slot: `Context` is the one object every node in the render tree reaches identically. The registry deduplicates at insertion time and preserves first-seen order — two different slots both needing `d3.min.js` render it once, at the position it was first needed.
+Unlike `setAttribute()`, there's no immutability or isolation footgun here — call it and move on, no reassignment needed. `addCss()`/`addJavascript()` reach the request-scoped `Quiote\Asset\AssetRegistry` in the container directly rather than going through the view's own attribute holder, so they work identically whether the view is the page's top-level view or something rendered inside a slot: every node in the render tree resolves the same registry. The registry deduplicates at insertion time and preserves first-seen order — two different slots both needing `d3.min.js` render it once, at the position it was first needed.
 
 Wire the registry into a renderer's `assigns` to read it from a template, the same way the request is exposed as `$rq`:
 

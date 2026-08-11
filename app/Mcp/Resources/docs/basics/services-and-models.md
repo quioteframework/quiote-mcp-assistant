@@ -7,7 +7,7 @@ Quiote is deliberately unopinionated about where your business logic lives (see 
 The short version:
 
 - **Services** hold behaviour — business logic, repositories, finders, integrations. They are resolved through the [DI container](/architecture/container/) with constructor injection.
-- **Models** are data objects — a DTO built from a row, a value object, a domain entity. They are resolved through `getModel()`.
+- **Models** are data objects — a DTO built from a row, a value object, a domain entity. They are resolved through `Quiote\Model\ModelLocator`.
 
 These were historically conflated (Agavi used "model" for both singleton service objects and transient data objects). Quiote keeps them separate on purpose.
 
@@ -76,6 +76,8 @@ Walk through what happens on a request to this action:
 
 That's the whole mechanism — there's no separate "action DI" to learn beyond [autowiring](/architecture/container/#autowiring) itself.
 
+For the same example built one file at a time — including the two cases that *do* need registering (an interface, and a constructor value that isn't a type), how to pick a scope, and how to test the result — see [Dependency injection in practice](/architecture/dependency-injection-in-practice/).
+
 **A view injects exactly the same way.** If the view rendering the result needs its own collaborator — a formatter, a different repository — declare it the same way:
 
 ```php
@@ -102,7 +104,7 @@ Two things worth knowing once this is working:
 - **The action and the service don't share a lifetime.** `Container::make()` never caches, so `PlaceOrderAction` is a brand-new instance on every dispatch regardless of anything. `OrderService` follows *its own* scope — transient by default (see [marking a service](#marking-a-service) below) — so two actions injecting it in the same request may get the same instance or two different ones depending on what you declared. This only matters if the service holds state between calls; a stateless service (the common case) behaves identically either way.
 - **Need a specific implementation, or a literal value, instead of autowiring by type?** `#[Inject('id')]` and `#[Autowire($value)]` work on an action's constructor parameters exactly as they do on a service's — see [autowiring](/architecture/container/#autowiring) for the full resolution order.
 
-**Testing this action** means resolving the same graph a request would, then either exercising the action directly or driving a full request through the pipeline — see [the fluent HTTP client](/advanced/testing/#the-fluent-http-client) and the [`UnitTestCase`](/advanced/testing/#the-foundation-unittestcase) example, which tests `OrderService` itself the same way `getContext()->getService(OrderService::class)` would inside the action.
+**Testing this action** means either constructing it with test doubles — its dependencies are just constructor arguments — or driving a full request through the pipeline. See [the fluent HTTP client](/advanced/testing/#the-fluent-http-client) and the [`UnitTestCase`](/advanced/testing/#the-foundation-unittestcase) example, plus [testing what you wired](/architecture/dependency-injection-in-practice/#10-testing-what-you-wired).
 
 ### Marking a service
 
@@ -142,34 +144,39 @@ A **singleton** service needing the request or the current user can't hold eithe
 Prefer constructor injection. For the cases that don't fit it — a lazy, conditional lookup deep inside a method — the context exposes a locator:
 
 ```php
-$orders = $this->getContext()->getService(OrderService::class);
+$orders = $this->getContext()->getContainer()->get(OrderService::class);
 ```
 
-`getService()` is a thin wrapper over the container's `get()`. It is there for legacy call sites and genuinely conditional lookups, not the default way to reach a collaborator.
+`get()` is typed on the class it is given, so this is as well typed as an injected property. It is there for legacy call sites and genuinely conditional lookups, not the default way to reach a collaborator.
 
 ### The transitional `Service` base class
 
-There is a `Quiote\Service\Service` base class that exposes `getContext()`. It exists only to help a half-migrated service reach `$this->getContext()->getModel('Other')` while its collaborators are being converted to injection. It is scaffolding to shed — the end state is a plain object with injected dependencies and no base class. Don't reach for it in new code; extending it out of habit rebuilds the service-locator pattern under a new name.
+There is a `Quiote\Service\Service` base class that exposes `getContext()`. It exists only to help a half-migrated service reach through the context while its collaborators are being converted to injection. It is scaffolding to shed — the end state is a plain object with injected dependencies and no base class. Don't reach for it in new code; extending it out of habit rebuilds the service-locator pattern under a new name.
 
 For the full container API — `set()`, `make()`, `#[Inject]`, `#[Autowire]`, `#[Required]`, autowiring order — see [The DI container](/architecture/container/).
 
 ## Models
 
-A model is a data object. Where a service *does* things, a model *is* something: a row loaded from the database, a value object, a piece of domain state. You get one with `getModel()`:
+A model is a data object. Where a service *does* things, a model *is* something: a row loaded from the database, a value object, a piece of domain state. You get one from `Quiote\Model\ModelLocator`, which is injectable like any other collaborator:
 
 ```php
-$post = $this->getContext()->getModel('Post', 'Blog');
+public function __construct(private readonly ModelLocator $models) {}
+
+// ...
+$post = $this->models->get('Post', 'Blog');
 ```
+
+A class holding a context can also reach the locator through it — `$this->getContext()->getModelLocator()`.
 
 ### How a model resolves
 
-`getModel($name, $module = null, $parameters = null)` locates the class the same way [modules](/basics/modules/) locate actions and views:
+`get($name, $module = null, $parameters = null)` locates the class the same way [modules](/basics/modules/) locate actions and views:
 
 | Call | Class |
 |---|---|
-| `getModel('Post', 'Blog')` | `App\Modules\Blog\Models\PostModel` |
-| `getModel('Clock')` | `App\Models\ClockModel` |
-| `getModel(\App\Domain\Money::class)` | that class as-is (FQCN passthrough) |
+| `get('Post', 'Blog')` | `App\Modules\Blog\Models\PostModel` |
+| `get('Clock')` | `App\Models\ClockModel` |
+| `get(\App\Domain\Money::class)` | that class as-is (FQCN passthrough) |
 
 A module model lives in the module's `Models/` directory; a global model lives in the app-level `Models/` directory. If you pass a fully-qualified class name, it is used directly.
 
@@ -198,8 +205,8 @@ The abstract `Quiote\Model\Model` base class provides `getContext()` and seriali
 | Question | Use |
 |---|---|
 | Does it hold behaviour / talk to other services? | A **service** with constructor injection |
-| Is it a passive data object built from a row or request? | A **model** via `getModel()` |
+| Is it a passive data object built from a row or request? | A **model** via `ModelLocator::get()` |
 | Does it need to be autowired into other classes? | A **service** (the container only autowires services) |
 | Does it need to be serialized into a session? | A **model** (the base class handles context serialization) |
 
-New code should put logic in services and reserve models for data. The two conventions stay separate so that "where does this happen?" always has a clear answer — behaviour in the container, data in `getModel()`.
+New code should put logic in services and reserve models for data. The two conventions stay separate so that "where does this happen?" always has a clear answer — behaviour in the container, data in the model locator.

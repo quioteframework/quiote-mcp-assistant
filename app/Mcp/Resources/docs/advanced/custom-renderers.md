@@ -77,17 +77,23 @@ Calling `parent::initialize()` (or simply not overriding it) reads the `<paramet
 | `$this->slotsVarName` | `slots_var_name` | `slots` | Key `$slots` is exposed under. |
 | `$this->extractVars` | `extract_vars` | `false` | If true, each attribute becomes its own top-level variable instead of one array under `$varName`. |
 | `$this->defaultExtension` | `default_extension` | class default | Template file extension, **including the dot**. |
-| `$this->assigns` | `assigns` | `[]` | Maps template-variable names to `Context` getters (see below). |
+| `$this->assigns` | `assigns` | `[]` | Maps template-variable names to framework objects (see below). |
 
 `initialize()` throws a `QuioteException` if `extractVars` is false and `varName === slotsVarName` — they would collide in the template namespace.
 
-### Exposing `Context` getters with `assigns`
+### Exposing framework objects with `assigns`
 
-An `assigns` block maps a short template variable name to a `Context` getter. `initialize()` camel-cases the config key into a getter name (`request_data` becomes `getRequestData`) and keeps only the ones that are real, callable `Context` getters; the rest fall through to `moreAssignNames` (renaming `$moreAssigns` keys instead). In `render()`:
+An `assigns` block maps a short template variable name to something the framework already holds. `initialize()` resolves each config key three ways, in order, and keeps the first that answers:
+
+1. a `Context` method — `correlation_id` reaching `getCorrelationId()`;
+2. a container id spelled exactly as written — `request`, `user`, `routing`, `controller` are bound under those names;
+3. that id camel-cased — `translation_manager` reaching `translationManager`, `asset_registry` reaching `assetRegistry`.
+
+A key that matches none of the three falls through to `moreAssignNames` (renaming `$moreAssigns` keys instead). What `initialize()` stores is a resolver per variable, called at render time so the value is this request's:
 
 ```php
-foreach ($this->assigns as $variable => $getter) {
-    $engine->set($variable, $this->getContext()->$getter());
+foreach ($this->assigns as $variable => $resolve) {
+    $engine->set($variable, $resolve());
 }
 ```
 
@@ -96,8 +102,8 @@ foreach ($this->assigns as $variable => $getter) {
 ```php
 // Config/output_types.php — inside the renderer's 'parameters'
 'assigns' => [
-    'routing' => 'ro',   // $ro = $context->getRouting()
-    'request' => 'rq',   // $rq = $context->getRequest()
+    'routing' => 'ro',   // $ro = the Routing
+    'request' => 'rq',   // $rq = this request
 ],
 ```
 
@@ -106,8 +112,8 @@ foreach ($this->assigns as $variable => $getter) {
 ```yaml
 # Config/output_types.yaml — inside the renderer's parameters
 assigns:
-  routing: ro   # $ro = $context->getRouting()
-  request: rq   # $rq = $context->getRequest()
+  routing: ro   # $ro = the Routing
+  request: rq   # $rq = this request
 ```
 
 #### XML
@@ -115,8 +121,8 @@ assigns:
 ```xml
 <!-- Config/output_types.xml — inside the <renderer> -->
 <parameter name="assigns">
-    <parameter name="routing">ro</parameter>   <!-- $ro = $context->getRouting() -->
-    <parameter name="request">rq</parameter>   <!-- $rq = $context->getRequest() -->
+    <parameter name="routing">ro</parameter>   <!-- $ro = the Routing -->
+    <parameter name="request">rq</parameter>   <!-- $rq = this request -->
 </parameter>
 ```
 

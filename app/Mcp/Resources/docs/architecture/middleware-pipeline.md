@@ -8,6 +8,8 @@ This page is the map of that pipeline: what's in it, in what order, what each pi
 
 :::note[The pipeline is built once, then reused]
 `Quiote\Middleware\MiddlewarePipeline` assembles the pipeline **once per worker** (in `doBuild()`) and reuses it for every request that worker serves. Building it means: a scanner reads the ordering attributes, a resolver sorts them, and the result is wrapped in a Relay chain that ends in a terminal sentinel. Nothing in the list is re-sorted per request.
+
+The middleware **objects** are reused along with the list, which is what makes a request value parked in a property visible to the next request that worker serves — see [One instance per worker, not per request](/advanced/custom-middleware/#one-instance-per-worker-not-per-request).
 :::
 
 ## How it fits in a request
@@ -18,7 +20,7 @@ The pipeline **is** the request lifecycle — this is the canonical picture the 
 
 2. **The path a request takes.** A middleware runs its "before" logic, calls the next one, and gets control back to run its "after" logic — so the list runs *outermost-first inward*, then unwinds:
 
-> Worker boots and builds the pipeline → request enters `ErrorHandlingMiddleware` (outermost) → `SessionMiddleware` starts the session → `PayloadParsingMiddleware` parses the body → `RoutingMiddleware` resolves the action → CSRF and `SecurityMiddleware` check the request → `ValidationMiddleware` validates input → `DispatchMiddleware` runs the action and renders the view → the response unwinds back out through each middleware (CSRF token injection, form repopulation, timing) → response is emitted.
+> Worker boots and builds the pipeline → request enters `StealthMiddleware` (outermost) → `ErrorHandlingMiddleware` → `SessionMiddleware` starts the session → `PayloadParsingMiddleware` parses the body → `RoutingMiddleware` resolves the action → CSRF and `SecurityMiddleware` check the request → `ValidationMiddleware` validates input → `DispatchMiddleware` runs the action and renders the view → the response unwinds back out through each middleware (CSRF token injection, form repopulation, timing) → response is emitted.
 
 For the full request lifecycle including the kernel and emitter, see [Request lifecycle](/architecture/request-lifecycle/).
 
@@ -27,7 +29,8 @@ For the full request lifecycle including the kernel and emitter, see [Request li
 Middlewares run outermost-first on the way in, and unwind on the way out. The default order is:
 
 ```
-ErrorHandlingMiddleware       ← outermost; catches everything
+StealthMiddleware             ← outermost; strips identifying headers off the way out
+ErrorHandlingMiddleware       ← catches everything below it
 TelemetryMiddleware           ← root request span + resource metrics (no-op when telemetry off)
 SessionMiddleware
 TimingMiddleware
@@ -77,7 +80,9 @@ Both use explicit `before:`/`after:` anchors rather than `phase`/`priority` tuni
 
 ## What each middleware does
 
-**ErrorHandlingMiddleware** — the outermost wrapper. Catches any `Throwable` from anything below it and renders a response (a developer error page when `core.developer_exceptions` is on, a safe generic page otherwise). It also logs the failure with request context.
+**StealthMiddleware** — the outermost wrapper, and the last code to touch the response. With `core.stealth_mode` on it strips every `X-Quiote-*` header plus the names in `core.stealth_additional_headers` (`X-Powered-By` by default); with it off it is a pass-through. It sits outside the error handler so error and 404 responses are covered too. See the [Middleware reference](/architecture/middleware-reference/#stealthmiddleware).
+
+**ErrorHandlingMiddleware** — the outermost wrapper around request handling. Catches any `Throwable` from anything below it and renders a response (a developer error page when `core.developer_exceptions` is on, a safe generic page otherwise). It also logs the failure with request context.
 
 **TelemetryMiddleware** — when telemetry is enabled, opens the root request span and records the resource metrics (time, CPU, memory); a pass-through no-op when off. See [Telemetry](/architecture/telemetry/).
 

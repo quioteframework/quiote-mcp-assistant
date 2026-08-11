@@ -10,7 +10,7 @@ Like [logging](/architecture/logging/) and [telemetry](/architecture/telemetry/)
 
 The framework never scans for listeners; you register them explicitly against the `Events` registry — from a [plugin's](/architecture/plugins/) `register()` (via `$registrar->listen(...)`) or in the front controller before `Kernel::run()`. Once registered, they stay for the worker's life. The framework then **fires its own lifecycle events at fixed points as a request flows through the pipeline**:
 
-> Kernel boots (`KernelBootEvent`) → request enters the pipeline → `RoutingMiddleware` matches a route (`RequestMatchedEvent`) → the action runs (`ActionBeforeEvent` → `ActionAfterEvent`) → `Context::handle()` returns (`ResponseSendingEvent`) → response emitted.
+> Kernel boots (`KernelBootEvent`) → request enters the pipeline → `RoutingMiddleware` matches a route (`RequestMatchedEvent`) → the action runs (`ActionBeforeEvent` → `ActionAfterEvent`) → `ContextRequestHandler::handle()` returns (`ResponseSendingEvent`) → response emitted.
 
 Each event is a plain readonly object carrying the relevant state; your listener runs synchronously at that point. See [The request lifecycle](/architecture/request-lifecycle/) for the surrounding flow.
 
@@ -42,7 +42,7 @@ All live in `Quiote\Event\Lifecycle`:
 | `RequestMatchedEvent` | `RoutingMiddleware`, after a successful match | `request`, `module`, `action`, `routeName`, `outputType` |
 | `ActionBeforeEvent` | before `ActionExecutor::execute()` | `descriptor` — **stoppable** |
 | `ActionAfterEvent` | after the action runs | `descriptor`, execution result |
-| `ResponseSendingEvent` | `Context::handle()`, just before returning | `request`, `response` |
+| `ResponseSendingEvent` | `ContextRequestHandler::handle()`, just before returning | `request`, `response` |
 
 ```php
 use Quiote\Event\Events;

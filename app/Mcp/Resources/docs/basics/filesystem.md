@@ -104,10 +104,32 @@ Visibility and ACLs, MIME-type detection, streaming reads and writes, copy and m
 
 The only driver in core. Every path is resolved against a fixed root directory, defaulting to `storage/app`:
 
+#### PHP
+
+```php
+// Config/settings.php
+return [
+    'filesystem.default_disk'      => 'local',
+    'filesystem.disks.local.root'  => 'storage/app',
+];
+```
+
+#### YAML
+
 ```yaml
 # Config/settings.yaml
 filesystem.default_disk: local
 filesystem.disks.local.root: storage/app
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="filesystem.">
+  <setting name="default_disk">local</setting>
+  <setting name="disks.local.root">storage/app</setting>
+</settings>
 ```
 
 Two properties worth knowing:

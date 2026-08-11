@@ -41,7 +41,7 @@ final class OrderServiceTest extends UnitTestCase
     public function testPlacingAnOrderPersistsIt(): void
     {
         $context = $this->getContext();
-        $service = $context->getService(\App\Service\OrderService::class);
+        $service = $context->getContainer()->get(\App\Service\OrderService::class);
 
         $order = $service->placeOrder($this->sampleCart());
 
@@ -61,7 +61,7 @@ This — a `UnitTestCase` that resolves the unit under test from the context and
 
 ## The fluent HTTP client
 
-To test a whole request — routing, middleware, action, view, response — extend `Quiote\Testing\HttpTestCase`. Unlike `ActionTestCase`, which dispatches a single action in isolation, this drives the request through `Context::handle()`: the same entry point production traffic uses, with the app's real middleware pipeline in place.
+To test a whole request — routing, middleware, action, view, response — extend `Quiote\Testing\HttpTestCase`. Unlike `ActionTestCase`, which dispatches a single action in isolation, this drives the request through `$context->getRequestHandler()->handle()`: the same entry point production traffic uses, with the app's real middleware pipeline in place.
 
 ```php
 use Quiote\Testing\HttpTestCase;
@@ -144,7 +144,7 @@ final class ShowPostFlowTest extends TestCase
     public function testItRenders(): void
     {
         Quiote::bootstrap('testing', 'web', ['prewarm' => false]);
-        $controller = Quiote::context('web', true)->getController();
+        $controller = Quiote::context('web', true)->getContainer()->get(Controller::class);
 
         $descriptor = new ActionDescriptor('Blog', 'ShowPost', 'GET', 'html', false);
         $stack = [
@@ -175,27 +175,32 @@ A custom middleware that reads or modifies the response (adding a header, say) c
 
 ## Sessions
 
-A test that needs a session installs one on the context. `Context::setSessionBag()` is public API and is the supported route — there is nothing to reach for by reflection:
+A test that needs a session binds one in the context's container, request-scoped, exactly as `SessionMiddleware` does — there is nothing to reach for by reflection:
 
 ```php
-use Quiote\Session\{SessionManager, FileSessionPersistence, QuioteSessionBag};
+use Quiote\DI\Container;
+use Quiote\Session\{SessionManager, SessionBagInterface, FileSessionPersistence, QuioteSessionBag};
 use Nyholm\Psr7\ServerRequest;
 
 $manager = new SessionManager(new FileSessionPersistence(sys_get_temp_dir() . '/qtest'));
 $request = new ServerRequest('GET', 'http://localhost/');
 $session = $manager->startFromRequest($request);
 
-$context->setSessionBag(new QuioteSessionBag($manager, $session, $request));
+$context->getContainer()->set(
+    SessionBagInterface::class,
+    new QuioteSessionBag($manager, $session, $request),
+    Container::SCOPE_REQUEST,
+);
 ```
 
 For a test that only needs to observe what the code under test wrote, a hand-rolled in-memory `SessionBagInterface` is usually simpler than a real backend — the interface is eight methods (`get`, `has`, `set`, `remove`, `exists`, `getId`, `regenerate`, `destroy`), so a `private array $data` double is a few lines.
 
-Passing `null` drops the bag, and the next `getSessionBag()` rebuilds the lazy default:
+`unset()` drops the binding, and the next resolution rebuilds the lazy default:
 
 ```php
-$context->setSessionBag(null);
+$context->getContainer()->unset(SessionBagInterface::class);
 
-$bag = $context->getSessionBag();   // Quiote\Session\NullSessionBag
+$bag = $context->getContainer()->get(SessionBagInterface::class);   // Quiote\Session\NullSessionBag
 $bag->set('k', 'v');
 $this->assertNull($bag->get('k'));  // writes are discarded
 $this->assertFalse($bag->exists());
@@ -204,7 +209,11 @@ $this->assertSame('', $bag->getId());
 
 That is the shape a console command, a queue worker or a stateless API runs in, so it is worth asserting against directly if your code has a sessionless path.
 
-`Context::setSessionManager()` is the companion seam: it installs a manager without a configured `session` factory slot, which is what lets a test exercise anything that asks the manager for its cookie name — CSRF validation, most obviously.
+Binding `SessionManager::class` singleton the same way is the companion seam: it installs a manager without a configured `session` factory slot, which is what lets a test exercise anything that asks the manager for its cookie name — CSRF validation, most obviously (`Context::setSessionManager()` no longer exists as of 4.0).
+
+```php
+$context->getContainer()->set(SessionManager::class, $manager, Container::SCOPE_SINGLETON);
+```
 
 ## Other seams worth knowing
 
@@ -266,8 +275,28 @@ final class SaveUserActionTest extends ActionTestCase
 }
 ```
 
+`ViewTestCase` runs one view and asserts on the response it built. `runView()` invokes the `execute{OutputType}()` method (falling back to `execute()`) with the request, the way `ActionExecutor` does, and the assertions read the resulting `WebResponse`:
+
+```php
+use Quiote\Testing\ViewTestCase;
+
+final class UserSuccessViewTest extends ViewTestCase
+{
+    public function testRedirectsToTheProfile(): void
+    {
+        $this->runView('html');
+
+        $this->assertViewRedirectsTo('/profile');            // the location, not the whole record
+        $this->assertViewSetsHeader('X-Total', '3');
+        $this->assertViewResponseHasHTTPStatus(302);
+    }
+}
+```
+
+`assertViewRedirectsTo()` takes the location, `assertViewSetsHeader()` a header name and one value, and `assertViewSetsCookie()` a cookie name and its value — each compares the value its signature promises, not the internal record it lives in.
+
 :::note[These base classes are transitional]
-`ActionTestCase`, `ViewTestCase`, and `ContainerTestCase` emulate a pre-PSR-7 execution container that has since been removed, and the framework's own suite has largely moved to `UnitTestCase` plus the middleware-composition pattern above. Some assertions on these classes depend on the removed container and will not behave — notably `ViewTestCase`'s response/header/cookie assertions and `ActionTestCase`'s argument assertions unless you called `performValidation()`. `ContainerTestCase` refers to that old *execution* container, **not** the DI container. For new tests, prefer `UnitTestCase` and pipeline composition; use `ActionTestCase` for the view-name-outcome case where it fits.
+`ActionTestCase`, `ViewTestCase`, and `ContainerTestCase` emulate a pre-PSR-7 execution container that has since been removed, and the framework's own suite has largely moved to `UnitTestCase` plus the middleware-composition pattern above. `ActionTestCase`'s argument assertions need a `performValidation()` call first, since arguments are populated by validation. `ContainerTestCase` refers to that old *execution* container, **not** the DI container. For new tests, prefer `UnitTestCase` and pipeline composition; use `ActionTestCase` for the view-name-outcome case where it fits.
 :::
 
 ## Process isolation

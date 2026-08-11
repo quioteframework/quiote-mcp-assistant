@@ -69,7 +69,7 @@ Authentication state and credentials persist in the [session bag](/basics/sessio
 
 Two more hooks exist specifically for the token/service-identity path used by `quioteframework/auth-jwt` and `auth-oauth` (see below):
 
-- **`isTokenDerived()` / `markTokenDerived(bool)`** — a persisted marker meaning "this identity's credentials are re-derived from a token or the database every request, not read back from the session." When set, `initialize()` skips rehydrating stale session credentials/roles, since `AuthenticationManager` re-grants them fresh from the token on every request. It's cleared on `setAuthenticated(false)` and `reset()`.
+- **`isTokenDerived()` / `markTokenDerived(bool)`** — a **request-scoped** marker meaning "this identity was re-derived from the token the caller presented on *this* request, not read back from the session." Nothing about a token-derived user is written to the session: no authentication flag, no credentials, no roles, and no session-id regeneration (attributes still persist). It is never read from the session either — `initialize()` always starts a user out session-derived, and only the request's own authenticator marks it otherwise. See [Token identities and the session](#token-identities-and-the-session) below.
 - **`restoreIdentityFromStorage()`** plus the `CORE_IDENTITY_KEYS` class constant — a hook for worker-mode cold starts, where a fresh `SecurityUser` is built via `restoreContext()` rather than `initialize()`. A subclass opts in by declaring `protected const CORE_IDENTITY_KEYS = ['legacy_user_id', ...];` and calling the hook explicitly; nothing calls it automatically.
 
 ### Subclassing: go through the mutators, or call `markDirty()`
@@ -193,9 +193,11 @@ Here `photomoderator` inherits `member`'s `photos.rate` and `guest`'s `photos.li
 Authentication is your code — verify a password, validate a token, complete an OAuth flow — and then tell the user object the result. A login action, in outline:
 
 ```php
+public function __construct(private readonly RbacSecurityUser $user) {}
+
 public function executeWrite(WebRequest $rd)
 {
-    $user = $this->getContext()->getUser();
+    $user = $this->user;
 
     if ($this->credentialsAreValid($rd)) {
         $user->setAuthenticated(true);      // regenerates the session id
@@ -266,9 +268,33 @@ So a firewall with `[HttpBasicAuthenticator, BearerTokenAuthenticator]` tries Ba
 
 **Applying a successful `Passport`.** On success, `AuthenticationManager::apply()` does three things to the request's `SecurityUser`/`RbacSecurityUser` (nothing happens if the configured `user` factory role isn't a `SecurityUser` at all):
 
-1. If the firewall is `stateless`, calls `markTokenDerived(true)` first, so `SecurityUser::initialize()` doesn't rehydrate stale session credentials this request — the ones about to be granted are fresher.
+1. If the firewall is `stateless`, calls `markTokenDerived(true)` and stores the passport's claims, then **revokes whatever the session rehydrated** — `revokeAllRoles()` on an `RbacSecurityUser`, `clearCredentials()` on any `SecurityUser`. The token is the whole identity here, so the roles and credentials a cookie sent alongside it may have carried are not part of it.
 2. Calls `setAuthenticated(true)`.
 3. Grants every credential the `Passport` carries — as roles via `grantRole()` on a `RbacSecurityUser`, or as flat credentials via `addCredential()` otherwise.
+
+A non-stateless (form-login) firewall skips step 1 entirely: it *adds* to the session identity rather than replacing it.
+
+### Token identities and the session
+
+A `stateless: true` firewall produces an identity that lasts exactly one request, and Quiote keeps it out of the session in both directions:
+
+- **Nothing is read in.** `SecurityUser::initialize()` always starts out session-derived; only the request's own authenticator can mark the user token-derived. A session can therefore never be left in a state where it authenticates but carries no roles.
+- **Nothing is written out.** While the user is token-derived, `setAuthenticated(true)` records no authentication flag and does not regenerate the session id, and `shutdown()` writes back no credentials and no roles. Attributes still persist.
+
+This matters most for the mixed case — an SPA that authenticates with a bearer token while the browser still holds a session cookie for the classic pages. The token request neither inherits that session's roles nor overwrites them, so the next ordinary page load on the same cookie is unaffected.
+
+**Turning a token into a browser session** (a session-establishing endpoint the SPA calls once) is the deliberate exception, and it opts back in explicitly:
+
+```php
+// In the action behind e.g. /auth/session, having already authenticated the JWT.
+// Inject Quiote\User\CurrentUser -- Context no longer exposes getUser() as of 4.0.
+$user = $this->currentUser->get();
+$user->markTokenDerived(false);   // this identity is now the session's
+$user->setAuthenticated(true);    // regenerates the id, writes the auth flag
+$user->grantRole('member');       // persisted on shutdown
+```
+
+Without the `markTokenDerived(false)`, every write above applies to the request and nothing else.
 
 **Two independent flags, not one.** `stateless` and `sessionless` answer different questions, and it's easy to conflate them:
 
@@ -423,6 +449,53 @@ Discovery is a network call at wiring time. The manual-endpoint constructors are
 
 Use this for "log in with Entra ID / Google / Okta" — a browser-based flow where a human authenticates *at the IdP*, not at Quiote.
 
+##### Why hand login to someone else
+
+The short version: **your application never sees the password.** Someone types an email address into your login page, they end up typing their password on `login.microsoftonline.com`, and what comes back to you is a signed statement about who they are.
+
+Concretely, from the user's side:
+
+1. They hit `/login` on your app and enter `ada@contoso.com` — or just click "Sign in with Microsoft" and enter nothing at all.
+2. Your login action calls `OidcClient::buildAuthorizationRequest()` and redirects the browser to Entra ID.
+3. **Everything hard happens over there.** Password, MFA push, hardware key, "this device isn't compliant", "your password expired, change it now", the organization's conditional-access rules. None of it is your code, and none of it is on your servers.
+4. Entra ID sends the browser back to `/callback?code=…&state=…`.
+5. `OidcAuthenticator` verifies the `state`, exchanges the code for tokens over a back channel, validates the ID token's signature, issuer, audience and `nonce`, and hands the verified claims to your `UserProviderInterface::loadByToken()`.
+6. Your provider maps those claims onto a local `SecurityUser` — roles, permissions, whatever your app needs — and from there the rest of this page applies unchanged.
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant Q as Your Quiote app
+    participant I as Entra ID / Google / Okta
+    B->>Q: GET /login
+    Q-->>B: 302 to the IdP (state + PKCE + nonce)
+    B->>I: authenticate (password, MFA, policy)
+    I-->>B: 302 to /callback?code=…&state=…
+    B->>Q: GET /callback
+    Q->>I: exchange code for tokens (back channel)
+    I-->>Q: ID token + access token
+    Q->>Q: verify signature, issuer, audience, nonce
+    Q-->>B: logged in
+```
+
+What you stop owning by doing this:
+
+- **Password storage and everything around it** — hashing, rotation policy, breach lists, "forgot password" email flows, the support ticket when it doesn't arrive.
+- **MFA and step-up.** The IdP already has TOTP, push, WebAuthn and the policy engine deciding when to demand them. Building that yourself is a project, not a feature.
+- **Offboarding.** Someone leaves; IT disables the account in the directory; access to your app dies with it. No "which of the fourteen internal apps still has an account for them?"
+- **The audit trail.** Sign-in logs, risky-sign-in detection and conditional access live in one place the security team already watches.
+- **The procurement conversation.** For anything sold into an enterprise, "does it do SSO with our IdP?" is a checkbox that decides whether the deal happens.
+
+And what you keep: the *authorization* half. The IdP asserts identity; deciding that this identity may approve a purchase order is your app's job, which is what the [user hierarchy](#the-user-hierarchy) and [securing an action](#securing-an-action) are for.
+
+When **not** to reach for this:
+
+| Situation | Use instead |
+|---|---|
+| Consumer app where accounts are yours and there is no external directory | a password form — [`quioteframework/auth`](#quioteframeworkauth--the-foundation), or your own `credentialsAreValid()` |
+| No browser involved — your backend calls another API | `ClientCredentialsClient`, in this same package |
+| Someone else's token arrives at *your* API and you only need to check it | [`auth-jwt`](#quioteframeworkauth-jwt--bearerjwt-resource-server) |
+
 - `OidcClient` wraps `GenericProvider` for the Authorization Code flow. PKCE S256 is **hardcoded**, not app-configurable — OAuth 2.1 mandates it. `buildAuthorizationRequest()` generates the state/PKCE-verifier/nonce and the redirect URL; `exchangeCode()` performs the token exchange.
 - `OidcAuthorizationState` / `OidcAuthorizationRequest` are value objects for the state round-trip; `OidcStateStorage` persists a single in-flight state in the session bag, keyed by its own `state` value, and `consume()` removes it on read (one-time use).
 - `OidcAuthenticator` is the **callback leg only** — `supports()` matches the callback path plus the presence of `code`/`state`. It verifies `state` in constant time, exchanges the code, validates the ID token via an injected `TokenValidatorInterface` (reusing `auth-jwt`'s validator rather than a second JWT stack) plus its own `nonce` check, then resolves identity via `UserProviderInterface::loadByToken()`. It does **not** initiate the flow — building the authorization redirect with `OidcClient::buildAuthorizationRequest()` is left to your own login-initiation action. `at_hash` is deliberately not checked: per OIDC Core §3.1.3.6 it's only *required* when an access token comes back from the authorization endpoint (implicit/hybrid flows), and `OidcAuthenticator` only implements the Authorization Code exchange at the token endpoint, where it's optional — and computing it would need the ID token's signing algorithm, which isn't exposed through `TokenValidatorInterface`'s return shape.
@@ -502,9 +575,76 @@ $response = $httpClient->request('GET', 'https://downstream.example.com/orders',
 
 On the *receiving* end, that downstream service validates the token with `auth-jwt`'s `BearerTokenAuthenticator` — the exact same authenticator a human's bearer token goes through, since `ClientTypeResolverInterface`'s RFC 9068 rule (`sub === client_id`/`azp`) is what tells the two apart. There's no separate "M2M authenticator" — the M2M-vs-human distinction lives entirely in how the token was *obtained* (client credentials vs. a user login), not in how it's *checked*.
 
-### Configuring firewalls with `security.xml`
+### Configuring firewalls in a `security` config
 
-Building `FirewallMap` by hand in a plugin's `register()`, as in the examples above, needs no config file at all and is the simplest path for most apps. If you'd rather declare firewalls in config, `Config\SecurityConfigHandler` parses a `security.xml`/`.php`/`.yaml` file into a canonical array that `Config\FirewallFactory` turns into a live `FirewallMap`:
+Building `FirewallMap` by hand in a plugin's `register()`, as in the examples above, needs no config file at all and is the simplest path for most apps. If you'd rather declare firewalls in config, `Config\SecurityConfigHandler` parses a `security.{php,yaml,xml}` file into a canonical array that `Config\FirewallFactory` turns into a live `FirewallMap`:
+
+#### PHP
+
+```php
+// Config/security.php
+return [
+    'password_hasher_algorithm' => 'argon2id',
+    'providers' => [
+        'app' => [
+            'type'              => 'pdo',
+            'connection'        => 'main',
+            'table'             => 'users',
+            'identifier_column' => 'email',
+            'password_column'   => 'password_hash',
+        ],
+    ],
+    'firewalls' => [
+        'api' => [
+            'pattern'        => '^/api/',
+            'stateless'      => true,
+            'sessionless'    => false,
+            'entry_point'    => 'challenge',
+            'provider'       => null,
+            'authenticators' => ['http_basic'],
+        ],
+        'main' => [
+            'pattern'        => '^/',
+            'stateless'      => false,
+            'sessionless'    => false,
+            'entry_point'    => 'login',
+            'provider'       => 'app',
+            'authenticators' => ['form_login'],
+        ],
+    ],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/security.yaml
+password_hasher_algorithm: argon2id
+providers:
+  app:
+    type: pdo
+    connection: main
+    table: users
+    identifier_column: email
+    password_column: password_hash
+firewalls:
+  api:
+    pattern: "^/api/"
+    stateless: true
+    sessionless: false
+    entry_point: challenge
+    provider: null
+    authenticators: [http_basic]
+  main:
+    pattern: "^/"
+    stateless: false
+    sessionless: false
+    entry_point: login
+    provider: app
+    authenticators: [form_login]
+```
+
+#### XML
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -527,6 +667,10 @@ Building `FirewallMap` by hand in a plugin's `register()`, as in the examples ab
   </ae:configuration>
 </ae:configurations>
 ```
+
+Order matters: firewalls are matched in declaration order, so the catch-all `^/` goes last.
+
+The PHP and YAML forms are the handler's **canonical array** — the same structure `toCanonicalArray()` produces from the XML — so they are written fully resolved. XML fills `stateless`, `sessionless`, `pattern`, `entry-point` and `provider` from attribute defaults when they are absent; `executeArray()` applies no defaults of its own, and the schema requires `pattern`, `stateless`, `sessionless` and `authenticators` on every firewall, plus `type` on every provider. Note the spelling difference the two formats inherit: XML attributes are hyphenated (`identifier-column`, `entry-point`), array keys are underscored (`identifier_column`, `entry_point`).
 
 :::caution[`security.xml` needs a handler entry, and `ref`/`provider` values are not auto-wired]
 `SecurityConfigHandler` is **not** wired into the framework's default `config_handlers.xml` — that file is core-default-only. Your app must add its own `<handler pattern="..." class="Quiote\Security\Auth\Config\SecurityConfigHandler">` entry to its own `config_handlers` config, exactly like any other non-core-default config kind (`RbacDefinitionConfigHandler` uses the identical mechanism, just pre-wired because it's core).
@@ -580,8 +724,10 @@ public function decide(Action $action): SecurityDecision
     if (!$action->isSecure()) {
         return SecurityDecision::Allow;
     }
-    $user = $this->controller->getContext()->getUser();
-    if (!$user->isAuthenticated()) {
+    $user = $this->controller->getContext()->getContainer()->get(User::class);
+    // A plain User carries no authentication or credential capability at all, so a
+    // secure action guarded by one is treated as unauthenticated rather than fatalling.
+    if (!$user instanceof ISecurityUser || !$user->isAuthenticated()) {
         return SecurityDecision::LoginForward;
     }
     $cred = $action->getCredentials();

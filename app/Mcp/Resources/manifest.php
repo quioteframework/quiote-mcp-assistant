@@ -90,6 +90,6187 @@ return array (
     'title' => 'Testing your application',
     'description' => 'Unit-testing actions and services, driving the full pipeline with HttpTestCase, and process isolation for worker-safe tests.',
   ),
+  'quiote-docs://api/action/action' => 
+  array (
+    'file' => 'api/action/action.md',
+    'path' => 'api/action/action',
+    'title' => 'Action',
+    'description' => 'Base class for an application\'s actions: the unit that runs the business logic of one routed request and names the view that presents the result.',
+  ),
+  'quiote-docs://api/action/index' => 
+  array (
+    'file' => 'api/action/index.md',
+    'path' => 'api/action/index',
+    'title' => 'Action',
+    'description' => 'The Quiote\\\\Action namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/action/slot-cacheable-trait' => 
+  array (
+    'file' => 'api/action/slot-cacheable-trait.md',
+    'path' => 'api/action/slot-cacheable-trait',
+    'title' => 'SlotCacheableTrait',
+    'description' => 'Optional trait for actions that want to customize slot caching TTL and tags.',
+  ),
+  'quiote-docs://api/action/traits/cacheable-action-trait' => 
+  array (
+    'file' => 'api/action/traits/cacheable-action-trait.md',
+    'path' => 'api/action/traits/cacheable-action-trait',
+    'title' => 'CacheableActionTrait',
+    'description' => 'Opt-in PSR cache support for actions.',
+  ),
+  'quiote-docs://api/action/traits/index' => 
+  array (
+    'file' => 'api/action/traits/index.md',
+    'path' => 'api/action/traits/index',
+    'title' => 'Traits',
+    'description' => 'The Quiote\\\\Action\\\\Traits namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/asset/asset-registry' => 
+  array (
+    'file' => 'api/asset/asset-registry.md',
+    'path' => 'api/asset/asset-registry',
+    'title' => 'AssetRegistry',
+    'description' => 'Request-scoped collection of page assets (stylesheets, scripts) accumulated while rendering a page and its nested slots.',
+  ),
+  'quiote-docs://api/asset/index' => 
+  array (
+    'file' => 'api/asset/index.md',
+    'path' => 'api/asset/index',
+    'title' => 'Asset',
+    'description' => 'The Quiote\\\\Asset namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/cache/action-view-cache' => 
+  array (
+    'file' => 'api/cache/action-view-cache.md',
+    'path' => 'api/cache/action-view-cache',
+    'title' => 'ActionViewCache',
+    'description' => 'Minimal action+view result cache.',
+  ),
+  'quiote-docs://api/cache/cache-interface' => 
+  array (
+    'file' => 'api/cache/cache-interface.md',
+    'path' => 'api/cache/cache-interface',
+    'title' => 'CacheInterface',
+    'description' => 'Framework-facing cache interface; extends PSR-16 for flexibility.',
+  ),
+  'quiote-docs://api/cache/cache-manager' => 
+  array (
+    'file' => 'api/cache/cache-manager.md',
+    'path' => 'api/cache/cache-manager',
+    'title' => 'CacheManager',
+    'description' => 'The framework\'s process-wide PSR-16 cache, and the namespace versioning that cached output is invalidated through.',
+  ),
+  'quiote-docs://api/cache/file-cache' => 
+  array (
+    'file' => 'api/cache/file-cache.md',
+    'path' => 'api/cache/file-cache',
+    'title' => 'FileCache',
+    'description' => 'Very small file-system PSR-16 cache (not for high concurrency, but fine as default replacement of legacy action/view cache).',
+  ),
+  'quiote-docs://api/cache/index' => 
+  array (
+    'file' => 'api/cache/index.md',
+    'path' => 'api/cache/index',
+    'title' => 'Cache',
+    'description' => 'The Quiote\\\\Cache namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/cache/invalid-cache-key-exception' => 
+  array (
+    'file' => 'api/cache/invalid-cache-key-exception.md',
+    'path' => 'api/cache/invalid-cache-key-exception',
+    'title' => 'InvalidCacheKeyException',
+    'description' => 'Thrown for a cache key PSR-16 does not permit: empty, or containing one of the characters reserved by PSR-16 §1.3 (`{}()/\\\\@:`).',
+  ),
+  'quiote-docs://api/config/apcu-config-cache' => 
+  array (
+    'file' => 'api/config/apcu-config-cache.md',
+    'path' => 'api/config/apcu-config-cache',
+    'title' => 'APCuConfigCache',
+    'description' => 'APCu-based configuration cache with warmup for Kubernetes/FrankenPHP deployments This class provides both warmup functionality and drop-in replacement methods for ConfigCache.',
+  ),
+  'quiote-docs://api/config/base-config-handler' => 
+  array (
+    'file' => 'api/config/base-config-handler.md',
+    'path' => 'api/config/base-config-handler',
+    'title' => 'BaseConfigHandler',
+    'description' => 'BaseConfigHandler allows a developer to create a custom formatted configuration file pertaining to any information they like.',
+  ),
+  'quiote-docs://api/config/caching-config-handler' => 
+  array (
+    'file' => 'api/config/caching-config-handler.md',
+    'path' => 'api/config/caching-config-handler',
+    'title' => 'CachingConfigHandler',
+    'description' => 'CachingConfigHandler compiles the per-action configuration files placed in the \\"cache\\" subfolder of a module directory.',
+  ),
+  'quiote-docs://api/config/compile-config-handler' => 
+  array (
+    'file' => 'api/config/compile-config-handler.md',
+    'path' => 'api/config/compile-config-handler',
+    'title' => 'CompileConfigHandler',
+    'description' => 'CompileConfigHandler gathers multiple files and puts them into a single file.',
+  ),
+  'quiote-docs://api/config/compiled-artifact' => 
+  array (
+    'file' => 'api/config/compiled-artifact.md',
+    'path' => 'api/config/compiled-artifact',
+    'title' => 'CompiledArtifact',
+    'description' => 'Serializes a config handler\'s declaration into the PHP file the on-disk cache holds.',
+  ),
+  'quiote-docs://api/config/compiled-config' => 
+  array (
+    'file' => 'api/config/compiled-config.md',
+    'path' => 'api/config/compiled-config',
+    'title' => 'CompiledConfig',
+    'description' => 'Reads the value of a compiled configuration through whichever cache implementation is active.',
+  ),
+  'quiote-docs://api/config/config' => 
+  array (
+    'file' => 'api/config/config.md',
+    'path' => 'api/config/config',
+    'title' => 'Config',
+    'description' => 'Static facade over the application\'s configuration.',
+  ),
+  'quiote-docs://api/config/config-cache' => 
+  array (
+    'file' => 'api/config/config-cache.md',
+    'path' => 'api/config/config-cache',
+    'title' => 'ConfigCache',
+    'description' => 'ConfigCache allows you to customize the format of a configuration file to make it easy-to-use, yet still provide a PHP formatted result for direct inclusion into your modules.',
+  ),
+  'quiote-docs://api/config/config-handler' => 
+  array (
+    'file' => 'api/config/config-handler.md',
+    'path' => 'api/config/config-handler',
+    'title' => 'ConfigHandler',
+    'description' => 'ConfigHandler allows a developer to create a custom formatted configuration file pertaining to any information they like and still have it auto-generate PHP code.',
+  ),
+  'quiote-docs://api/config/config-handlers-config-handler' => 
+  array (
+    'file' => 'api/config/config-handlers-config-handler.md',
+    'path' => 'api/config/config-handlers-config-handler',
+    'title' => 'ConfigHandlersConfigHandler',
+    'description' => 'ConfigHandlersConfigHandler allows you to specify configuration handlers for the application or on a module level.',
+  ),
+  'quiote-docs://api/config/config-parser' => 
+  array (
+    'file' => 'api/config/config-parser.md',
+    'path' => 'api/config/config-parser',
+    'title' => 'ConfigParser',
+    'description' => 'ConfigParser parses XML files using XmlConfigParser, but returns old-style ConfigValueHolders.',
+  ),
+  'quiote-docs://api/config/config-repository' => 
+  array (
+    'file' => 'api/config/config-repository.md',
+    'path' => 'api/config/config-repository',
+    'title' => 'ConfigRepository',
+    'description' => 'An instance-backed store of configuration directives, with typed accessors that fail loudly when a directive does not hold the shape the caller asked for.',
+  ),
+  'quiote-docs://api/config/config-value-holder' => 
+  array (
+    'file' => 'api/config/config-value-holder.md',
+    'path' => 'api/config/config-value-holder',
+    'title' => 'ConfigValueHolder',
+    'description' => 'ConfigValueHolder is the storage class for the XmlConfigHandler',
+  ),
+  'quiote-docs://api/config/database-config-handler' => 
+  array (
+    'file' => 'api/config/database-config-handler.md',
+    'path' => 'api/config/database-config-handler',
+    'title' => 'DatabaseConfigHandler',
+    'description' => 'DatabaseConfigHandler allows you to setup database connections in a configuration file that will be created for you automatically upon first request.',
+  ),
+  'quiote-docs://api/config/factory-config-handler' => 
+  array (
+    'file' => 'api/config/factory-config-handler.md',
+    'path' => 'api/config/factory-config-handler',
+    'title' => 'FactoryConfigHandler',
+    'description' => 'FactoryConfigHandler allows you to specify which factory implementation the system will use.',
+  ),
+  'quiote-docs://api/config/factory/component-installer' => 
+  array (
+    'file' => 'api/config/factory/component-installer.md',
+    'path' => 'api/config/factory/component-installer',
+    'title' => 'ComponentInstaller',
+    'description' => 'Carries out a FactoryDefinitions operation list.',
+  ),
+  'quiote-docs://api/config/factory/factory-definitions' => 
+  array (
+    'file' => 'api/config/factory/factory-definitions.md',
+    'path' => 'api/config/factory/factory-definitions',
+    'title' => 'FactoryDefinitions',
+    'description' => 'What the compiled `factories` configuration says, as data.',
+  ),
+  'quiote-docs://api/config/factory/index' => 
+  array (
+    'file' => 'api/config/factory/index.md',
+    'path' => 'api/config/factory/index',
+    'title' => 'Factory',
+    'description' => 'The Quiote\\\\Config\\\\Factory namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/config/factory/installed-components' => 
+  array (
+    'file' => 'api/config/factory/installed-components.md',
+    'path' => 'api/config/factory/installed-components',
+    'title' => 'InstalledComponents',
+    'description' => 'The components a ComponentInstaller built, keyed by role.',
+  ),
+  'quiote-docs://api/config/format/abstract-array-format-driver' => 
+  array (
+    'file' => 'api/config/format/abstract-array-format-driver.md',
+    'path' => 'api/config/format/abstract-array-format-driver',
+    'title' => 'AbstractArrayFormatDriver',
+    'description' => 'Shared parent-chain and imports resolution for array-shaped formats (PHP arrays, YAML).',
+  ),
+  'quiote-docs://api/config/format/array-merge-strategy' => 
+  array (
+    'file' => 'api/config/format/array-merge-strategy.md',
+    'path' => 'api/config/format/array-merge-strategy',
+    'title' => 'ArrayMergeStrategy',
+    'description' => 'Format-agnostic parent/child config inheritance (phase 4).',
+  ),
+  'quiote-docs://api/config/format/directive-expander' => 
+  array (
+    'file' => 'api/config/format/directive-expander.md',
+    'path' => 'api/config/format/directive-expander',
+    'title' => 'DirectiveExpander',
+    'description' => 'Applies the same %core.quiote_dir%-style directive expansion and literal-boolean coercion that XML config values get \\"for free\\" via XmlConfigDomElement::getLiteralValue() (which runs Toolkit::literalize() on element text by default) -- to PHP-array and YAML config values, which have no XML text-node equivalent to hook that into.',
+  ),
+  'quiote-docs://api/config/format/format-aware-config-cache' => 
+  array (
+    'file' => 'api/config/format/format-aware-config-cache.md',
+    'path' => 'api/config/format/format-aware-config-cache',
+    'title' => 'FormatAwareConfigCache',
+    'description' => 'Extension-agnostic sibling of ConfigCache::checkConfig(): given a base path with NO extension, resolves whichever of .php/.yaml/.yml/.xml actually exists (via FormatDriverRegistry::locate(), priority PHP > YAML > XML), compiles it through the given handler\'s array contract, and reuses ConfigCache\'s own cache-naming/staleness/write primitives so the compiled artifact is indistinguishable from one ConfigCache produced.',
+  ),
+  'quiote-docs://api/config/format/format-driver-interface' => 
+  array (
+    'file' => 'api/config/format/format-driver-interface.md',
+    'path' => 'api/config/format/format-driver-interface',
+    'title' => 'FormatDriverInterface',
+    'description' => 'A FormatDriver turns one config source file, in whatever format it understands, into a normalized PHP array -- the same canonical shape a given config handler\'s array-based execute() method consumes regardless of which driver produced it (see Quiote\\\\Config\\\\IArrayConfigHandler).',
+  ),
+  'quiote-docs://api/config/format/format-driver-registry' => 
+  array (
+    'file' => 'api/config/format/format-driver-registry.md',
+    'path' => 'api/config/format/format-driver-registry',
+    'title' => 'FormatDriverRegistry',
+    'description' => 'Maps a config file\'s extension to the FormatDriver that understands it, and is itself the thing `parent`/`imports` references are resolved through -- so a PHP-array config can have a YAML parent, a YAML config can import an XML-derived one, etc.',
+  ),
+  'quiote-docs://api/config/format/index' => 
+  array (
+    'file' => 'api/config/format/index.md',
+    'path' => 'api/config/format/index',
+    'title' => 'Format',
+    'description' => 'The Quiote\\\\Config\\\\Format namespace — 13 documented types.',
+  ),
+  'quiote-docs://api/config/format/php-array-format-driver' => 
+  array (
+    'file' => 'api/config/format/php-array-format-driver.md',
+    'path' => 'api/config/format/php-array-format-driver',
+    'title' => 'PhpArrayFormatDriver',
+    'description' => 'Loads a config source that is itself a plain PHP file returning an array -- the recommended primary format (zero parsing cost beyond opcache, full IDE support, native `parent`/`imports` path resolution via AbstractArrayFormatDriver).',
+  ),
+  'quiote-docs://api/config/format/php/index' => 
+  array (
+    'file' => 'api/config/format/php/index.md',
+    'path' => 'api/config/format/php/index',
+    'title' => 'Php',
+    'description' => 'The Quiote\\\\Config\\\\Format\\\\Php namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/config/format/php/php-array-position-parser' => 
+  array (
+    'file' => 'api/config/format/php/php-array-position-parser.md',
+    'path' => 'api/config/format/php/php-array-position-parser',
+    'title' => 'PhpArrayPositionParser',
+    'description' => 'Best-effort key-path -> {file, line} index for a PHP-array config file\'s own `return [...]` literal.',
+  ),
+  'quiote-docs://api/config/format/position-aware-format-driver-interface' => 
+  array (
+    'file' => 'api/config/format/position-aware-format-driver-interface.md',
+    'path' => 'api/config/format/position-aware-format-driver-interface',
+    'title' => 'PositionAwareFormatDriverInterface',
+    'description' => 'Opt-in \\"locating\\" parse mode (see VSCODE_EXTENSION_INTEGRATION.md\'s config validator work item 3): same canonical array a plain load() would produce, plus a key-path -> {file, line} index for whichever keys the driver could trace back to a source position.',
+  ),
+  'quiote-docs://api/config/format/xml-format-driver' => 
+  array (
+    'file' => 'api/config/format/xml-format-driver.md',
+    'path' => 'api/config/format/xml-format-driver',
+    'title' => 'XmlFormatDriver',
+    'description' => 'Wraps the existing XmlConfigParser pipeline (XInclude, XSD validation, XSL normalization, parent-chain merge -- all untouched, see phase 1\'s \\"what this is NOT\\") and converts its output to the canonical array via the bound handler\'s toCanonicalArray().',
+  ),
+  'quiote-docs://api/config/format/xml/element-position-index' => 
+  array (
+    'file' => 'api/config/format/xml/element-position-index.md',
+    'path' => 'api/config/format/xml/element-position-index',
+    'title' => 'ElementPositionIndex',
+    'description' => 'Maps a merged (post-importNode()) DOMElement to the {file, line} it was cloned from, built incrementally by XmlConfigParser::run() while it merges per-file documents into the final result.',
+  ),
+  'quiote-docs://api/config/format/xml/index' => 
+  array (
+    'file' => 'api/config/format/xml/index.md',
+    'path' => 'api/config/format/xml/index',
+    'title' => 'Xml',
+    'description' => 'The Quiote\\\\Config\\\\Format\\\\Xml namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/config/format/yaml-format-driver' => 
+  array (
+    'file' => 'api/config/format/yaml-format-driver.md',
+    'path' => 'api/config/format/yaml-format-driver',
+    'title' => 'YamlFormatDriver',
+    'description' => 'Loads a config source written in YAML, via symfony/yaml.',
+  ),
+  'quiote-docs://api/config/format/yaml/index' => 
+  array (
+    'file' => 'api/config/format/yaml/index.md',
+    'path' => 'api/config/format/yaml/index',
+    'title' => 'Yaml',
+    'description' => 'The Quiote\\\\Config\\\\Format\\\\Yaml namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/config/format/yaml/yaml-position-parser' => 
+  array (
+    'file' => 'api/config/format/yaml/yaml-position-parser.md',
+    'path' => 'api/config/format/yaml/yaml-position-parser',
+    'title' => 'YamlPositionParser',
+    'description' => 'Best-effort key-path -> {file, line} index for a YAML config file, built by a block-style line scanner rather than a full YAML implementation.',
+  ),
+  'quiote-docs://api/config/i-array-config-handler' => 
+  array (
+    'file' => 'api/config/i-array-config-handler.md',
+    'path' => 'api/config/i-array-config-handler',
+    'title' => 'IArrayConfigHandler',
+    'description' => 'A ConfigHandler on the array-based contract: its compilation logic (executeArray()) consumes a plain, canonical array instead of walking a DOM, so the same logic works whether that array came from XML, a PHP-array file, or YAML.',
+  ),
+  'quiote-docs://api/config/i-declaration-config-handler' => 
+  array (
+    'file' => 'api/config/i-declaration-config-handler.md',
+    'path' => 'api/config/i-declaration-config-handler',
+    'title' => 'IDeclarationConfigHandler',
+    'description' => 'A config handler whose compiled artifact is a declaration -- data -- plus the code that applies that data to runtime state.',
+  ),
+  'quiote-docs://api/config/i-legacy-config-handler' => 
+  array (
+    'file' => 'api/config/i-legacy-config-handler.md',
+    'path' => 'api/config/i-legacy-config-handler',
+    'title' => 'ILegacyConfigHandler',
+    'description' => 'ILegacyConfigHandler is the interface that all old-style config handlers which deal with ConfigValueHolders and parse configs themselves implement.',
+  ),
+  'quiote-docs://api/config/i-position-aware-config-handler' => 
+  array (
+    'file' => 'api/config/i-position-aware-config-handler.md',
+    'path' => 'api/config/i-position-aware-config-handler',
+    'title' => 'IPositionAwareConfigHandler',
+    'description' => 'Opt-in, like ISchemaAwareConfigHandler: a handler implements this once it knows how to correlate its own canonical-array key paths back to the elements it read them from.',
+  ),
+  'quiote-docs://api/config/i-schema-aware-config-handler' => 
+  array (
+    'file' => 'api/config/i-schema-aware-config-handler.md',
+    'path' => 'api/config/i-schema-aware-config-handler',
+    'title' => 'ISchemaAwareConfigHandler',
+    'description' => 'Opt-in: a handler implements this once its canonical array shape has a meaningful, hand-authored structural schema.',
+  ),
+  'quiote-docs://api/config/i-xml-config-handler' => 
+  array (
+    'file' => 'api/config/i-xml-config-handler.md',
+    'path' => 'api/config/i-xml-config-handler',
+    'title' => 'IXmlConfigHandler',
+    'description' => 'IXmlConfigHandler is the interface that config handlers may implement to indicate that they wish to process a DOMDocument directly.',
+  ),
+  'quiote-docs://api/config/index' => 
+  array (
+    'file' => 'api/config/index.md',
+    'path' => 'api/config/index',
+    'title' => 'Config',
+    'description' => 'The Quiote\\\\Config namespace — 67 documented types.',
+  ),
+  'quiote-docs://api/config/middleware-config-handler' => 
+  array (
+    'file' => 'api/config/middleware-config-handler.md',
+    'path' => 'api/config/middleware-config-handler',
+    'title' => 'MiddlewareConfigHandler',
+    'description' => 'MiddlewareConfigHandler reads a `middleware.{xml,php,yaml,yml}` file -- a flat list of `<use>` entries that register app/plugin middleware and/or override the placement or enabled state of any middleware (framework or app) known to `#[Quiote\\\\Middleware\\\\Attribute\\\\Middleware]` scanning.',
+  ),
+  'quiote-docs://api/config/module-config-handler' => 
+  array (
+    'file' => 'api/config/module-config-handler.md',
+    'path' => 'api/config/module-config-handler',
+    'title' => 'ModuleConfigHandler',
+    'description' => 'ModuleConfigHandler reads module configuration files to determine the status of a module.',
+  ),
+  'quiote-docs://api/config/output-type-config-handler' => 
+  array (
+    'file' => 'api/config/output-type-config-handler.md',
+    'path' => 'api/config/output-type-config-handler',
+    'title' => 'OutputTypeConfigHandler',
+    'description' => 'OutputTypeConfigHandler handles output type configuration files.',
+  ),
+  'quiote-docs://api/config/plugin-config-handler' => 
+  array (
+    'file' => 'api/config/plugin-config-handler.md',
+    'path' => 'api/config/plugin-config-handler',
+    'title' => 'PluginConfigHandler',
+    'description' => 'PluginConfigHandler reads a `plugins.{xml,php,yaml,yml}` file -- the correct, documented way to register plugins -- a flat, ordered enable/disable list of plugin classes -- and appends the enabled ones to the `plugins` config key that PluginManager::bootFromConfig() already reads.',
+  ),
+  'quiote-docs://api/config/rbac-definition-config-handler' => 
+  array (
+    'file' => 'api/config/rbac-definition-config-handler.md',
+    'path' => 'api/config/rbac-definition-config-handler',
+    'title' => 'RbacDefinitionConfigHandler',
+    'description' => 'RbacDefinitionConfigHandler handles RBAC role and permission definition files.',
+  ),
+  'quiote-docs://api/config/return-array-config-handler' => 
+  array (
+    'file' => 'api/config/return-array-config-handler.md',
+    'path' => 'api/config/return-array-config-handler',
+    'title' => 'ReturnArrayConfigHandler',
+    'description' => 'ReturnArrayConfigHandler allows you to retrieve the contents of a config file as an array.',
+  ),
+  'quiote-docs://api/config/schema/diagnostic' => 
+  array (
+    'file' => 'api/config/schema/diagnostic.md',
+    'path' => 'api/config/schema/diagnostic',
+    'title' => 'Diagnostic',
+    'description' => 'One structural-shape violation found by SchemaValidator.',
+  ),
+  'quiote-docs://api/config/schema/index' => 
+  array (
+    'file' => 'api/config/schema/index.md',
+    'path' => 'api/config/schema/index',
+    'title' => 'Schema',
+    'description' => 'The Quiote\\\\Config\\\\Schema namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/config/schema/rule' => 
+  array (
+    'file' => 'api/config/schema/rule.md',
+    'path' => 'api/config/schema/rule',
+    'title' => 'Rule',
+    'description' => 'A declarative description of one canonical-array shape, structural only (allowed keys, enums-of-kind, nesting) -- not required-ness that depends on runtime state or document processing order, which stays a Layer-2 semantic check in the handler\'s own executeArray()/toCanonicalArray().',
+  ),
+  'quiote-docs://api/config/schema/schema-type' => 
+  array (
+    'file' => 'api/config/schema/schema-type.md',
+    'path' => 'api/config/schema/schema-type',
+    'title' => 'SchemaType',
+    'description' => 'The kinds of shape a Rule can describe.',
+  ),
+  'quiote-docs://api/config/schema/schema-validator' => 
+  array (
+    'file' => 'api/config/schema/schema-validator.md',
+    'path' => 'api/config/schema/schema-validator',
+    'title' => 'SchemaValidator',
+    'description' => 'Validates a canonical config array against a declarative Rule shape.',
+  ),
+  'quiote-docs://api/config/schema/severity' => 
+  array (
+    'file' => 'api/config/schema/severity.md',
+    'path' => 'api/config/schema/severity',
+    'title' => 'Severity',
+    'description' => 'The Severity enum in Quiote\\\\Config\\\\Schema.',
+  ),
+  'quiote-docs://api/config/setting-config-handler' => 
+  array (
+    'file' => 'api/config/setting-config-handler.md',
+    'path' => 'api/config/setting-config-handler',
+    'title' => 'SettingConfigHandler',
+    'description' => 'SettingConfigHandler handles the settings.xml file.',
+  ),
+  'quiote-docs://api/config/test-suites-config-handler' => 
+  array (
+    'file' => 'api/config/test-suites-config-handler.md',
+    'path' => 'api/config/test-suites-config-handler',
+    'title' => 'TestSuitesConfigHandler',
+    'description' => 'TestSuitesConfigHandler reads the testsuites configuration files to determine the available suites and their tests.',
+  ),
+  'quiote-docs://api/config/translation-config-handler' => 
+  array (
+    'file' => 'api/config/translation-config-handler.md',
+    'path' => 'api/config/translation-config-handler',
+    'title' => 'TranslationConfigHandler',
+    'description' => 'TranslationConfigHandler allows you to define translator implementations for different domains.',
+  ),
+  'quiote-docs://api/config/util/dom/index' => 
+  array (
+    'file' => 'api/config/util/dom/index.md',
+    'path' => 'api/config/util/dom/index',
+    'title' => 'DOM',
+    'description' => 'The Quiote\\\\Config\\\\Util\\\\DOM namespace — 13 documented types.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-attr' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-attr.md',
+    'path' => 'api/config/util/dom/xml-config-dom-attr',
+    'title' => 'XmlConfigDomAttr',
+    'description' => 'Extended DOMAttr class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-character-data' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-character-data.md',
+    'path' => 'api/config/util/dom/xml-config-dom-character-data',
+    'title' => 'XmlConfigDomCharacterData',
+    'description' => 'Extended DOMCharacterData class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-comment' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-comment.md',
+    'path' => 'api/config/util/dom/xml-config-dom-comment',
+    'title' => 'XmlConfigDomComment',
+    'description' => 'Extended DOMComment class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-document' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-document.md',
+    'path' => 'api/config/util/dom/xml-config-dom-document',
+    'title' => 'XmlConfigDomDocument',
+    'description' => 'Extended DOMDocument class with several convenience enhancements.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-document-fragment' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-document-fragment.md',
+    'path' => 'api/config/util/dom/xml-config-dom-document-fragment',
+    'title' => 'XmlConfigDomDocumentFragment',
+    'description' => 'Extended DOMDocumentFragment class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-document-type' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-document-type.md',
+    'path' => 'api/config/util/dom/xml-config-dom-document-type',
+    'title' => 'XmlConfigDomDocumentType',
+    'description' => 'Extended DOMDocumentType class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-element' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-element.md',
+    'path' => 'api/config/util/dom/xml-config-dom-element',
+    'title' => 'XmlConfigDomElement',
+    'description' => 'Extended DOMElement class with several convenience enhancements.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-entity' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-entity.md',
+    'path' => 'api/config/util/dom/xml-config-dom-entity',
+    'title' => 'XmlConfigDomEntity',
+    'description' => 'Extended DOMEntity class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-entity-reference' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-entity-reference.md',
+    'path' => 'api/config/util/dom/xml-config-dom-entity-reference',
+    'title' => 'XmlConfigDomEntityReference',
+    'description' => 'Extended DOMEntityReference class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-node' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-node.md',
+    'path' => 'api/config/util/dom/xml-config-dom-node',
+    'title' => 'XmlConfigDomNode',
+    'description' => 'Extended DOMNode class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-notation' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-notation.md',
+    'path' => 'api/config/util/dom/xml-config-dom-notation',
+    'title' => 'XmlConfigDomNotation',
+    'description' => 'Extended DOMNotation class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-processing-instruction' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-processing-instruction.md',
+    'path' => 'api/config/util/dom/xml-config-dom-processing-instruction',
+    'title' => 'XmlConfigDomProcessingInstruction',
+    'description' => 'Extended DOMProcessingInstruction class.',
+  ),
+  'quiote-docs://api/config/util/dom/xml-config-dom-text' => 
+  array (
+    'file' => 'api/config/util/dom/xml-config-dom-text.md',
+    'path' => 'api/config/util/dom/xml-config-dom-text',
+    'title' => 'XmlConfigDomText',
+    'description' => 'Extended DOMText class.',
+  ),
+  'quiote-docs://api/config/util/index' => 
+  array (
+    'file' => 'api/config/util/index.md',
+    'path' => 'api/config/util/index',
+    'title' => 'Util',
+    'description' => 'The Quiote\\\\Config\\\\Util namespace — 13 documented types.',
+  ),
+  'quiote-docs://api/config/validator-config-handler' => 
+  array (
+    'file' => 'api/config/validator-config-handler.md',
+    'path' => 'api/config/validator-config-handler',
+    'title' => 'ValidatorConfigHandler',
+    'description' => 'Compiles a validators.xml document into a compiled Quiote configuration file: a declaration of the validators to build, which ValidatorDeclarationApplier registers onto a validation manager.',
+  ),
+  'quiote-docs://api/config/xml-config-handler' => 
+  array (
+    'file' => 'api/config/xml-config-handler.md',
+    'path' => 'api/config/xml-config-handler',
+    'title' => 'XmlConfigHandler',
+    'description' => 'XmlConfigHandler is the base config handler that deals with DOMDocuments',
+  ),
+  'quiote-docs://api/config/xml-config-parser' => 
+  array (
+    'file' => 'api/config/xml-config-parser.md',
+    'path' => 'api/config/xml-config-parser',
+    'title' => 'XmlConfigParser',
+    'description' => 'XmlConfigParser handles both Quiote and foreign XML configuration files, deals with XIncludes, XSL transformations and validation as well as filtering and ordering of configuration blocks and parent file resolution and parsing.',
+  ),
+  'quiote-docs://api/console/app-dir-resolver' => 
+  array (
+    'file' => 'api/console/app-dir-resolver.md',
+    'path' => 'api/console/app-dir-resolver',
+    'title' => 'AppDirResolver',
+    'description' => 'Resolves the app directory (+ optionally the environment) for a CLI invocation.',
+  ),
+  'quiote-docs://api/console/application' => 
+  array (
+    'file' => 'api/console/application.md',
+    'path' => 'api/console/application',
+    'title' => 'Application',
+    'description' => 'The `quiote` CLI.',
+  ),
+  'quiote-docs://api/console/command/about-command' => 
+  array (
+    'file' => 'api/console/command/about-command.md',
+    'path' => 'api/console/command/about-command',
+    'title' => 'AboutCommand',
+    'description' => 'Prints framework/app diagnostic info.',
+  ),
+  'quiote-docs://api/console/command/abstract-app-command' => 
+  array (
+    'file' => 'api/console/command/abstract-app-command.md',
+    'path' => 'api/console/command/abstract-app-command',
+    'title' => 'AbstractAppCommand',
+    'description' => 'Base for commands that need a bootstrapped Quiote application (as opposed to `new`, which is deliberately pre-bootstrap -- see NewCommand).',
+  ),
+  'quiote-docs://api/console/command/cache-warmup-command' => 
+  array (
+    'file' => 'api/console/command/cache-warmup-command.md',
+    'path' => 'api/console/command/cache-warmup-command',
+    'title' => 'CacheWarmupCommand',
+    'description' => 'Compiles the app\'s configuration ahead of time so a freshly started worker starts warm instead of paying the first-request cost of parsing/validating/ XSL-transforming every config file.',
+  ),
+  'quiote-docs://api/console/command/index' => 
+  array (
+    'file' => 'api/console/command/index.md',
+    'path' => 'api/console/command/index',
+    'title' => 'Command',
+    'description' => 'The Quiote\\\\Console\\\\Command namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/console/command/make-action-command' => 
+  array (
+    'file' => 'api/console/command/make-action-command.md',
+    'path' => 'api/console/command/make-action-command',
+    'title' => 'MakeActionCommand',
+    'description' => 'Scaffolds an Action (and, unless --no-view, a matching View + Template) inside an existing app\'s Modules/{module}/ tree -- the \\"inside an app\\" counterpart to `new` scaffolding a whole app from nothing.',
+  ),
+  'quiote-docs://api/console/command/make-job-command' => 
+  array (
+    'file' => 'api/console/command/make-job-command.md',
+    'path' => 'api/console/command/make-job-command',
+    'title' => 'MakeJobCommand',
+    'description' => 'Scaffolds a `Quiote\\\\Queue\\\\Job` implementation, optionally `Quiote\\\\Queue\\\\RetryableJob` for a per-job retry policy.',
+  ),
+  'quiote-docs://api/console/command/make-middleware-command' => 
+  array (
+    'file' => 'api/console/command/make-middleware-command.md',
+    'path' => 'api/console/command/make-middleware-command',
+    'title' => 'MakeMiddlewareCommand',
+    'description' => 'Scaffolds a PSR-15 middleware class carrying a Middleware attribute -- app-owned classes need no explicit registration beyond that attribute, since `MiddlewareAttributeScanner` picks them up automatically.',
+  ),
+  'quiote-docs://api/console/command/make-module-command' => 
+  array (
+    'file' => 'api/console/command/make-module-command.md',
+    'path' => 'api/console/command/make-module-command',
+    'title' => 'MakeModuleCommand',
+    'description' => 'Scaffolds an empty module (Actions/Views/Templates directories) -- a module has no class of its own, it\'s a directory convention (see `ModuleActionDiscovery`), so unlike the other `make:*` commands this one has nothing to templatize beyond the directories themselves and an optional seed Action via --with-index.',
+  ),
+  'quiote-docs://api/console/command/new-command' => 
+  array (
+    'file' => 'api/console/command/new-command.md',
+    'path' => 'api/console/command/new-command',
+    'title' => 'NewCommand',
+    'description' => 'Scaffolds a new Quiote application: a Default module (Index/About/Boom actions), the minimal config set needed to boot (settings, factories, routing, output_types -- config_handlers.xml/compile.xml/translation.xml/databases.xml can all be omitted and still boot cleanly), and a FrankenPHP-ready pub/index.php.',
+  ),
+  'quiote-docs://api/console/command/openapi-generate-command' => 
+  array (
+    'file' => 'api/console/command/openapi-generate-command.md',
+    'path' => 'api/console/command/openapi-generate-command',
+    'title' => 'OpenapiGenerateCommand',
+    'description' => 'Writes an OpenAPI 3.1 description of the app, derived from the live routing service\'s route collection and each action\'s own validator declarations -- see OpenApiGenerator for what is and isn\'t derivable.',
+  ),
+  'quiote-docs://api/console/command/routes-compile-command' => 
+  array (
+    'file' => 'api/console/command/routes-compile-command.md',
+    'path' => 'api/console/command/routes-compile-command',
+    'title' => 'RoutesCompileCommand',
+    'description' => 'Generates the `cache/introspection/app.json` artifact an editor extension reads directly (no PHP spawn) on its warm path -- routes, modules, Action/ View/Template triads, diagnostics, a dependency manifest, and shadowed- config info -- and prints the same payload to stdout.',
+  ),
+  'quiote-docs://api/console/command/routes-list-command' => 
+  array (
+    'file' => 'api/console/command/routes-list-command.md',
+    'path' => 'api/console/command/routes-list-command',
+    'title' => 'RoutesListCommand',
+    'description' => 'Lists every route the app\'s actual configured Routing service knows about -- i.e.',
+  ),
+  'quiote-docs://api/console/command/scaffold/action-writer' => 
+  array (
+    'file' => 'api/console/command/scaffold/action-writer.md',
+    'path' => 'api/console/command/scaffold/action-writer',
+    'title' => 'ActionWriter',
+    'description' => 'Writes the files for `make:action`: the Action class itself, and (optionally) a matching View + Template.',
+  ),
+  'quiote-docs://api/console/command/scaffold/app-writer' => 
+  array (
+    'file' => 'api/console/command/scaffold/app-writer.md',
+    'path' => 'api/console/command/scaffold/app-writer',
+    'title' => 'AppWriter',
+    'description' => 'Writes the actual files for `quiote new`.',
+  ),
+  'quiote-docs://api/console/command/scaffold/generator-support' => 
+  array (
+    'file' => 'api/console/command/scaffold/generator-support.md',
+    'path' => 'api/console/command/scaffold/generator-support',
+    'title' => 'GeneratorSupport',
+    'description' => 'Shared validation/overwrite-guard helpers for the `make:*` generator commands, mirroring the checks `NewCommand` already applies to its own `--namespace` argument (see `NewCommand::execute()`).',
+  ),
+  'quiote-docs://api/console/command/scaffold/index' => 
+  array (
+    'file' => 'api/console/command/scaffold/index.md',
+    'path' => 'api/console/command/scaffold/index',
+    'title' => 'Scaffold',
+    'description' => 'The Quiote\\\\Console\\\\Command\\\\Scaffold namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/console/command/serve-command' => 
+  array (
+    'file' => 'api/console/command/serve-command.md',
+    'path' => 'api/console/command/serve-command',
+    'title' => 'ServeCommand',
+    'description' => 'Dev-server convenience wrapper: `quiote new`\'s own \\"next steps\\" just tell the user to run `php -S` or `frankenphp php-server` by hand -- this runs whichever is available, and `--runtime` reaches the CLI-hosted servers too so there is one entry point for every deployment shape Quiote supports.',
+  ),
+  'quiote-docs://api/console/command/telemetry-dashboard-command' => 
+  array (
+    'file' => 'api/console/command/telemetry-dashboard-command.md',
+    'path' => 'api/console/command/telemetry-dashboard-command',
+    'title' => 'TelemetryDashboardCommand',
+    'description' => 'Live monitoring for a Quiote app\'s OTLP telemetry.',
+  ),
+  'quiote-docs://api/console/index' => 
+  array (
+    'file' => 'api/console/index.md',
+    'path' => 'api/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Console namespace — 18 documented types.',
+  ),
+  'quiote-docs://api/context' => 
+  array (
+    'file' => 'api/context.md',
+    'path' => 'api/context',
+    'title' => 'Context',
+    'description' => 'An execution profile -- web, console, a named one -- and the container its services resolve from.',
+  ),
+  'quiote-docs://api/context-component-interface' => 
+  array (
+    'file' => 'api/context-component-interface.md',
+    'path' => 'api/context-component-interface',
+    'title' => 'ContextComponentInterface',
+    'description' => 'A core component the Context constructs from the factory metadata captured at Context::initialize() and drives through a two-step lifecycle.',
+  ),
+  'quiote-docs://api/context-interface' => 
+  array (
+    'file' => 'api/context-interface.md',
+    'path' => 'api/context-interface',
+    'title' => 'ContextInterface',
+    'description' => 'What a collaborator needs from the application context: which profile this execution belongs to, and a way to reach its services.',
+  ),
+  'quiote-docs://api/context-lifecycle' => 
+  array (
+    'file' => 'api/context-lifecycle.md',
+    'path' => 'api/context-lifecycle',
+    'title' => 'ContextLifecycle',
+    'description' => 'A context\'s per-request state machine: armed, claimed, cleared, armed again.',
+  ),
+  'quiote-docs://api/context-registry' => 
+  array (
+    'file' => 'api/context-registry.md',
+    'path' => 'api/context-registry',
+    'title' => 'ContextRegistry',
+    'description' => 'Owns the live Context instances -- one per named profile.',
+  ),
+  'quiote-docs://api/controller/controller' => 
+  array (
+    'file' => 'api/controller/controller.md',
+    'path' => 'api/controller/controller',
+    'title' => 'Controller',
+    'description' => 'The per-context registry and factory that dispatch routes through.',
+  ),
+  'quiote-docs://api/controller/controller-interface' => 
+  array (
+    'file' => 'api/controller/controller-interface.md',
+    'path' => 'api/controller/controller-interface',
+    'title' => 'ControllerInterface',
+    'description' => 'What the framework asks of a controller: resolve and build the action and view for a dispatch, answer questions about what a module contains, and hold the response being assembled.',
+  ),
+  'quiote-docs://api/controller/index' => 
+  array (
+    'file' => 'api/controller/index.md',
+    'path' => 'api/controller/index',
+    'title' => 'Controller',
+    'description' => 'The Quiote\\\\Controller namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/controller/output-type' => 
+  array (
+    'file' => 'api/controller/output-type.md',
+    'path' => 'api/controller/output-type',
+    'title' => 'OutputType',
+    'description' => 'One configured output type -- `html`, `json`, or whatever else `output_types.xml` declares -- together with the renderers, layouts and parameters that belong to it.',
+  ),
+  'quiote-docs://api/controller/output-type-definitions' => 
+  array (
+    'file' => 'api/controller/output-type-definitions.md',
+    'path' => 'api/controller/output-type-definitions',
+    'title' => 'OutputTypeDefinitions',
+    'description' => 'What the compiled `output_types` configuration declares, as data.',
+  ),
+  'quiote-docs://api/database/abstract-orm-database' => 
+  array (
+    'file' => 'api/database/abstract-orm-database.md',
+    'path' => 'api/database/abstract-orm-database',
+    'title' => 'AbstractOrmDatabase',
+    'description' => 'Shared base for ORM adapters whose AbstractOrmDatabase::getConnection() returns an ORM manager (Eloquent Capsule, Doctrine EntityManager, Cycle ORM) rather than a raw PDO handle.',
+  ),
+  'quiote-docs://api/database/adapter/cycle/cycle-database' => 
+  array (
+    'file' => 'api/database/adapter/cycle/cycle-database.md',
+    'path' => 'api/database/adapter/cycle/cycle-database',
+    'title' => 'CycleDatabase',
+    'description' => 'First-class adapter for Cycle ORM v2 — the data-mapper built for long-running (RoadRunner/FrankenPHP) processes, a natural fit for Quiote\'s worker mode.',
+  ),
+  'quiote-docs://api/database/adapter/cycle/cycle-plugin' => 
+  array (
+    'file' => 'api/database/adapter/cycle/cycle-plugin.md',
+    'path' => 'api/database/adapter/cycle/cycle-plugin',
+    'title' => 'CyclePlugin',
+    'description' => 'Enables the `cycle` database driver alias.',
+  ),
+  'quiote-docs://api/database/adapter/cycle/index' => 
+  array (
+    'file' => 'api/database/adapter/cycle/index.md',
+    'path' => 'api/database/adapter/cycle/index',
+    'title' => 'Cycle',
+    'description' => 'The Quiote\\\\Database\\\\Adapter\\\\Cycle namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/database/adapter/doctrine/doctrine-database' => 
+  array (
+    'file' => 'api/database/adapter/doctrine/doctrine-database.md',
+    'path' => 'api/database/adapter/doctrine/doctrine-database',
+    'title' => 'DoctrineDatabase',
+    'description' => 'Modern first-class adapter for Doctrine ORM 3 / DBAL 4.',
+  ),
+  'quiote-docs://api/database/adapter/doctrine/doctrine-dbal-database' => 
+  array (
+    'file' => 'api/database/adapter/doctrine/doctrine-dbal-database.md',
+    'path' => 'api/database/adapter/doctrine/doctrine-dbal-database',
+    'title' => 'DoctrineDbalDatabase',
+    'description' => 'Tier-2 adapter: a Doctrine DBAL connection (connection abstraction + query builder) without the ORM/entity layer.',
+  ),
+  'quiote-docs://api/database/adapter/doctrine/doctrine-dbal-params' => 
+  array (
+    'file' => 'api/database/adapter/doctrine/doctrine-dbal-params.md',
+    'path' => 'api/database/adapter/doctrine/doctrine-dbal-params',
+    'title' => 'DoctrineDbalParams',
+    'description' => 'Shared translation of flat `databases.xml` parameters into a Doctrine DBAL connection-parameters array, used by both DoctrineDatabase and DoctrineDbalDatabase.',
+  ),
+  'quiote-docs://api/database/adapter/doctrine/doctrine-plugin' => 
+  array (
+    'file' => 'api/database/adapter/doctrine/doctrine-plugin.md',
+    'path' => 'api/database/adapter/doctrine/doctrine-plugin',
+    'title' => 'DoctrinePlugin',
+    'description' => 'Enables the `doctrine` (ORM) and `doctrine_dbal` (DBAL-only) driver aliases.',
+  ),
+  'quiote-docs://api/database/adapter/doctrine/index' => 
+  array (
+    'file' => 'api/database/adapter/doctrine/index.md',
+    'path' => 'api/database/adapter/doctrine/index',
+    'title' => 'Doctrine',
+    'description' => 'The Quiote\\\\Database\\\\Adapter\\\\Doctrine namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/database/adapter/eloquent/eloquent-database' => 
+  array (
+    'file' => 'api/database/adapter/eloquent/eloquent-database.md',
+    'path' => 'api/database/adapter/eloquent/eloquent-database',
+    'title' => 'EloquentDatabase',
+    'description' => 'First-class adapter for Eloquent (illuminate/database) used standalone via the Capsule Manager.',
+  ),
+  'quiote-docs://api/database/adapter/eloquent/eloquent-plugin' => 
+  array (
+    'file' => 'api/database/adapter/eloquent/eloquent-plugin.md',
+    'path' => 'api/database/adapter/eloquent/eloquent-plugin',
+    'title' => 'EloquentPlugin',
+    'description' => 'Enables the `eloquent` database driver alias.',
+  ),
+  'quiote-docs://api/database/adapter/eloquent/index' => 
+  array (
+    'file' => 'api/database/adapter/eloquent/index.md',
+    'path' => 'api/database/adapter/eloquent/index',
+    'title' => 'Eloquent',
+    'description' => 'The Quiote\\\\Database\\\\Adapter\\\\Eloquent namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/database/adapter/index' => 
+  array (
+    'file' => 'api/database/adapter/index.md',
+    'path' => 'api/database/adapter/index',
+    'title' => 'Adapter',
+    'description' => 'The Quiote\\\\Database\\\\Adapter namespace — 10 documented types.',
+  ),
+  'quiote-docs://api/database/adapter/propulsion/index' => 
+  array (
+    'file' => 'api/database/adapter/propulsion/index.md',
+    'path' => 'api/database/adapter/propulsion/index',
+    'title' => 'Propulsion',
+    'description' => 'The Quiote\\\\Database\\\\Adapter\\\\Propulsion namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/database/adapter/propulsion/propulsion-database' => 
+  array (
+    'file' => 'api/database/adapter/propulsion/propulsion-database.md',
+    'path' => 'api/database/adapter/propulsion/propulsion-database',
+    'title' => 'PropulsionDatabase',
+    'description' => 'First-class adapter for Propulsion (the quioteframework/propulsion fork of Propel 1).',
+  ),
+  'quiote-docs://api/database/adapter/propulsion/propulsion-plugin' => 
+  array (
+    'file' => 'api/database/adapter/propulsion/propulsion-plugin.md',
+    'path' => 'api/database/adapter/propulsion/propulsion-plugin',
+    'title' => 'PropulsionPlugin',
+    'description' => 'Enables the `propulsion` database driver alias.',
+  ),
+  'quiote-docs://api/database/database' => 
+  array (
+    'file' => 'api/database/database.md',
+    'path' => 'api/database/database',
+    'title' => 'Database',
+    'description' => 'Database is a base abstraction class that allows you to setup any type of database connection via a configuration file.',
+  ),
+  'quiote-docs://api/database/database-definitions' => 
+  array (
+    'file' => 'api/database/database-definitions.md',
+    'path' => 'api/database/database-definitions',
+    'title' => 'DatabaseDefinitions',
+    'description' => 'What the compiled `databases` configuration declares, as data.',
+  ),
+  'quiote-docs://api/database/database-driver-registry' => 
+  array (
+    'file' => 'api/database/database-driver-registry.md',
+    'path' => 'api/database/database-driver-registry',
+    'title' => 'DatabaseDriverRegistry',
+    'description' => 'Process-global registry mapping short driver aliases (e.g.',
+  ),
+  'quiote-docs://api/database/database-manager' => 
+  array (
+    'file' => 'api/database/database-manager.md',
+    'path' => 'api/database/database-manager',
+    'title' => 'DatabaseManager',
+    'description' => 'DatabaseManager allows you to setup your database connectivity before the request is handled.',
+  ),
+  'quiote-docs://api/database/index' => 
+  array (
+    'file' => 'api/database/index.md',
+    'path' => 'api/database/index',
+    'title' => 'Database',
+    'description' => 'The Quiote\\\\Database namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/database/pdo-database' => 
+  array (
+    'file' => 'api/database/pdo-database.md',
+    'path' => 'api/database/pdo-database',
+    'title' => 'PdoDatabase',
+    'description' => 'PdoDatabase provides connectivity for the PDO database API layer.',
+  ),
+  'quiote-docs://api/di/attribute/autowire' => 
+  array (
+    'file' => 'api/di/attribute/autowire.md',
+    'path' => 'api/di/attribute/autowire',
+    'title' => 'Autowire',
+    'description' => 'Parameter-level override: inject this literal scalar/config value instead of autowiring by type.',
+  ),
+  'quiote-docs://api/di/attribute/index' => 
+  array (
+    'file' => 'api/di/attribute/index.md',
+    'path' => 'api/di/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\DI\\\\Attribute namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/di/attribute/inject' => 
+  array (
+    'file' => 'api/di/attribute/inject.md',
+    'path' => 'api/di/attribute/inject',
+    'title' => 'Inject',
+    'description' => 'Parameter-level override: resolve this parameter from the container by an explicit id instead of autowiring by type.',
+  ),
+  'quiote-docs://api/di/attribute/service' => 
+  array (
+    'file' => 'api/di/attribute/service.md',
+    'path' => 'api/di/attribute/service',
+    'title' => 'Service',
+    'description' => 'Class-level discovery marker + scope declaration for services.',
+  ),
+  'quiote-docs://api/di/container' => 
+  array (
+    'file' => 'api/di/container.md',
+    'path' => 'api/di/container',
+    'title' => 'Container',
+    'description' => 'Small scope-aware DI container: supports definitions as closures, class names, or instances.',
+  ),
+  'quiote-docs://api/di/container-exception' => 
+  array (
+    'file' => 'api/di/container-exception.md',
+    'path' => 'api/di/container-exception',
+    'title' => 'ContainerException',
+    'description' => 'PSR-11 `ContainerExceptionInterface`: the container found something for the id but could not deliver it.',
+  ),
+  'quiote-docs://api/di/index' => 
+  array (
+    'file' => 'api/di/index.md',
+    'path' => 'api/di/index',
+    'title' => 'DI',
+    'description' => 'The Quiote\\\\DI namespace — 6 documented types.',
+  ),
+  'quiote-docs://api/di/not-found-exception' => 
+  array (
+    'file' => 'api/di/not-found-exception.md',
+    'path' => 'api/di/not-found-exception',
+    'title' => 'NotFoundException',
+    'description' => 'PSR-11 `NotFoundExceptionInterface`: nothing is bound under the requested id and no autowireable class or alias answers to it either.',
+  ),
+  'quiote-docs://api/docs/api-reflector' => 
+  array (
+    'file' => 'api/docs/api-reflector.md',
+    'path' => 'api/docs/api-reflector',
+    'title' => 'ApiReflector',
+    'description' => 'Builds the documentation model from the types the scanner verified.',
+  ),
+  'quiote-docs://api/docs/console/docs-api-command' => 
+  array (
+    'file' => 'api/docs/console/docs-api-command.md',
+    'path' => 'api/docs/console/docs-api-command',
+    'title' => 'DocsApiCommand',
+    'description' => 'Writes the API reference into the documentation site.',
+  ),
+  'quiote-docs://api/docs/console/index' => 
+  array (
+    'file' => 'api/docs/console/index.md',
+    'path' => 'api/docs/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Docs\\\\Console namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/docs/docblock/docblock-parser' => 
+  array (
+    'file' => 'api/docs/docblock/docblock-parser.md',
+    'path' => 'api/docs/docblock/docblock-parser',
+    'title' => 'DocblockParser',
+    'description' => 'Turns a raw docblock into a DocBlock.',
+  ),
+  'quiote-docs://api/docs/docblock/index' => 
+  array (
+    'file' => 'api/docs/docblock/index.md',
+    'path' => 'api/docs/docblock/index',
+    'title' => 'Docblock',
+    'description' => 'The Quiote\\\\Docs\\\\Docblock namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/docs/docblock/reference-resolver' => 
+  array (
+    'file' => 'api/docs/docblock/reference-resolver.md',
+    'path' => 'api/docs/docblock/reference-resolver',
+    'title' => 'ReferenceResolver',
+    'description' => 'Rewrites the ``…`` references in docblock prose into a form an emitter can link.',
+  ),
+  'quiote-docs://api/docs/docblock/type-resolver' => 
+  array (
+    'file' => 'api/docs/docblock/type-resolver.md',
+    'path' => 'api/docs/docblock/type-resolver',
+    'title' => 'TypeResolver',
+    'description' => 'Builds TypeRef trees from what the source says, resolving names the way PHP would.',
+  ),
+  'quiote-docs://api/docs/docblock/value-renderer' => 
+  array (
+    'file' => 'api/docs/docblock/value-renderer.md',
+    'path' => 'api/docs/docblock/value-renderer',
+    'title' => 'ValueRenderer',
+    'description' => 'Renders a default value the way it would be written in source.',
+  ),
+  'quiote-docs://api/docs/docs-generator' => 
+  array (
+    'file' => 'api/docs/docs-generator.md',
+    'path' => 'api/docs/docs-generator',
+    'title' => 'DocsGenerator',
+    'description' => 'Turns the documentation model into the full set of pages, plus the manifest that describes it.',
+  ),
+  'quiote-docs://api/docs/emitter/api-index-emitter' => 
+  array (
+    'file' => 'api/docs/emitter/api-index-emitter.md',
+    'path' => 'api/docs/emitter/api-index-emitter',
+    'title' => 'ApiIndexEmitter',
+    'description' => 'Renders the reference\'s own landing page: every top-level namespace and what it holds.',
+  ),
+  'quiote-docs://api/docs/emitter/class-page-emitter' => 
+  array (
+    'file' => 'api/docs/emitter/class-page-emitter.md',
+    'path' => 'api/docs/emitter/class-page-emitter',
+    'title' => 'ClassPageEmitter',
+    'description' => 'Renders one class as a Starlight page.',
+  ),
+  'quiote-docs://api/docs/emitter/index' => 
+  array (
+    'file' => 'api/docs/emitter/index.md',
+    'path' => 'api/docs/emitter/index',
+    'title' => 'Emitter',
+    'description' => 'The Quiote\\\\Docs\\\\Emitter namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/docs/emitter/markdown' => 
+  array (
+    'file' => 'api/docs/emitter/markdown.md',
+    'path' => 'api/docs/emitter/markdown',
+    'title' => 'Markdown',
+    'description' => 'The small amount of Markdown and YAML escaping the emitters share.',
+  ),
+  'quiote-docs://api/docs/emitter/namespace-index-emitter' => 
+  array (
+    'file' => 'api/docs/emitter/namespace-index-emitter.md',
+    'path' => 'api/docs/emitter/namespace-index-emitter',
+    'title' => 'NamespaceIndexEmitter',
+    'description' => 'Renders the index page for one namespace.',
+  ),
+  'quiote-docs://api/docs/emitter/type-linker' => 
+  array (
+    'file' => 'api/docs/emitter/type-linker.md',
+    'path' => 'api/docs/emitter/type-linker',
+    'title' => 'TypeLinker',
+    'description' => 'Renders a type as Markdown, linking the parts that have somewhere to point.',
+  ),
+  'quiote-docs://api/docs/index' => 
+  array (
+    'file' => 'api/docs/index.md',
+    'path' => 'api/docs/index',
+    'title' => 'Docs',
+    'description' => 'The Quiote\\\\Docs namespace — 26 documented types.',
+  ),
+  'quiote-docs://api/docs/ir/api-index' => 
+  array (
+    'file' => 'api/docs/ir/api-index.md',
+    'path' => 'api/docs/ir/api-index',
+    'title' => 'ApiIndex',
+    'description' => 'Every documented class, plus the lookups the emitters need across them.',
+  ),
+  'quiote-docs://api/docs/ir/class-doc' => 
+  array (
+    'file' => 'api/docs/ir/class-doc.md',
+    'path' => 'api/docs/ir/class-doc',
+    'title' => 'ClassDoc',
+    'description' => 'Everything one page needs about one class, interface, trait or enum.',
+  ),
+  'quiote-docs://api/docs/ir/constant-doc' => 
+  array (
+    'file' => 'api/docs/ir/constant-doc.md',
+    'path' => 'api/docs/ir/constant-doc',
+    'title' => 'ConstantDoc',
+    'description' => 'One public class constant.',
+  ),
+  'quiote-docs://api/docs/ir/doc-block' => 
+  array (
+    'file' => 'api/docs/ir/doc-block.md',
+    'path' => 'api/docs/ir/doc-block',
+    'title' => 'DocBlock',
+    'description' => 'The prose and tags of one docblock, already separated into the parts a page renders.',
+  ),
+  'quiote-docs://api/docs/ir/enum-case-doc' => 
+  array (
+    'file' => 'api/docs/ir/enum-case-doc.md',
+    'path' => 'api/docs/ir/enum-case-doc',
+    'title' => 'EnumCaseDoc',
+    'description' => 'One case of an enum, with its backing value when it has one.',
+  ),
+  'quiote-docs://api/docs/ir/index' => 
+  array (
+    'file' => 'api/docs/ir/index.md',
+    'path' => 'api/docs/ir/index',
+    'title' => 'Ir',
+    'description' => 'The Quiote\\\\Docs\\\\Ir namespace — 10 documented types.',
+  ),
+  'quiote-docs://api/docs/ir/inherited-member' => 
+  array (
+    'file' => 'api/docs/ir/inherited-member.md',
+    'path' => 'api/docs/ir/inherited-member',
+    'title' => 'InheritedMember',
+    'description' => 'A member a class gets from an ancestor, listed rather than documented.',
+  ),
+  'quiote-docs://api/docs/ir/method-doc' => 
+  array (
+    'file' => 'api/docs/ir/method-doc.md',
+    'path' => 'api/docs/ir/method-doc',
+    'title' => 'MethodDoc',
+    'description' => 'One method, as documented on the page of the class that declares it.',
+  ),
+  'quiote-docs://api/docs/ir/param-doc' => 
+  array (
+    'file' => 'api/docs/ir/param-doc.md',
+    'path' => 'api/docs/ir/param-doc',
+    'title' => 'ParamDoc',
+    'description' => 'One parameter of a method, with the type actually rendered and its prose.',
+  ),
+  'quiote-docs://api/docs/ir/property-doc' => 
+  array (
+    'file' => 'api/docs/ir/property-doc.md',
+    'path' => 'api/docs/ir/property-doc',
+    'title' => 'PropertyDoc',
+    'description' => 'One property, including a constructor-promoted one.',
+  ),
+  'quiote-docs://api/docs/ir/type-ref' => 
+  array (
+    'file' => 'api/docs/ir/type-ref.md',
+    'path' => 'api/docs/ir/type-ref',
+    'title' => 'TypeRef',
+    'description' => 'A type, kept as a tree rather than a string so each part can be linked independently.',
+  ),
+  'quiote-docs://api/docs/scan/file-token-reader' => 
+  array (
+    'file' => 'api/docs/scan/file-token-reader.md',
+    'path' => 'api/docs/scan/file-token-reader',
+    'title' => 'FileTokenReader',
+    'description' => 'Reads a PHP file\'s namespace, first class-like declaration and `use` imports straight from its tokens, without executing or autoloading anything.',
+  ),
+  'quiote-docs://api/docs/scan/index' => 
+  array (
+    'file' => 'api/docs/scan/index.md',
+    'path' => 'api/docs/scan/index',
+    'title' => 'Scan',
+    'description' => 'The Quiote\\\\Docs\\\\Scan namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/docs/scan/scanned-type' => 
+  array (
+    'file' => 'api/docs/scan/scanned-type.md',
+    'path' => 'api/docs/scan/scanned-type',
+    'title' => 'ScannedType',
+    'description' => 'One class-like declaration, as read out of its source file by the tokenizer.',
+  ),
+  'quiote-docs://api/docs/scan/source-scanner' => 
+  array (
+    'file' => 'api/docs/scan/source-scanner.md',
+    'path' => 'api/docs/scan/source-scanner',
+    'title' => 'SourceScanner',
+    'description' => 'Finds every documentable class-like in the framework by walking Composer\'s PSR-4 prefix map and reading each file\'s own declaration.',
+  ),
+  'quiote-docs://api/docs/slug/index' => 
+  array (
+    'file' => 'api/docs/slug/index.md',
+    'path' => 'api/docs/slug/index',
+    'title' => 'Slug',
+    'description' => 'The Quiote\\\\Docs\\\\Slug namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/docs/slug/slugger' => 
+  array (
+    'file' => 'api/docs/slug/slugger.md',
+    'path' => 'api/docs/slug/slugger',
+    'title' => 'Slugger',
+    'description' => 'Turns a fully-qualified name into the URL path its page lives at.',
+  ),
+  'quiote-docs://api/event/event' => 
+  array (
+    'file' => 'api/event/event.md',
+    'path' => 'api/event/event',
+    'title' => 'Event',
+    'description' => 'Base class for framework/domain events dispatched through Events.',
+  ),
+  'quiote-docs://api/event/event-dispatcher' => 
+  array (
+    'file' => 'api/event/event-dispatcher.md',
+    'path' => 'api/event/event-dispatcher',
+    'title' => 'EventDispatcher',
+    'description' => 'A minimal PSR-14 dispatcher over a ListenerProvider.',
+  ),
+  'quiote-docs://api/event/events' => 
+  array (
+    'file' => 'api/event/events.md',
+    'path' => 'api/event/events',
+    'title' => 'Events',
+    'description' => 'Static facade for the event subsystem, mirroring Log and Trace: a process-global, worker-lifetime listener registry configured once (typically by plugins at boot) and used everywhere via the facade, with no per-request wiring.',
+  ),
+  'quiote-docs://api/event/index' => 
+  array (
+    'file' => 'api/event/index.md',
+    'path' => 'api/event/index',
+    'title' => 'Event',
+    'description' => 'The Quiote\\\\Event namespace — 12 documented types.',
+  ),
+  'quiote-docs://api/event/lifecycle/action-after-event' => 
+  array (
+    'file' => 'api/event/lifecycle/action-after-event.md',
+    'path' => 'api/event/lifecycle/action-after-event',
+    'title' => 'ActionAfterEvent',
+    'description' => 'Emitted by ActionExecutor::execute() after an action (and its view) have run, carrying the resulting execution context.',
+  ),
+  'quiote-docs://api/event/lifecycle/action-before-event' => 
+  array (
+    'file' => 'api/event/lifecycle/action-before-event.md',
+    'path' => 'api/event/lifecycle/action-before-event',
+    'title' => 'ActionBeforeEvent',
+    'description' => 'Emitted by ActionExecutor::execute() just before an action runs.',
+  ),
+  'quiote-docs://api/event/lifecycle/exception-caught-event' => 
+  array (
+    'file' => 'api/event/lifecycle/exception-caught-event.md',
+    'path' => 'api/event/lifecycle/exception-caught-event',
+    'title' => 'ExceptionCaughtEvent',
+    'description' => 'Emitted by ErrorHandlingMiddleware whenever it catches an unhandled throwable, before rendering the error response.',
+  ),
+  'quiote-docs://api/event/lifecycle/index' => 
+  array (
+    'file' => 'api/event/lifecycle/index.md',
+    'path' => 'api/event/lifecycle/index',
+    'title' => 'Lifecycle',
+    'description' => 'The Quiote\\\\Event\\\\Lifecycle namespace — 7 documented types.',
+  ),
+  'quiote-docs://api/event/lifecycle/kernel-boot-event' => 
+  array (
+    'file' => 'api/event/lifecycle/kernel-boot-event.md',
+    'path' => 'api/event/lifecycle/kernel-boot-event',
+    'title' => 'KernelBootEvent',
+    'description' => 'Emitted at the end of Quiote::bootstrap(), once settings are loaded, plugins registered, and any requested contexts created.',
+  ),
+  'quiote-docs://api/event/lifecycle/request-matched-event' => 
+  array (
+    'file' => 'api/event/lifecycle/request-matched-event.md',
+    'path' => 'api/event/lifecycle/request-matched-event',
+    'title' => 'RequestMatchedEvent',
+    'description' => 'Emitted by RoutingMiddleware immediately after a request is matched to a module/action, before the matched request is handed to the rest of the pipeline.',
+  ),
+  'quiote-docs://api/event/lifecycle/response-sending-event' => 
+  array (
+    'file' => 'api/event/lifecycle/response-sending-event.md',
+    'path' => 'api/event/lifecycle/response-sending-event',
+    'title' => 'ResponseSendingEvent',
+    'description' => 'Emitted by Context::handle() once the pipeline has produced a response, just before it is returned to the runtime for emission.',
+  ),
+  'quiote-docs://api/event/lifecycle/worker-request-completed-event' => 
+  array (
+    'file' => 'api/event/lifecycle/worker-request-completed-event.md',
+    'path' => 'api/event/lifecycle/worker-request-completed-event',
+    'title' => 'WorkerRequestCompletedEvent',
+    'description' => 'Emitted once per request from Kernel\'s worker-mode reset step — after WorkerManager::resetForNextRequest() (if worker mode is active), regardless of whether the request succeeded or the pipeline threw.',
+  ),
+  'quiote-docs://api/event/listener-provider' => 
+  array (
+    'file' => 'api/event/listener-provider.md',
+    'path' => 'api/event/listener-provider',
+    'title' => 'ListenerProvider',
+    'description' => 'Priority-ordered PSR-14 listener provider.',
+  ),
+  'quiote-docs://api/event/stoppable-event' => 
+  array (
+    'file' => 'api/event/stoppable-event.md',
+    'path' => 'api/event/stoppable-event',
+    'title' => 'StoppableEvent',
+    'description' => 'An Event whose propagation a listener can halt.',
+  ),
+  'quiote-docs://api/exception/cache-exception' => 
+  array (
+    'file' => 'api/exception/cache-exception.md',
+    'path' => 'api/exception/cache-exception',
+    'title' => 'CacheException',
+    'description' => 'CacheException is thrown when ConfigCache fails to execute properly.',
+  ),
+  'quiote-docs://api/exception/class-not-found-exception' => 
+  array (
+    'file' => 'api/exception/class-not-found-exception.md',
+    'path' => 'api/exception/class-not-found-exception',
+    'title' => 'ClassNotFoundException',
+    'description' => 'ClassNotFoundException is thrown when a class could not be found.',
+  ),
+  'quiote-docs://api/exception/configuration-exception' => 
+  array (
+    'file' => 'api/exception/configuration-exception.md',
+    'path' => 'api/exception/configuration-exception',
+    'title' => 'ConfigurationException',
+    'description' => 'ConfigurationException is thrown when the framework finds an error in a configuration setting.',
+  ),
+  'quiote-docs://api/exception/controller-exception' => 
+  array (
+    'file' => 'api/exception/controller-exception.md',
+    'path' => 'api/exception/controller-exception',
+    'title' => 'ControllerException',
+    'description' => 'ControllerException is thrown when a requested Controller implementation doesn\'t exist.',
+  ),
+  'quiote-docs://api/exception/database-exception' => 
+  array (
+    'file' => 'api/exception/database-exception.md',
+    'path' => 'api/exception/database-exception',
+    'title' => 'DatabaseException',
+    'description' => 'DatabaseException is thrown when a database related error occurs.',
+  ),
+  'quiote-docs://api/exception/disabled-module-exception' => 
+  array (
+    'file' => 'api/exception/disabled-module-exception.md',
+    'path' => 'api/exception/disabled-module-exception',
+    'title' => 'DisabledModuleException',
+    'description' => 'DisabledModuleException is thrown when Controller::initializeModule gets called on a disabled module',
+  ),
+  'quiote-docs://api/exception/factory-exception' => 
+  array (
+    'file' => 'api/exception/factory-exception.md',
+    'path' => 'api/exception/factory-exception',
+    'title' => 'FactoryException',
+    'description' => 'FactoryException is thrown when an error occurs while attempting to create a new factory implementation instance.',
+  ),
+  'quiote-docs://api/exception/file-exception' => 
+  array (
+    'file' => 'api/exception/file-exception.md',
+    'path' => 'api/exception/file-exception',
+    'title' => 'FileException',
+    'description' => 'FileException is thrown when an error occurs while moving an uploaded file.',
+  ),
+  'quiote-docs://api/exception/file-not-found-exception' => 
+  array (
+    'file' => 'api/exception/file-not-found-exception.md',
+    'path' => 'api/exception/file-not-found-exception',
+    'title' => 'FileNotFoundException',
+    'description' => 'FileNotFoundException is thrown when a file could not be found.',
+  ),
+  'quiote-docs://api/exception/index' => 
+  array (
+    'file' => 'api/exception/index.md',
+    'path' => 'api/exception/index',
+    'title' => 'Exception',
+    'description' => 'The Quiote\\\\Exception namespace — 27 documented types.',
+  ),
+  'quiote-docs://api/exception/initialization-exception' => 
+  array (
+    'file' => 'api/exception/initialization-exception.md',
+    'path' => 'api/exception/initialization-exception',
+    'title' => 'InitializationException',
+    'description' => 'InitializationException is thrown when an initialization procedure fails.',
+  ),
+  'quiote-docs://api/exception/logging-exception' => 
+  array (
+    'file' => 'api/exception/logging-exception.md',
+    'path' => 'api/exception/logging-exception',
+    'title' => 'LoggingException',
+    'description' => 'LoggingException is thrown when a logging related error occurs.',
+  ),
+  'quiote-docs://api/exception/parse-exception' => 
+  array (
+    'file' => 'api/exception/parse-exception.md',
+    'path' => 'api/exception/parse-exception',
+    'title' => 'ParseException',
+    'description' => 'ParseException is thrown when a parsing procedure fails to complete successfully.',
+  ),
+  'quiote-docs://api/exception/quiote-exception' => 
+  array (
+    'file' => 'api/exception/quiote-exception.md',
+    'path' => 'api/exception/quiote-exception',
+    'title' => 'QuioteException',
+    'description' => 'QuioteException is the base class for all Quiote related exceptions.',
+  ),
+  'quiote-docs://api/exception/render-exception' => 
+  array (
+    'file' => 'api/exception/render-exception.md',
+    'path' => 'api/exception/render-exception',
+    'title' => 'RenderException',
+    'description' => 'RenderException is thrown when a view\'s pre-render check fails.',
+  ),
+  'quiote-docs://api/exception/rendering/exception-renderer' => 
+  array (
+    'file' => 'api/exception/rendering/exception-renderer.md',
+    'path' => 'api/exception/rendering/exception-renderer',
+    'title' => 'ExceptionRenderer',
+    'description' => 'Turns a caught Throwable into a client-facing PSR-7 response.',
+  ),
+  'quiote-docs://api/exception/rendering/exception-renderer-registry' => 
+  array (
+    'file' => 'api/exception/rendering/exception-renderer-registry.md',
+    'path' => 'api/exception/rendering/exception-renderer-registry',
+    'title' => 'ExceptionRendererRegistry',
+    'description' => 'Process-global slot for the \\"developer\\" exception renderer (the one ErrorHandlingMiddleware uses when `core.developer_exceptions` is true), mirroring the static, worker-lifetime pattern of DatabaseDriverRegistry / MiddlewareCatalog.',
+  ),
+  'quiote-docs://api/exception/rendering/index' => 
+  array (
+    'file' => 'api/exception/rendering/index.md',
+    'path' => 'api/exception/rendering/index',
+    'title' => 'Rendering',
+    'description' => 'The Quiote\\\\Exception\\\\Rendering namespace — 6 documented types.',
+  ),
+  'quiote-docs://api/exception/rendering/negotiates-content' => 
+  array (
+    'file' => 'api/exception/rendering/negotiates-content.md',
+    'path' => 'api/exception/rendering/negotiates-content',
+    'title' => 'NegotiatesContent',
+    'description' => 'Shared Accept-header negotiation for exception renderers.',
+  ),
+  'quiote-docs://api/exception/rendering/safe-renderer' => 
+  array (
+    'file' => 'api/exception/rendering/safe-renderer.md',
+    'path' => 'api/exception/rendering/safe-renderer',
+    'title' => 'SafeRenderer',
+    'description' => 'Default renderer: never leaks exception internals.',
+  ),
+  'quiote-docs://api/exception/rendering/whoops/index' => 
+  array (
+    'file' => 'api/exception/rendering/whoops/index.md',
+    'path' => 'api/exception/rendering/whoops/index',
+    'title' => 'Whoops',
+    'description' => 'The Quiote\\\\Exception\\\\Rendering\\\\Whoops namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/exception/rendering/whoops/whoops-plugin' => 
+  array (
+    'file' => 'api/exception/rendering/whoops/whoops-plugin.md',
+    'path' => 'api/exception/rendering/whoops/whoops-plugin',
+    'title' => 'WhoopsPlugin',
+    'description' => 'Opt-in entry point for the Whoops developer-exception renderer.',
+  ),
+  'quiote-docs://api/exception/rendering/whoops/whoops-renderer' => 
+  array (
+    'file' => 'api/exception/rendering/whoops/whoops-renderer.md',
+    'path' => 'api/exception/rendering/whoops/whoops-renderer',
+    'title' => 'WhoopsRenderer',
+    'description' => 'Full-detail developer renderer built on filp/whoops -- the \\"shiny page\\" shiny.php always tried and failed to be.',
+  ),
+  'quiote-docs://api/exception/security-exception' => 
+  array (
+    'file' => 'api/exception/security-exception.md',
+    'path' => 'api/exception/security-exception',
+    'title' => 'SecurityException',
+    'description' => 'SecurityException is thrown when a security related error occurs.',
+  ),
+  'quiote-docs://api/exception/storage-exception' => 
+  array (
+    'file' => 'api/exception/storage-exception.md',
+    'path' => 'api/exception/storage-exception',
+    'title' => 'StorageException',
+    'description' => 'StorageException is thrown when a requested Storage implementation doesn\'t exist or data cannot be read from or written to the storage.',
+  ),
+  'quiote-docs://api/exception/uncacheable-exception' => 
+  array (
+    'file' => 'api/exception/uncacheable-exception.md',
+    'path' => 'api/exception/uncacheable-exception',
+    'title' => 'UncacheableException',
+    'description' => 'UncacheableException can be thrown by cache group callbacks to signal to the framework\'s execution filter that no caching should occur.',
+  ),
+  'quiote-docs://api/exception/unreadable-exception' => 
+  array (
+    'file' => 'api/exception/unreadable-exception.md',
+    'path' => 'api/exception/unreadable-exception',
+    'title' => 'UnreadableException',
+    'description' => 'UnreadableException is thrown when a configuration file could not be found or is unreadable.',
+  ),
+  'quiote-docs://api/exception/unvalidated-parameter-access-exception' => 
+  array (
+    'file' => 'api/exception/unvalidated-parameter-access-exception.md',
+    'path' => 'api/exception/unvalidated-parameter-access-exception',
+    'title' => 'UnvalidatedParameterAccessException',
+    'description' => 'Raised by WebRequest::getParameter() when a parameter that no validator declared is read without a default.',
+  ),
+  'quiote-docs://api/exception/validator-exception' => 
+  array (
+    'file' => 'api/exception/validator-exception.md',
+    'path' => 'api/exception/validator-exception',
+    'title' => 'ValidatorException',
+    'description' => 'ValidatorException is thrown when an error occurs in a validator.',
+  ),
+  'quiote-docs://api/exception/view-exception' => 
+  array (
+    'file' => 'api/exception/view-exception.md',
+    'path' => 'api/exception/view-exception',
+    'title' => 'ViewException',
+    'description' => 'ViewException is thrown when an error occurs in a view.',
+  ),
+  'quiote-docs://api/execution/action-cache-helper' => 
+  array (
+    'file' => 'api/execution/action-cache-helper.md',
+    'path' => 'api/execution/action-cache-helper',
+    'title' => 'ActionCacheHelper',
+    'description' => 'Static helpers for the action/view cache round trip used by DispatchMiddleware.',
+  ),
+  'quiote-docs://api/execution/action-descriptor' => 
+  array (
+    'file' => 'api/execution/action-descriptor.md',
+    'path' => 'api/execution/action-descriptor',
+    'title' => 'ActionDescriptor',
+    'description' => 'Immutable value object describing which action to execute.',
+  ),
+  'quiote-docs://api/execution/action-execution-context' => 
+  array (
+    'file' => 'api/execution/action-execution-context.md',
+    'path' => 'api/execution/action-execution-context',
+    'title' => 'ActionExecutionContext',
+    'description' => 'Lightweight DTO for container-less slot execution path.',
+  ),
+  'quiote-docs://api/execution/action-executor' => 
+  array (
+    'file' => 'api/execution/action-executor.md',
+    'path' => 'api/execution/action-executor',
+    'title' => 'ActionExecutor',
+    'description' => 'ActionExecutor: container-less execution of an action+view producing ActionExecutionContext.',
+  ),
+  'quiote-docs://api/execution/action-init-context' => 
+  array (
+    'file' => 'api/execution/action-init-context.md',
+    'path' => 'api/execution/action-init-context',
+    'title' => 'ActionInitContext',
+    'description' => 'What an action is handed by `Action::initialize()`: the identity of the dispatch it is running under, the request and response it works with, and the slot for the view it wants rendered.',
+  ),
+  'quiote-docs://api/execution/action-resolver' => 
+  array (
+    'file' => 'api/execution/action-resolver.md',
+    'path' => 'api/execution/action-resolver',
+    'title' => 'ActionResolver',
+    'description' => 'Resolves which execute* method to call and invokes action, returning raw view token.',
+  ),
+  'quiote-docs://api/execution/attribute-bag' => 
+  array (
+    'file' => 'api/execution/attribute-bag.md',
+    'path' => 'api/execution/attribute-bag',
+    'title' => 'AttributeBag',
+    'description' => 'Simple immutable-style attribute bag for no-container execution path.',
+  ),
+  'quiote-docs://api/execution/deferred-slot-renderable' => 
+  array (
+    'file' => 'api/execution/deferred-slot-renderable.md',
+    'path' => 'api/execution/deferred-slot-renderable',
+    'title' => 'DeferredSlotRenderable',
+    'description' => 'A slot whose action is not dispatched until its content is actually asked for.',
+  ),
+  'quiote-docs://api/execution/execution-state' => 
+  array (
+    'file' => 'api/execution/execution-state.md',
+    'path' => 'api/execution/execution-state',
+    'title' => 'ExecutionState',
+    'description' => 'Mutable per-execution state for one action execution.',
+  ),
+  'quiote-docs://api/execution/forward-service' => 
+  array (
+    'file' => 'api/execution/forward-service.md',
+    'path' => 'api/execution/forward-service',
+    'title' => 'ForwardService',
+    'description' => 'ForwardService: resolves forward targets (login / secure / custom) without creating a full execution container.',
+  ),
+  'quiote-docs://api/execution/http-method-mapper' => 
+  array (
+    'file' => 'api/execution/http-method-mapper.md',
+    'path' => 'api/execution/http-method-mapper',
+    'title' => 'HttpMethodMapper',
+    'description' => 'Central mapping from HTTP verbs to Quiote action method tokens.',
+  ),
+  'quiote-docs://api/execution/immutable-view-init-context' => 
+  array (
+    'file' => 'api/execution/immutable-view-init-context.md',
+    'path' => 'api/execution/immutable-view-init-context',
+    'title' => 'ImmutableViewInitContext',
+    'description' => 'The ViewInitContext a view is initialized with: a fixed snapshot of the dispatch that produced it.',
+  ),
+  'quiote-docs://api/execution/index' => 
+  array (
+    'file' => 'api/execution/index.md',
+    'path' => 'api/execution/index',
+    'title' => 'Execution',
+    'description' => 'The Quiote\\\\Execution namespace — 33 documented types.',
+  ),
+  'quiote-docs://api/execution/lightweight-action-init-context' => 
+  array (
+    'file' => 'api/execution/lightweight-action-init-context.md',
+    'path' => 'api/execution/lightweight-action-init-context',
+    'title' => 'LightweightActionInitContext',
+    'description' => 'The ActionInitContext every dispatch path constructs: the executor, the dispatch, security and validation middleware, the slot dispatcher and the input-schema resolver.',
+  ),
+  'quiote-docs://api/execution/output-type-name-provider' => 
+  array (
+    'file' => 'api/execution/output-type-name-provider.md',
+    'path' => 'api/execution/output-type-name-provider',
+    'title' => 'OutputTypeNameProvider',
+    'description' => 'Minimal contract for the legacy-style output type proxy returned by ImmutableViewInitContext::getOutputType().',
+  ),
+  'quiote-docs://api/execution/response-handle' => 
+  array (
+    'file' => 'api/execution/response-handle.md',
+    'path' => 'api/execution/response-handle',
+    'title' => 'ResponseHandle',
+    'description' => 'Minimal façade exposing response operations in no-container execution paths.',
+  ),
+  'quiote-docs://api/execution/security-decision' => 
+  array (
+    'file' => 'api/execution/security-decision.md',
+    'path' => 'api/execution/security-decision',
+    'title' => 'SecurityDecision',
+    'description' => 'The outcome of the security check for an action: run it, or forward somewhere else.',
+  ),
+  'quiote-docs://api/execution/security-service' => 
+  array (
+    'file' => 'api/execution/security-service.md',
+    'path' => 'api/execution/security-service',
+    'title' => 'SecurityService',
+    'description' => 'Lightweight security checker mapping Action security methods to a decision enum.',
+  ),
+  'quiote-docs://api/execution/slot-content' => 
+  array (
+    'file' => 'api/execution/slot-content.md',
+    'path' => 'api/execution/slot-content',
+    'title' => 'SlotContent',
+    'description' => 'Immutable value object representing rendered slot content plus metadata.',
+  ),
+  'quiote-docs://api/execution/slot-dispatcher' => 
+  array (
+    'file' => 'api/execution/slot-dispatcher.md',
+    'path' => 'api/execution/slot-dispatcher',
+    'title' => 'SlotDispatcher',
+    'description' => 'Dynamic optional action extension points used via method_exists():',
+  ),
+  'quiote-docs://api/execution/slot-execution-context' => 
+  array (
+    'file' => 'api/execution/slot-execution-context.md',
+    'path' => 'api/execution/slot-execution-context',
+    'title' => 'SlotExecutionContext',
+    'description' => 'Immutable context returned by SlotDispatcher for container-less execution.',
+  ),
+  'quiote-docs://api/execution/slot-execution-guard' => 
+  array (
+    'file' => 'api/execution/slot-execution-guard.md',
+    'path' => 'api/execution/slot-execution-guard',
+    'title' => 'SlotExecutionGuard',
+    'description' => 'SlotExecutionGuard centralizes recursion limit enforcement for slot dispatches.',
+  ),
+  'quiote-docs://api/execution/slot-renderable' => 
+  array (
+    'file' => 'api/execution/slot-renderable.md',
+    'path' => 'api/execution/slot-renderable',
+    'title' => 'SlotRenderable',
+    'description' => 'Marker interface for renderable slot results.',
+  ),
+  'quiote-docs://api/execution/slot-request-factory' => 
+  array (
+    'file' => 'api/execution/slot-request-factory.md',
+    'path' => 'api/execution/slot-request-factory',
+    'title' => 'SlotRequestFactory',
+    'description' => 'Factory to derive a child PSR-7 request for slot (sub-action) execution.',
+  ),
+  'quiote-docs://api/execution/slot-stack' => 
+  array (
+    'file' => 'api/execution/slot-stack.md',
+    'path' => 'api/execution/slot-stack',
+    'title' => 'SlotStack',
+    'description' => 'Stack tracking nested slot/sub-action executions, so recursion depth is explicit and boundable rather than implicit in the call stack.',
+  ),
+  'quiote-docs://api/execution/slot/index' => 
+  array (
+    'file' => 'api/execution/slot/index.md',
+    'path' => 'api/execution/slot/index',
+    'title' => 'Slot',
+    'description' => 'The Quiote\\\\Execution\\\\Slot namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/execution/slot/slot-cache' => 
+  array (
+    'file' => 'api/execution/slot/slot-cache.md',
+    'path' => 'api/execution/slot/slot-cache',
+    'title' => 'SlotCache',
+    'description' => 'Reading and writing a slot\'s rendered content to the shared cache.',
+  ),
+  'quiote-docs://api/execution/slot/slot-parameter-overlay' => 
+  array (
+    'file' => 'api/execution/slot/slot-parameter-overlay.md',
+    'path' => 'api/execution/slot/slot-parameter-overlay',
+    'title' => 'SlotParameterOverlay',
+    'description' => 'Puts a slot\'s own parameters on the shared request for the length of its dispatch, and takes them off again afterwards.',
+  ),
+  'quiote-docs://api/execution/validation-decision' => 
+  array (
+    'file' => 'api/execution/validation-decision.md',
+    'path' => 'api/execution/validation-decision',
+    'title' => 'ValidationDecision',
+    'description' => 'Immutable value object encapsulating the validation outcome for a request/action.',
+  ),
+  'quiote-docs://api/execution/validation-result' => 
+  array (
+    'file' => 'api/execution/validation-result.md',
+    'path' => 'api/execution/validation-result',
+    'title' => 'ValidationResult',
+    'description' => 'Lightweight immutable validation result for container-less execution paths.',
+  ),
+  'quiote-docs://api/execution/validation-service' => 
+  array (
+    'file' => 'api/execution/validation-service.md',
+    'path' => 'api/execution/validation-service',
+    'title' => 'ValidationService',
+    'description' => 'Adapter around legacy validation logic to enable container-less execution.',
+  ),
+  'quiote-docs://api/execution/validation-trace' => 
+  array (
+    'file' => 'api/execution/validation-trace.md',
+    'path' => 'api/execution/validation-trace',
+    'title' => 'ValidationTrace',
+    'description' => 'Tiny immutable description of what we validated (for debugging/parity tests).',
+  ),
+  'quiote-docs://api/execution/view-factory' => 
+  array (
+    'file' => 'api/execution/view-factory.md',
+    'path' => 'api/execution/view-factory',
+    'title' => 'ViewFactory',
+    'description' => 'ViewFactory: creates and initializes a view using ImmutableViewInitContext.',
+  ),
+  'quiote-docs://api/execution/view-init-context' => 
+  array (
+    'file' => 'api/execution/view-init-context.md',
+    'path' => 'api/execution/view-init-context',
+    'title' => 'ViewInitContext',
+    'description' => 'ViewInitContext: minimal, presentation-focused initialization contract for views.',
+  ),
+  'quiote-docs://api/execution/view-name-resolver' => 
+  array (
+    'file' => 'api/execution/view-name-resolver.md',
+    'path' => 'api/execution/view-name-resolver',
+    'title' => 'ViewNameResolver',
+    'description' => 'ViewNameResolver: pure resolution of raw view return values to (module, canonicalViewName|NONE).',
+  ),
+  'quiote-docs://api/filesystem/azure/azure-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/azure/azure-filesystem-adapter.md',
+    'path' => 'api/filesystem/azure/azure-filesystem-adapter',
+    'title' => 'AzureFilesystemAdapter',
+    'description' => 'FilesystemAdapterInterface over AzureBlobClient (Shared-Key REST client), against a fixed container.',
+  ),
+  'quiote-docs://api/filesystem/azure/azure-filesystem-plugin' => 
+  array (
+    'file' => 'api/filesystem/azure/azure-filesystem-plugin.md',
+    'path' => 'api/filesystem/azure/azure-filesystem-plugin',
+    'title' => 'AzureFilesystemPlugin',
+    'description' => 'Registers the `azure` filesystem driver alias and publishes `filesystem.disks.azure.*` config defaults.',
+  ),
+  'quiote-docs://api/filesystem/azure/index' => 
+  array (
+    'file' => 'api/filesystem/azure/index.md',
+    'path' => 'api/filesystem/azure/index',
+    'title' => 'Azure',
+    'description' => 'The Quiote\\\\Filesystem\\\\Azure namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/filesystem/file-not-found-storage-exception' => 
+  array (
+    'file' => 'api/filesystem/file-not-found-storage-exception.md',
+    'path' => 'api/filesystem/file-not-found-storage-exception',
+    'title' => 'FileNotFoundStorageException',
+    'description' => 'Thrown by FilesystemAdapterInterface::read()/FilesystemAdapterInterface::size()/FilesystemAdapterInterface::lastModified() when the path does not exist.',
+  ),
+  'quiote-docs://api/filesystem/filesystem-adapter-interface' => 
+  array (
+    'file' => 'api/filesystem/filesystem-adapter-interface.md',
+    'path' => 'api/filesystem/filesystem-adapter-interface',
+    'title' => 'FilesystemAdapterInterface',
+    'description' => 'A general-purpose \\"read/write/list a file\\" contract, distinct from SessionPersistenceInterface (session-shaped) and the legacy Storage hierarchy (`SessionHandlerInterface`- bound).',
+  ),
+  'quiote-docs://api/filesystem/filesystem-config' => 
+  array (
+    'file' => 'api/filesystem/filesystem-config.md',
+    'path' => 'api/filesystem/filesystem-config',
+    'title' => 'FilesystemConfig',
+    'description' => 'Typed snapshot of the `filesystem.*` settings family.',
+  ),
+  'quiote-docs://api/filesystem/filesystem-driver-registry' => 
+  array (
+    'file' => 'api/filesystem/filesystem-driver-registry.md',
+    'path' => 'api/filesystem/filesystem-driver-registry',
+    'title' => 'FilesystemDriverRegistry',
+    'description' => 'Process-global registry mapping short driver aliases (e.g.',
+  ),
+  'quiote-docs://api/filesystem/filesystem-manager' => 
+  array (
+    'file' => 'api/filesystem/filesystem-manager.md',
+    'path' => 'api/filesystem/filesystem-manager',
+    'title' => 'FilesystemManager',
+    'description' => 'App-facing entry point: `$container->get(FilesystemManager::class)->write(\'reports/x.csv\', $csv)`.',
+  ),
+  'quiote-docs://api/filesystem/filesystem-plugin' => 
+  array (
+    'file' => 'api/filesystem/filesystem-plugin.md',
+    'path' => 'api/filesystem/filesystem-plugin',
+    'title' => 'FilesystemPlugin',
+    'description' => 'Registers the filesystem subsystem: `filesystem.*` setting defaults (`local` disk rooted at `storage/app`, out of the box) and the FilesystemManager service app code depends on.',
+  ),
+  'quiote-docs://api/filesystem/filesystem-storage-exception' => 
+  array (
+    'file' => 'api/filesystem/filesystem-storage-exception.md',
+    'path' => 'api/filesystem/filesystem-storage-exception',
+    'title' => 'FilesystemStorageException',
+    'description' => 'Thrown when a FilesystemAdapterInterface operation fails.',
+  ),
+  'quiote-docs://api/filesystem/gcs/gcs-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/gcs/gcs-filesystem-adapter.md',
+    'path' => 'api/filesystem/gcs/gcs-filesystem-adapter',
+    'title' => 'GcsFilesystemAdapter',
+    'description' => 'FilesystemAdapterInterface over GcsClient (HMAC interop-key REST client, no google/cloud-storage).',
+  ),
+  'quiote-docs://api/filesystem/gcs/gcs-filesystem-plugin' => 
+  array (
+    'file' => 'api/filesystem/gcs/gcs-filesystem-plugin.md',
+    'path' => 'api/filesystem/gcs/gcs-filesystem-plugin',
+    'title' => 'GcsFilesystemPlugin',
+    'description' => 'Registers the `gcs` filesystem driver alias and publishes `filesystem.disks.gcs.*` config defaults.',
+  ),
+  'quiote-docs://api/filesystem/gcs/index' => 
+  array (
+    'file' => 'api/filesystem/gcs/index.md',
+    'path' => 'api/filesystem/gcs/index',
+    'title' => 'Gcs',
+    'description' => 'The Quiote\\\\Filesystem\\\\Gcs namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/filesystem/index' => 
+  array (
+    'file' => 'api/filesystem/index.md',
+    'path' => 'api/filesystem/index',
+    'title' => 'Filesystem',
+    'description' => 'The Quiote\\\\Filesystem namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/filesystem/listable-filesystem-interface' => 
+  array (
+    'file' => 'api/filesystem/listable-filesystem-interface.md',
+    'path' => 'api/filesystem/listable-filesystem-interface',
+    'title' => 'ListableFilesystemInterface',
+    'description' => 'A filesystem that can enumerate what it holds.',
+  ),
+  'quiote-docs://api/filesystem/local-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/local-filesystem-adapter.md',
+    'path' => 'api/filesystem/local-filesystem-adapter',
+    'title' => 'LocalFilesystemAdapter',
+    'description' => 'Zero-dependency local-disk FilesystemAdapterInterface — the default driver.',
+  ),
+  'quiote-docs://api/filesystem/object-store-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/object-store-filesystem-adapter.md',
+    'path' => 'api/filesystem/object-store-filesystem-adapter',
+    'title' => 'ObjectStoreFilesystemAdapter',
+    'description' => 'A FilesystemAdapterInterface over any ObjectStoreClientInterface.',
+  ),
+  'quiote-docs://api/filesystem/s3/index' => 
+  array (
+    'file' => 'api/filesystem/s3/index.md',
+    'path' => 'api/filesystem/s3/index',
+    'title' => 'S3',
+    'description' => 'The Quiote\\\\Filesystem\\\\S3 namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/filesystem/s3/s3-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/s3/s3-filesystem-adapter.md',
+    'path' => 'api/filesystem/s3/s3-filesystem-adapter',
+    'title' => 'S3FilesystemAdapter',
+    'description' => 'FilesystemAdapterInterface over S3Client (SigV4 REST client, no aws-sdk-php).',
+  ),
+  'quiote-docs://api/filesystem/s3/s3-filesystem-plugin' => 
+  array (
+    'file' => 'api/filesystem/s3/s3-filesystem-plugin.md',
+    'path' => 'api/filesystem/s3/s3-filesystem-plugin',
+    'title' => 'S3FilesystemPlugin',
+    'description' => 'Registers the `s3` filesystem driver alias and publishes `filesystem.disks.s3.*` config defaults.',
+  ),
+  'quiote-docs://api/http/client/curl-transport' => 
+  array (
+    'file' => 'api/http/client/curl-transport.md',
+    'path' => 'api/http/client/curl-transport',
+    'title' => 'CurlTransport',
+    'description' => 'Zero-dependency PSR-18 transport built on ext-curl and the Nyholm PSR-17 factory (already a hard framework dependency).',
+  ),
+  'quiote-docs://api/http/client/exception/index' => 
+  array (
+    'file' => 'api/http/client/exception/index.md',
+    'path' => 'api/http/client/exception/index',
+    'title' => 'Exception',
+    'description' => 'The Quiote\\\\Http\\\\Client\\\\Exception namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/http/client/exception/network-exception' => 
+  array (
+    'file' => 'api/http/client/exception/network-exception.md',
+    'path' => 'api/http/client/exception/network-exception',
+    'title' => 'NetworkException',
+    'description' => 'PSR-18 network failure: the request could not be sent / no response was received (DNS failure, connection refused/reset, timeout).',
+  ),
+  'quiote-docs://api/http/client/exception/request-exception' => 
+  array (
+    'file' => 'api/http/client/exception/request-exception.md',
+    'path' => 'api/http/client/exception/request-exception',
+    'title' => 'RequestException',
+    'description' => 'PSR-18 malformed-request failure: the request itself is not a well-formed HTTP request and could not even be attempted (e.g.',
+  ),
+  'quiote-docs://api/http/client/exception/transport-exception' => 
+  array (
+    'file' => 'api/http/client/exception/transport-exception.md',
+    'path' => 'api/http/client/exception/transport-exception',
+    'title' => 'TransportException',
+    'description' => 'Base PSR-18 client exception for the Quiote HTTP client — anything that went wrong sending a request that isn\'t more specifically a network or malformed- request failure (NetworkException/RequestException).',
+  ),
+  'quiote-docs://api/http/client/http-client' => 
+  array (
+    'file' => 'api/http/client/http-client.md',
+    'path' => 'api/http/client/http-client',
+    'title' => 'HttpClient',
+    'description' => 'The framework HTTP client: a PSR-18 `ClientInterface` wrapping an underlying transport, adding base-URI resolution, default headers, a transient-failure retry policy, ergonomic verb helpers, and — the payoff for the whole abstraction — the central egress seam for telemetry.',
+  ),
+  'quiote-docs://api/http/client/http-client-config' => 
+  array (
+    'file' => 'api/http/client/http-client-config.md',
+    'path' => 'api/http/client/http-client-config',
+    'title' => 'HttpClientConfig',
+    'description' => 'Mutable, fluent configuration for a named HTTP client, populated inside a HttpClientFactory::configure() callback (the dotnet `AddHttpClient(\\"name\\", c => ...)` analogue).',
+  ),
+  'quiote-docs://api/http/client/http-client-factory' => 
+  array (
+    'file' => 'api/http/client/http-client-factory.md',
+    'path' => 'api/http/client/http-client-factory',
+    'title' => 'HttpClientFactory',
+    'description' => 'Registry + factory for named HTTP clients, modelled on .NET\'s `services.AddHttpClient(\\"name\\", c => ...)` / `IHttpClientFactory`: you register a named client\'s configuration once, then resolve it by name, and the same HttpClient instance is reused for that name for the lifetime of the process (a FrankenPHP worker keeps one per name) rather than being rebuilt on every call.',
+  ),
+  'quiote-docs://api/http/client/index' => 
+  array (
+    'file' => 'api/http/client/index.md',
+    'path' => 'api/http/client/index',
+    'title' => 'Client',
+    'description' => 'The Quiote\\\\Http\\\\Client namespace — 8 documented types.',
+  ),
+  'quiote-docs://api/http/client/transport-factory' => 
+  array (
+    'file' => 'api/http/client/transport-factory.md',
+    'path' => 'api/http/client/transport-factory',
+    'title' => 'TransportFactory',
+    'description' => 'Chooses the default underlying PSR-18 transport: Guzzle if it is installed (its `GuzzleHttp\\\\Client` already implements PSR-18 `ClientInterface`, so it is used directly — no adapter needed), otherwise the zero-dependency CurlTransport.',
+  ),
+  'quiote-docs://api/http/cookie-serializer' => 
+  array (
+    'file' => 'api/http/cookie-serializer.md',
+    'path' => 'api/http/cookie-serializer',
+    'title' => 'CookieSerializer',
+    'description' => 'Bridges cookies queued on a Quiote response onto a PSR-7 response\'s `Set-Cookie` headers.',
+  ),
+  'quiote-docs://api/http/http-status' => 
+  array (
+    'file' => 'api/http/http-status.md',
+    'path' => 'api/http/http-status',
+    'title' => 'HttpStatus',
+    'description' => 'The single source of truth for HTTP status-code validity and reason phrases.',
+  ),
+  'quiote-docs://api/http/index' => 
+  array (
+    'file' => 'api/http/index.md',
+    'path' => 'api/http/index',
+    'title' => 'Http',
+    'description' => 'The Quiote\\\\Http namespace — 21 documented types.',
+  ),
+  'quiote-docs://api/http/mime-type-registry' => 
+  array (
+    'file' => 'api/http/mime-type-registry.md',
+    'path' => 'api/http/mime-type-registry',
+    'title' => 'MimeTypeRegistry',
+    'description' => 'Maps between Quiote format names, MIME types, and file extensions using symfony/mime.',
+  ),
+  'quiote-docs://api/http/problem-details' => 
+  array (
+    'file' => 'api/http/problem-details.md',
+    'path' => 'api/http/problem-details',
+    'title' => 'ProblemDetails',
+    'description' => 'An RFC 9457 (Problem Details for HTTP APIs; obsoletes RFC 7807) document.',
+  ),
+  'quiote-docs://api/http/psr-response-adapter' => 
+  array (
+    'file' => 'api/http/psr-response-adapter.md',
+    'path' => 'api/http/psr-response-adapter',
+    'title' => 'PsrResponseAdapter',
+    'description' => 'A PSR-7 view of a WebResponse, so a view or action handed a PSR-7 response can read the status, headers and body the framework has assembled.',
+  ),
+  'quiote-docs://api/http/psr-server-request-adapter' => 
+  array (
+    'file' => 'api/http/psr-server-request-adapter.md',
+    'path' => 'api/http/psr-server-request-adapter',
+    'title' => 'PsrServerRequestAdapter',
+    'description' => 'DEPRECATED: PsrServerRequestAdapter has been removed in favor of using WebRequest directly (which now implements ServerRequestInterface).',
+  ),
+  'quiote-docs://api/http/psr17' => 
+  array (
+    'file' => 'api/http/psr17.md',
+    'path' => 'api/http/psr17',
+    'title' => 'Psr17',
+    'description' => 'Shared stateless Nyholm\\\\Psr7\\\\Factory\\\\Psr17Factory instance.',
+  ),
+  'quiote-docs://api/http/request-scheme' => 
+  array (
+    'file' => 'api/http/request-scheme.md',
+    'path' => 'api/http/request-scheme',
+    'title' => 'RequestScheme',
+    'description' => 'Whether a PSR-7 request reached the client over TLS.',
+  ),
+  'quiote-docs://api/http/simple-stream' => 
+  array (
+    'file' => 'api/http/simple-stream.md',
+    'path' => 'api/http/simple-stream',
+    'title' => 'SimpleStream',
+    'description' => 'A minimal PSR-7 `StreamInterface` over a plain PHP stream resource, so the framework can produce response bodies without depending on a third-party PSR-7 implementation.',
+  ),
+  'quiote-docs://api/http/simple-uri' => 
+  array (
+    'file' => 'api/http/simple-uri.md',
+    'path' => 'api/http/simple-uri',
+    'title' => 'SimpleUri',
+    'description' => 'A minimal PSR-7 `UriInterface` built by handing a URI string to `parse_url()`, so the framework can supply a URI without depending on a third-party PSR-7 implementation.',
+  ),
+  'quiote-docs://api/http/sse/index' => 
+  array (
+    'file' => 'api/http/sse/index.md',
+    'path' => 'api/http/sse/index',
+    'title' => 'Sse',
+    'description' => 'The Quiote\\\\Http\\\\Sse namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/http/sse/sse-event' => 
+  array (
+    'file' => 'api/http/sse/sse-event.md',
+    'path' => 'api/http/sse/sse-event',
+    'title' => 'SseEvent',
+    'description' => 'A single Server-Sent Events wire-format message.',
+  ),
+  'quiote-docs://api/http/sse/sse-stream' => 
+  array (
+    'file' => 'api/http/sse/sse-stream.md',
+    'path' => 'api/http/sse/sse-stream',
+    'title' => 'SseStream',
+    'description' => 'A write-once PSR-7 stream backed by an iterable of SseEvent (or plain string) items, typically a generator produced by an SseStreamingAction::streamEvents() implementation.',
+  ),
+  'quiote-docs://api/http/sse/sse-streaming-action' => 
+  array (
+    'file' => 'api/http/sse/sse-streaming-action.md',
+    'path' => 'api/http/sse/sse-streaming-action',
+    'title' => 'SseStreamingAction',
+    'description' => 'Actions implementing this interface bypass the normal Action/View dispatch entirely -- DispatchMiddleware detects it and streams the returned events directly as a `text/event-stream` response, with no caching, validation short-circuiting, or View involved.',
+  ),
+  'quiote-docs://api/i18n/date-time-facade' => 
+  array (
+    'file' => 'api/i18n/date-time-facade.md',
+    'path' => 'api/i18n/date-time-facade',
+    'title' => 'DateTimeFacade',
+    'description' => 'Lightweight modern replacement for legacy DateFormat / calendar stack.',
+  ),
+  'quiote-docs://api/i18n/index' => 
+  array (
+    'file' => 'api/i18n/index.md',
+    'path' => 'api/i18n/index',
+    'title' => 'I18n',
+    'description' => 'The Quiote\\\\I18n namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/index' => 
+  array (
+    'file' => 'api/index.md',
+    'path' => 'api/index',
+    'title' => 'API reference',
+    'description' => 'Every class, interface, trait and enum the framework ships — 744 types across 42 namespaces.',
+  ),
+  'quiote-docs://api/introspection/app-introspection-artifact-writer' => 
+  array (
+    'file' => 'api/introspection/app-introspection-artifact-writer.md',
+    'path' => 'api/introspection/app-introspection-artifact-writer',
+    'title' => 'AppIntrospectionArtifactWriter',
+    'description' => 'Writes the `cache/introspection/app.json` artifact via a write-to-temp-then-rename, so an editor extension polling the file never observes a partial write mid-regeneration -- the same technique `Quiote\\\\Support\\\\Compiler\\\\FilesystemArtifactWriter` uses for compiled PHP artifacts, just for arbitrary JSON content instead of PHP source.',
+  ),
+  'quiote-docs://api/introspection/app-introspection-compiler' => 
+  array (
+    'file' => 'api/introspection/app-introspection-compiler.md',
+    'path' => 'api/introspection/app-introspection-compiler',
+    'title' => 'AppIntrospectionCompiler',
+    'description' => 'Builds the versioned `cache/introspection/app.json` artifact an editor extension reads directly, with no PHP spawn, on its warm path: routes, modules, Action/View/Template triads, diagnostics, a dependency manifest, and shadowed-config info.',
+  ),
+  'quiote-docs://api/introspection/index' => 
+  array (
+    'file' => 'api/introspection/index.md',
+    'path' => 'api/introspection/index',
+    'title' => 'Introspection',
+    'description' => 'The Quiote\\\\Introspection namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/logging/category-logger' => 
+  array (
+    'file' => 'api/logging/category-logger.md',
+    'path' => 'api/logging/category-logger',
+    'title' => 'CategoryLogger',
+    'description' => 'A PSR-3 logger bound to a single category.',
+  ),
+  'quiote-docs://api/logging/index' => 
+  array (
+    'file' => 'api/logging/index.md',
+    'path' => 'api/logging/index',
+    'title' => 'Logging',
+    'description' => 'The Quiote\\\\Logging namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/logging/level' => 
+  array (
+    'file' => 'api/logging/level.md',
+    'path' => 'api/logging/level',
+    'title' => 'Level',
+    'description' => 'Ordinal log level with minimum-level (>=) semantics.',
+  ),
+  'quiote-docs://api/logging/log' => 
+  array (
+    'file' => 'api/logging/log.md',
+    'path' => 'api/logging/log',
+    'title' => 'Log',
+    'description' => 'Static facade for the logging subsystem: configuration (called in index.php before Kernel::run()) and logger acquisition (used everywhere else).',
+  ),
+  'quiote-docs://api/logging/log-context' => 
+  array (
+    'file' => 'api/logging/log-context.md',
+    'path' => 'api/logging/log-context',
+    'title' => 'LogContext',
+    'description' => 'Ambient, stack-based logging context (Serilog LogContext / .NET BeginScope).',
+  ),
+  'quiote-docs://api/logging/log-event' => 
+  array (
+    'file' => 'api/logging/log-event.md',
+    'path' => 'api/logging/log-event',
+    'title' => 'LogEvent',
+    'description' => 'An immutable structured log event.',
+  ),
+  'quiote-docs://api/logging/log-registry' => 
+  array (
+    'file' => 'api/logging/log-registry.md',
+    'path' => 'api/logging/log-registry',
+    'title' => 'LogRegistry',
+    'description' => 'Process-global store of logging configuration: the default minimum level, the per-category minimum levels, and the registered sinks.',
+  ),
+  'quiote-docs://api/logging/logger-factory' => 
+  array (
+    'file' => 'api/logging/logger-factory.md',
+    'path' => 'api/logging/logger-factory',
+    'title' => 'LoggerFactory',
+    'description' => 'Default LoggerFactoryInterface: thin wrapper over the Log facade (and thus LogRegistry) for constructor injection via the DI container.',
+  ),
+  'quiote-docs://api/logging/logger-factory-interface' => 
+  array (
+    'file' => 'api/logging/logger-factory-interface.md',
+    'path' => 'api/logging/logger-factory-interface',
+    'title' => 'LoggerFactoryInterface',
+    'description' => 'DI-injectable factory for category loggers.',
+  ),
+  'quiote-docs://api/logging/scope-token' => 
+  array (
+    'file' => 'api/logging/scope-token.md',
+    'path' => 'api/logging/scope-token',
+    'title' => 'ScopeToken',
+    'description' => 'Handle to an active LogContext scope frame.',
+  ),
+  'quiote-docs://api/logging/sink/abstract-stream-sink' => 
+  array (
+    'file' => 'api/logging/sink/abstract-stream-sink.md',
+    'path' => 'api/logging/sink/abstract-stream-sink',
+    'title' => 'AbstractStreamSink',
+    'description' => 'Base for sinks that write one line per event to a stream.',
+  ),
+  'quiote-docs://api/logging/sink/ansi-text-stream-sink' => 
+  array (
+    'file' => 'api/logging/sink/ansi-text-stream-sink.md',
+    'path' => 'api/logging/sink/ansi-text-stream-sink',
+    'title' => 'AnsiTextStreamSink',
+    'description' => 'TextStreamSink that colors warning-and-above lines so they stand out in an interactive terminal: yellow = warning red = error bold red = critical/alert/emergency Debug/info/notice are left uncolored — the goal is making problems jump out, not painting every line.',
+  ),
+  'quiote-docs://api/logging/sink/emoji-text-stream-sink' => 
+  array (
+    'file' => 'api/logging/sink/emoji-text-stream-sink.md',
+    'path' => 'api/logging/sink/emoji-text-stream-sink',
+    'title' => 'EmojiTextStreamSink',
+    'description' => 'AnsiTextStreamSink with an emoji prefix per level, for local dev consoles where a quick visual scan matters more than a clean tail | grep.',
+  ),
+  'quiote-docs://api/logging/sink/file-sink' => 
+  array (
+    'file' => 'api/logging/sink/file-sink.md',
+    'path' => 'api/logging/sink/file-sink',
+    'title' => 'FileSink',
+    'description' => 'Plain-text sink that appends one line per event to a file on disk, creating the parent directory if it doesn\'t exist yet (AbstractStreamSink\'s lazy fopen() would otherwise fail silently against a missing directory).',
+  ),
+  'quiote-docs://api/logging/sink/index' => 
+  array (
+    'file' => 'api/logging/sink/index.md',
+    'path' => 'api/logging/sink/index',
+    'title' => 'Sink',
+    'description' => 'The Quiote\\\\Logging\\\\Sink namespace — 7 documented types.',
+  ),
+  'quiote-docs://api/logging/sink/json-stdout-sink' => 
+  array (
+    'file' => 'api/logging/sink/json-stdout-sink.md',
+    'path' => 'api/logging/sink/json-stdout-sink',
+    'title' => 'JsonStdoutSink',
+    'description' => 'Default container sink: one compact JSON object per line to stdout.',
+  ),
+  'quiote-docs://api/logging/sink/sink-interface' => 
+  array (
+    'file' => 'api/logging/sink/sink-interface.md',
+    'path' => 'api/logging/sink/sink-interface',
+    'title' => 'SinkInterface',
+    'description' => 'A destination for log events.',
+  ),
+  'quiote-docs://api/logging/sink/text-stream-sink' => 
+  array (
+    'file' => 'api/logging/sink/text-stream-sink.md',
+    'path' => 'api/logging/sink/text-stream-sink',
+    'title' => 'TextStreamSink',
+    'description' => 'Human-readable single-line sink for local development.',
+  ),
+  'quiote-docs://api/mcp/auth/index' => 
+  array (
+    'file' => 'api/mcp/auth/index.md',
+    'path' => 'api/mcp/auth/index',
+    'title' => 'Auth',
+    'description' => 'The Quiote\\\\Mcp\\\\Auth namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/mcp/auth/mcp-authenticator-interface' => 
+  array (
+    'file' => 'api/mcp/auth/mcp-authenticator-interface.md',
+    'path' => 'api/mcp/auth/mcp-authenticator-interface',
+    'title' => 'McpAuthenticatorInterface',
+    'description' => 'Validates the bearer token presented to the MCP HTTP endpoint.',
+  ),
+  'quiote-docs://api/mcp/auth/static-token-authenticator' => 
+  array (
+    'file' => 'api/mcp/auth/static-token-authenticator.md',
+    'path' => 'api/mcp/auth/static-token-authenticator',
+    'title' => 'StaticTokenAuthenticator',
+    'description' => 'The default McpAuthenticatorInterface: a single shared secret from the `mcp.auth_token` setting.',
+  ),
+  'quiote-docs://api/mcp/bridge/action-tool-adapter' => 
+  array (
+    'file' => 'api/mcp/bridge/action-tool-adapter.md',
+    'path' => 'api/mcp/bridge/action-tool-adapter',
+    'title' => 'ActionToolAdapter',
+    'description' => 'The actions-as-tools bridge (the headline feature): maps one `tools/call` to a specific `#[Route]` action\'s own execution path.',
+  ),
+  'quiote-docs://api/mcp/bridge/container-adapter' => 
+  array (
+    'file' => 'api/mcp/bridge/container-adapter.md',
+    'path' => 'api/mcp/bridge/container-adapter',
+    'title' => 'ContainerAdapter',
+    'description' => 'Wraps Quiote\'s DI Container as the PSR-11 container `mcp/sdk` uses (`Mcp\\\\Server\\\\Builder::setContainer()`) to resolve string/array tool handlers (`Mcp\\\\Capability\\\\Registry\\\\ReferenceHandler::getClassInstance()`).',
+  ),
+  'quiote-docs://api/mcp/bridge/index' => 
+  array (
+    'file' => 'api/mcp/bridge/index.md',
+    'path' => 'api/mcp/bridge/index',
+    'title' => 'Bridge',
+    'description' => 'The Quiote\\\\Mcp\\\\Bridge namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/mcp/compiler/action-tool-definition' => 
+  array (
+    'file' => 'api/mcp/compiler/action-tool-definition.md',
+    'path' => 'api/mcp/compiler/action-tool-definition',
+    'title' => 'ActionToolDefinition',
+    'description' => 'Format-independent description of one action exposed as an MCP tool -- what ActionToolScanner discovers, consumed by McpServer to build the actual SDK registration.',
+  ),
+  'quiote-docs://api/mcp/compiler/action-tool-scanner' => 
+  array (
+    'file' => 'api/mcp/compiler/action-tool-scanner.md',
+    'path' => 'api/mcp/compiler/action-tool-scanner',
+    'title' => 'ActionToolScanner',
+    'description' => 'Discovers `#[Route]` action classes that are also decorated with the SDK\'s own `#[McpTool]` attribute -- \\"add one attribute to an existing action\\" is the headline feature.',
+  ),
+  'quiote-docs://api/mcp/compiler/index' => 
+  array (
+    'file' => 'api/mcp/compiler/index.md',
+    'path' => 'api/mcp/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Mcp\\\\Compiler namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/mcp/compiler/mcp-directory-resolver' => 
+  array (
+    'file' => 'api/mcp/compiler/mcp-directory-resolver.md',
+    'path' => 'api/mcp/compiler/mcp-directory-resolver',
+    'title' => 'McpDirectoryResolver',
+    'description' => 'Resolves the plain-class attribute-discovery scan set: every existing `{ModuleDir}/{Module}/Mcp/` subdirectory across the app\'s module directory plus any plugin-contributed module directories -- mirroring the `{Module}/Actions/`, `{Module}/Validate/` per-module convention the rest of the framework already uses, scoped to a `Mcp/` subtree so this scan is cheap and doesn\'t also walk every action/controller class in the app.',
+  ),
+  'quiote-docs://api/mcp/compiler/validator-schema-mapper' => 
+  array (
+    'file' => 'api/mcp/compiler/validator-schema-mapper.md',
+    'path' => 'api/mcp/compiler/validator-schema-mapper',
+    'title' => 'ValidatorSchemaMapper',
+    'description' => 'The ValidatorSchemaMapper class in Quiote\\\\Mcp\\\\Compiler.',
+  ),
+  'quiote-docs://api/mcp/console/index' => 
+  array (
+    'file' => 'api/mcp/console/index.md',
+    'path' => 'api/mcp/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Mcp\\\\Console namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/mcp/console/mcp-serve-command' => 
+  array (
+    'file' => 'api/mcp/console/mcp-serve-command.md',
+    'path' => 'api/mcp/console/mcp-serve-command',
+    'title' => 'McpServeCommand',
+    'description' => 'Runs this app as an MCP server over stdio -- the transport local clients (Claude Desktop, IDEs) launch as a subprocess, with no HTTP/auth surface.',
+  ),
+  'quiote-docs://api/mcp/console/mcp-warmup-command' => 
+  array (
+    'file' => 'api/mcp/console/mcp-warmup-command.md',
+    'path' => 'api/mcp/console/mcp-warmup-command',
+    'title' => 'McpWarmupCommand',
+    'description' => 'Pre-populates the plain-class attribute-discovery cache (see McpServer::buildDiscoveryCache()) by building the SDK server once offline, so the first real `mcp:serve`/HTTP request in a freshly started process hits the file-backed cache instead of paying the filesystem-walk + reflection cost of `Mcp\\\\Capability\\\\Discovery\\\\Discoverer` itself.',
+  ),
+  'quiote-docs://api/mcp/index' => 
+  array (
+    'file' => 'api/mcp/index.md',
+    'path' => 'api/mcp/index',
+    'title' => 'Mcp',
+    'description' => 'The Quiote\\\\Mcp namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/mcp/mcp-catalog' => 
+  array (
+    'file' => 'api/mcp/mcp-catalog.md',
+    'path' => 'api/mcp/mcp-catalog',
+    'title' => 'McpCatalog',
+    'description' => 'Process-global registry of MCP tools/resources/prompts, mirroring the static, worker-lifetime pattern of MiddlewareCatalog and PluginManager: entries are added once at boot (via PluginRegistrar or attribute discovery, once that lands) and read once by McpServer::build() when the server is assembled.',
+  ),
+  'quiote-docs://api/mcp/mcp-config' => 
+  array (
+    'file' => 'api/mcp/mcp-config.md',
+    'path' => 'api/mcp/mcp-config',
+    'title' => 'McpConfig',
+    'description' => 'Typed snapshot of the `mcp.*` settings family.',
+  ),
+  'quiote-docs://api/mcp/mcp-plugin' => 
+  array (
+    'file' => 'api/mcp/mcp-plugin.md',
+    'path' => 'api/mcp/mcp-plugin',
+    'title' => 'McpPlugin',
+    'description' => 'Opt-in entry point for the MCP server capability.',
+  ),
+  'quiote-docs://api/mcp/mcp-server' => 
+  array (
+    'file' => 'api/mcp/mcp-server.md',
+    'path' => 'api/mcp/mcp-server',
+    'title' => 'McpServer',
+    'description' => 'Our own facade over the official `mcp/sdk` `Server::builder()` API: every `Mcp\\\\*` symbol the app touches is confined to this class (plus ContainerAdapter), so an SDK breaking change (it is pre-1.0) touches one file, not the whole feature.',
+  ),
+  'quiote-docs://api/mcp/middleware/index' => 
+  array (
+    'file' => 'api/mcp/middleware/index.md',
+    'path' => 'api/mcp/middleware/index',
+    'title' => 'Middleware',
+    'description' => 'The Quiote\\\\Mcp\\\\Middleware namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/mcp/middleware/mcp-auth-middleware' => 
+  array (
+    'file' => 'api/mcp/middleware/mcp-auth-middleware.md',
+    'path' => 'api/mcp/middleware/mcp-auth-middleware',
+    'title' => 'McpAuthMiddleware',
+    'description' => 'Bearer-token auth for the MCP HTTP endpoint.',
+  ),
+  'quiote-docs://api/mcp/middleware/mcp-endpoint-middleware' => 
+  array (
+    'file' => 'api/mcp/middleware/mcp-endpoint-middleware.md',
+    'path' => 'api/mcp/middleware/mcp-endpoint-middleware',
+    'title' => 'McpEndpointMiddleware',
+    'description' => 'The Streamable-HTTP transport: matches the configured `mcp.path` (default `/mcp`) -- plus, when `mcp.auth` is `\'oauth2\'`, a GET to the RFC 9728 well-known metadata path, since that also has to reach McpServer::handleHttp() for the SDK\'s own `ProtectedResourceMetadataMiddleware` (composed there) to serve it -- and delegates everything else to the rest of the pipeline unchanged.',
+  ),
+  'quiote-docs://api/middleware/asset-aggregation-middleware' => 
+  array (
+    'file' => 'api/middleware/asset-aggregation-middleware.md',
+    'path' => 'api/middleware/asset-aggregation-middleware',
+    'title' => 'AssetAggregationMiddleware',
+    'description' => 'Collects legacy appended attributes like \'css\' and \'js\' from the Request (when using adapter) and exposes them as PSR request attributes `assets.css` and `assets.js`.',
+  ),
+  'quiote-docs://api/middleware/attribute/index' => 
+  array (
+    'file' => 'api/middleware/attribute/index.md',
+    'path' => 'api/middleware/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\Middleware\\\\Attribute namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/middleware/attribute/middleware' => 
+  array (
+    'file' => 'api/middleware/attribute/middleware.md',
+    'path' => 'api/middleware/attribute/middleware',
+    'title' => 'Middleware',
+    'description' => 'Attribute to declare middleware metadata for auto-registration.',
+  ),
+  'quiote-docs://api/middleware/compiler/index' => 
+  array (
+    'file' => 'api/middleware/compiler/index.md',
+    'path' => 'api/middleware/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Middleware\\\\Compiler namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/middleware/compiler/middleware-attribute-scanner' => 
+  array (
+    'file' => 'api/middleware/compiler/middleware-attribute-scanner.md',
+    'path' => 'api/middleware/compiler/middleware-attribute-scanner',
+    'title' => 'MiddlewareAttributeScanner',
+    'description' => 'Reflects a list of candidate classes for `#[Middleware]` attributes and builds the `MiddlewareDefinition`s that `MiddlewareOrderResolver` sorts into a pipeline order.',
+  ),
+  'quiote-docs://api/middleware/compiler/middleware-definition' => 
+  array (
+    'file' => 'api/middleware/compiler/middleware-definition.md',
+    'path' => 'api/middleware/compiler/middleware-definition',
+    'title' => 'MiddlewareDefinition',
+    'description' => 'The scanned contents of one `#[Middleware]` attribute, plus the class it was found on and where it was discovered — mirrors `Quiote\\\\Routing\\\\Compiler\\\\RouteDefinition`\'s role for `#[Route]`.',
+  ),
+  'quiote-docs://api/middleware/compiler/middleware-order-exception' => 
+  array (
+    'file' => 'api/middleware/compiler/middleware-order-exception.md',
+    'path' => 'api/middleware/compiler/middleware-order-exception',
+    'title' => 'MiddlewareOrderException',
+    'description' => 'Thrown by MiddlewareOrderResolver when a `#[Middleware]` ordering constraint cannot be honoured and there is no safe fallback: either the `before`/`after` constraints form a cycle, or a *guarded* (framework) middleware\'s constraint names something that isn\'t there.',
+  ),
+  'quiote-docs://api/middleware/compiler/middleware-order-resolver' => 
+  array (
+    'file' => 'api/middleware/compiler/middleware-order-resolver.md',
+    'path' => 'api/middleware/compiler/middleware-order-resolver',
+    'title' => 'MiddlewareOrderResolver',
+    'description' => 'Turns scanned `MiddlewareDefinition`s into a single pipeline order.',
+  ),
+  'quiote-docs://api/middleware/compiler/middleware-phase' => 
+  array (
+    'file' => 'api/middleware/compiler/middleware-phase.md',
+    'path' => 'api/middleware/compiler/middleware-phase',
+    'title' => 'MiddlewarePhase',
+    'description' => 'Canonical ordering of the `phase` values accepted by `Quiote\\\\Middleware\\\\Attribute\\\\Middleware`.',
+  ),
+  'quiote-docs://api/middleware/config/index' => 
+  array (
+    'file' => 'api/middleware/config/index.md',
+    'path' => 'api/middleware/config/index',
+    'title' => 'Config',
+    'description' => 'The Quiote\\\\Middleware\\\\Config namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/middleware/config/middleware-config-registry' => 
+  array (
+    'file' => 'api/middleware/config/middleware-config-registry.md',
+    'path' => 'api/middleware/config/middleware-config-registry',
+    'title' => 'MiddlewareConfigRegistry',
+    'description' => 'Process-global accumulator for `<use>` entries contributed by compiled `middleware.{xml,php,yaml,yml}` files (the app\'s own plus any module\'s `Config/middleware.*`), mirroring PluginManager\'s role for `plugins.*`.',
+  ),
+  'quiote-docs://api/middleware/content-negotiation-middleware' => 
+  array (
+    'file' => 'api/middleware/content-negotiation-middleware.md',
+    'path' => 'api/middleware/content-negotiation-middleware',
+    'title' => 'ContentNegotiationMiddleware',
+    'description' => 'Minimal wrapper over middlewares/content-type.',
+  ),
+  'quiote-docs://api/middleware/core-middleware-registry' => 
+  array (
+    'file' => 'api/middleware/core-middleware-registry.md',
+    'path' => 'api/middleware/core-middleware-registry',
+    'title' => 'CoreMiddlewareRegistry',
+    'description' => 'The single declaration of the middleware the framework ships.',
+  ),
+  'quiote-docs://api/middleware/dispatch-middleware' => 
+  array (
+    'file' => 'api/middleware/dispatch-middleware.md',
+    'path' => 'api/middleware/dispatch-middleware',
+    'title' => 'DispatchMiddleware',
+    'description' => 'DispatchMiddleware runs the requested action.',
+  ),
+  'quiote-docs://api/middleware/error-handling-middleware' => 
+  array (
+    'file' => 'api/middleware/error-handling-middleware.md',
+    'path' => 'api/middleware/error-handling-middleware',
+    'title' => 'ErrorHandlingMiddleware',
+    'description' => 'Catches unhandled throwables from downstream middleware/action dispatch and produces a generic 500 (or mapped) response.',
+  ),
+  'quiote-docs://api/middleware/execution-time-middleware' => 
+  array (
+    'file' => 'api/middleware/execution-time-middleware.md',
+    'path' => 'api/middleware/execution-time-middleware',
+    'title' => 'ExecutionTimeMiddleware',
+    'description' => 'Basic execution timing middleware replacing ExecutionTimeFilter.',
+  ),
+  'quiote-docs://api/middleware/finalize-middleware' => 
+  array (
+    'file' => 'api/middleware/finalize-middleware.md',
+    'path' => 'api/middleware/finalize-middleware',
+    'title' => 'FinalizeMiddleware',
+    'description' => 'FinalizeMiddleware (scaffold): end-of-request persistence for session/user.',
+  ),
+  'quiote-docs://api/middleware/form-population-middleware' => 
+  array (
+    'file' => 'api/middleware/form-population-middleware.md',
+    'path' => 'api/middleware/form-population-middleware',
+    'title' => 'FormPopulationMiddleware',
+    'description' => 'Applies the modernized form population engine to PSR-7 responses so container-less requests still receive automatic form value and error message population.',
+  ),
+  'quiote-docs://api/middleware/index' => 
+  array (
+    'file' => 'api/middleware/index.md',
+    'path' => 'api/middleware/index',
+    'title' => 'Middleware',
+    'description' => 'The Quiote\\\\Middleware namespace — 29 documented types.',
+  ),
+  'quiote-docs://api/middleware/middleware-catalog' => 
+  array (
+    'file' => 'api/middleware/middleware-catalog.md',
+    'path' => 'api/middleware/middleware-catalog',
+    'title' => 'MiddlewareCatalog',
+    'description' => 'MiddlewareCatalog stores enable/disable flags for middleware FQCNs, settable programmatically via MiddlewareCatalog::initialize() (tests, app bootstrap code), so the runtime pipeline builder can cheaply skip optional middlewares.',
+  ),
+  'quiote-docs://api/middleware/middleware-pipeline' => 
+  array (
+    'file' => 'api/middleware/middleware-pipeline.md',
+    'path' => 'api/middleware/middleware-pipeline',
+    'title' => 'MiddlewarePipeline',
+    'description' => 'MiddlewarePipeline builds and caches the PSR-15 middleware chain; safe for worker reuse.',
+  ),
+  'quiote-docs://api/middleware/output-type-sync-middleware' => 
+  array (
+    'file' => 'api/middleware/output-type-sync-middleware.md',
+    'path' => 'api/middleware/output-type-sync-middleware',
+    'title' => 'OutputTypeSyncMiddleware',
+    'description' => 'Synchronizes the Controller\'s current output type with the PSR request attribute \'output_type\' after routing has resolved (and potentially overridden) it.',
+  ),
+  'quiote-docs://api/middleware/payload-parsing-middleware' => 
+  array (
+    'file' => 'api/middleware/payload-parsing-middleware.md',
+    'path' => 'api/middleware/payload-parsing-middleware',
+    'title' => 'PayloadParsingMiddleware',
+    'description' => 'Unified body parsing leveraging middlewares/payload.',
+  ),
+  'quiote-docs://api/middleware/request-diagnostics' => 
+  array (
+    'file' => 'api/middleware/request-diagnostics.md',
+    'path' => 'api/middleware/request-diagnostics',
+    'title' => 'RequestDiagnostics',
+    'description' => 'Session and authentication state for a middleware\'s debug lines.',
+  ),
+  'quiote-docs://api/middleware/routing-middleware' => 
+  array (
+    'file' => 'api/middleware/routing-middleware.md',
+    'path' => 'api/middleware/routing-middleware',
+    'title' => 'RoutingMiddleware',
+    'description' => 'Executes Quiote routing and attaches module/action/outputType to PSR request attributes.',
+  ),
+  'quiote-docs://api/middleware/security-middleware' => 
+  array (
+    'file' => 'api/middleware/security-middleware.md',
+    'path' => 'api/middleware/security-middleware',
+    'title' => 'SecurityMiddleware',
+    'description' => 'Security middleware: evaluates action security requirements and forwards unauthenticated/unauthorized requests to login/secure system actions.',
+  ),
+  'quiote-docs://api/middleware/session-middleware' => 
+  array (
+    'file' => 'api/middleware/session-middleware.md',
+    'path' => 'api/middleware/session-middleware',
+    'title' => 'SessionMiddleware',
+    'description' => 'Bootstrap-phase session wiring for the framework pipeline.',
+  ),
+  'quiote-docs://api/middleware/slot-middleware' => 
+  array (
+    'file' => 'api/middleware/slot-middleware.md',
+    'path' => 'api/middleware/slot-middleware',
+    'title' => 'SlotMiddleware',
+    'description' => 'SlotMiddleware: establishes a SlotStack in request attributes for nested slot/sub-action rendering.',
+  ),
+  'quiote-docs://api/middleware/stealth-middleware' => 
+  array (
+    'file' => 'api/middleware/stealth-middleware.md',
+    'path' => 'api/middleware/stealth-middleware',
+    'title' => 'StealthMiddleware',
+    'description' => 'Strips framework-identifying response headers when `core.stealth_mode` is enabled: any `X-Quiote-*` header, plus the names listed in `core.stealth_additional_headers` (covers `X-Powered-By`, which doesn\'t follow that prefix).',
+  ),
+  'quiote-docs://api/middleware/telemetry-middleware' => 
+  array (
+    'file' => 'api/middleware/telemetry-middleware.md',
+    'path' => 'api/middleware/telemetry-middleware',
+    'title' => 'TelemetryMiddleware',
+    'description' => 'Opens the root OpenTelemetry span for the request and records the headline resource measurements — wall time, CPU, memory — as both span attributes and OTel metrics.',
+  ),
+  'quiote-docs://api/middleware/timing-middleware' => 
+  array (
+    'file' => 'api/middleware/timing-middleware.md',
+    'path' => 'api/middleware/timing-middleware',
+    'title' => 'TimingMiddleware',
+    'description' => 'Records timing spans for downstream middleware execution.',
+  ),
+  'quiote-docs://api/middleware/trace-middleware' => 
+  array (
+    'file' => 'api/middleware/trace-middleware.md',
+    'path' => 'api/middleware/trace-middleware',
+    'title' => 'TraceMiddleware',
+    'description' => 'Captures names of executed middleware for debugging.',
+  ),
+  'quiote-docs://api/middleware/validation-middleware' => 
+  array (
+    'file' => 'api/middleware/validation-middleware.md',
+    'path' => 'api/middleware/validation-middleware',
+    'title' => 'ValidationMiddleware',
+    'description' => 'Runs validation before the action executes, and enforces that only validated parameters are reachable afterwards.',
+  ),
+  'quiote-docs://api/model/i-model' => 
+  array (
+    'file' => 'api/model/i-model.md',
+    'path' => 'api/model/i-model',
+    'title' => 'IModel',
+    'description' => 'Model provides a convention for separating business logic from application logic.',
+  ),
+  'quiote-docs://api/model/i-singleton-model' => 
+  array (
+    'file' => 'api/model/i-singleton-model.md',
+    'path' => 'api/model/i-singleton-model',
+    'title' => 'ISingletonModel',
+    'description' => 'An extension to Model, but for implementation as a Singleton',
+  ),
+  'quiote-docs://api/model/index' => 
+  array (
+    'file' => 'api/model/index.md',
+    'path' => 'api/model/index',
+    'title' => 'Model',
+    'description' => 'The Quiote\\\\Model namespace — 6 documented types.',
+  ),
+  'quiote-docs://api/model/model' => 
+  array (
+    'file' => 'api/model/model.md',
+    'path' => 'api/model/model',
+    'title' => 'Model',
+    'description' => 'Model provides a convention for separating business logic from application logic.',
+  ),
+  'quiote-docs://api/model/model-class-resolver' => 
+  array (
+    'file' => 'api/model/model-class-resolver.md',
+    'path' => 'api/model/model-class-resolver',
+    'title' => 'ModelClassResolver',
+    'description' => 'Turns a model name into the class that implements it.',
+  ),
+  'quiote-docs://api/model/model-locator' => 
+  array (
+    'file' => 'api/model/model-locator.md',
+    'path' => 'api/model/model-locator',
+    'title' => 'ModelLocator',
+    'description' => 'Hands out model instances.',
+  ),
+  'quiote-docs://api/model/resolved-model' => 
+  array (
+    'file' => 'api/model/resolved-model.md',
+    'path' => 'api/model/resolved-model',
+    'title' => 'ResolvedModel',
+    'description' => 'What ModelClassResolver learned about a model name: which class it names, and the two facts about that class the instantiation path needs.',
+  ),
+  'quiote-docs://api/openapi/index' => 
+  array (
+    'file' => 'api/openapi/index.md',
+    'path' => 'api/openapi/index',
+    'title' => 'Openapi',
+    'description' => 'The Quiote\\\\Openapi namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/openapi/open-api-generator' => 
+  array (
+    'file' => 'api/openapi/open-api-generator.md',
+    'path' => 'api/openapi/open-api-generator',
+    'title' => 'OpenApiGenerator',
+    'description' => 'Derives an OpenAPI 3.1 document from things the app already declares: the routing IR says which paths and verbs exist and which action each resolves to, each action\'s own validators say which parameters it accepts and what they must look like (via ActionInputSchemaResolver, the same derivation that gives an MCP tool its `inputSchema`), the output type says what media type a successful response carries, and ProblemDetails says what a failure looks like.',
+  ),
+  'quiote-docs://api/openapi/open-api-options' => 
+  array (
+    'file' => 'api/openapi/open-api-options.md',
+    'path' => 'api/openapi/open-api-options',
+    'title' => 'OpenApiOptions',
+    'description' => 'The document-level knobs OpenApiGenerator can\'t derive from code: `info`, `servers`, and which routes to describe at all.',
+  ),
+  'quiote-docs://api/openapi/route-path-template' => 
+  array (
+    'file' => 'api/openapi/route-path-template.md',
+    'path' => 'api/openapi/route-path-template',
+    'title' => 'RoutePathTemplate',
+    'description' => 'A route path parsed into the shape OpenAPI wants: a template whose placeholders are bare `{name}`, plus what the placeholders\' inline syntax said about them.',
+  ),
+  'quiote-docs://api/plugin/attribute/index' => 
+  array (
+    'file' => 'api/plugin/attribute/index.md',
+    'path' => 'api/plugin/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\Plugin\\\\Attribute namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/plugin/attribute/plugin' => 
+  array (
+    'file' => 'api/plugin/attribute/plugin.md',
+    'path' => 'api/plugin/attribute/plugin',
+    'title' => 'Plugin',
+    'description' => 'Marks a class as a sanctioned plugin entry point.',
+  ),
+  'quiote-docs://api/plugin/index' => 
+  array (
+    'file' => 'api/plugin/index.md',
+    'path' => 'api/plugin/index',
+    'title' => 'Plugin',
+    'description' => 'The Quiote\\\\Plugin namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/plugin/named-plugin' => 
+  array (
+    'file' => 'api/plugin/named-plugin.md',
+    'path' => 'api/plugin/named-plugin',
+    'title' => 'NamedPlugin',
+    'description' => 'Opt-in for a plugin whose diagnostics/logging name can\'t be a compile-time constant (e.g.',
+  ),
+  'quiote-docs://api/plugin/plugin-interface' => 
+  array (
+    'file' => 'api/plugin/plugin-interface.md',
+    'path' => 'api/plugin/plugin-interface',
+    'title' => 'PluginInterface',
+    'description' => 'A Quiote plugin: a self-contained bundle that contributes to the framework through the seams that already exist (config defaults, DI services, middleware, event listeners, routes/modules, output types, commands, HTTP clients) via a single PluginInterface::register() lifecycle call — this is the mechanism the framework\'s \\"unopinionated core + opinionated drop-ins\\" philosophy is built on.',
+  ),
+  'quiote-docs://api/plugin/plugin-manager' => 
+  array (
+    'file' => 'api/plugin/plugin-manager.md',
+    'path' => 'api/plugin/plugin-manager',
+    'title' => 'PluginManager',
+    'description' => 'Process-global registry + lifecycle for PluginInterfaces, mirroring the static, worker-lifetime pattern of MiddlewareCatalog and Events: plugins are registered once and their contributions persist for the life of the process.',
+  ),
+  'quiote-docs://api/plugin/plugin-registrar' => 
+  array (
+    'file' => 'api/plugin/plugin-registrar.md',
+    'path' => 'api/plugin/plugin-registrar',
+    'title' => 'PluginRegistrar',
+    'description' => 'The fluent contribution API handed to PluginInterface::register().',
+  ),
+  'quiote-docs://api/queue/console/abstract-queue-failed-command' => 
+  array (
+    'file' => 'api/queue/console/abstract-queue-failed-command.md',
+    'path' => 'api/queue/console/abstract-queue-failed-command',
+    'title' => 'AbstractQueueFailedCommand',
+    'description' => 'Shared plumbing for the `queue:failed:*` commands.',
+  ),
+  'quiote-docs://api/queue/console/index' => 
+  array (
+    'file' => 'api/queue/console/index.md',
+    'path' => 'api/queue/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Queue\\\\Console namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/queue/console/queue-failed-forget-command' => 
+  array (
+    'file' => 'api/queue/console/queue-failed-forget-command.md',
+    'path' => 'api/queue/console/queue-failed-forget-command',
+    'title' => 'QueueFailedForgetCommand',
+    'description' => 'Deletes a dead-lettered job without retrying it.',
+  ),
+  'quiote-docs://api/queue/console/queue-failed-list-command' => 
+  array (
+    'file' => 'api/queue/console/queue-failed-list-command.md',
+    'path' => 'api/queue/console/queue-failed-list-command',
+    'title' => 'QueueFailedListCommand',
+    'description' => 'Lists jobs that exhausted their retries (see InspectableFailedJobStoreInterface).',
+  ),
+  'quiote-docs://api/queue/console/queue-failed-retry-command' => 
+  array (
+    'file' => 'api/queue/console/queue-failed-retry-command.md',
+    'path' => 'api/queue/console/queue-failed-retry-command',
+    'title' => 'QueueFailedRetryCommand',
+    'description' => 'Re-pushes a dead-lettered job and removes it from the failed store.',
+  ),
+  'quiote-docs://api/queue/console/queue-work-command' => 
+  array (
+    'file' => 'api/queue/console/queue-work-command.md',
+    'path' => 'api/queue/console/queue-work-command',
+    'title' => 'QueueWorkCommand',
+    'description' => 'Polls a persistent PollableQueueDriverInterface and processes jobs one at a time via QueueWorker.',
+  ),
+  'quiote-docs://api/queue/db/db-failed-job-store' => 
+  array (
+    'file' => 'api/queue/db/db-failed-job-store.md',
+    'path' => 'api/queue/db/db-failed-job-store',
+    'title' => 'DbFailedJobStore',
+    'description' => 'Persistent FailedJobStoreInterface — an inspectable dead-letter table, alternative to the default LogFailedJobStore.',
+  ),
+  'quiote-docs://api/queue/db/db-queue-driver' => 
+  array (
+    'file' => 'api/queue/db/db-queue-driver.md',
+    'path' => 'api/queue/db/db-queue-driver',
+    'title' => 'DbQueueDriver',
+    'description' => 'PDO-backed PollableQueueDriverInterface.',
+  ),
+  'quiote-docs://api/queue/db/index' => 
+  array (
+    'file' => 'api/queue/db/index.md',
+    'path' => 'api/queue/db/index',
+    'title' => 'Db',
+    'description' => 'The Quiote\\\\Queue\\\\Db namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/queue/db/queue-db-plugin' => 
+  array (
+    'file' => 'api/queue/db/queue-db-plugin.md',
+    'path' => 'api/queue/db/queue-db-plugin',
+    'title' => 'QueueDbPlugin',
+    'description' => 'Registers the `db` queue driver alias and publishes `queue.db.*` config defaults.',
+  ),
+  'quiote-docs://api/queue/execution-failure' => 
+  array (
+    'file' => 'api/queue/execution-failure.md',
+    'path' => 'api/queue/execution-failure',
+    'title' => 'ExecutionFailure',
+    'description' => 'Outcome of a failed JobExecutor::attempt() call: retry, or give up.',
+  ),
+  'quiote-docs://api/queue/failed-job' => 
+  array (
+    'file' => 'api/queue/failed-job.md',
+    'path' => 'api/queue/failed-job',
+    'title' => 'FailedJob',
+    'description' => 'A job whose retries were exhausted, handed to a FailedJobStoreInterface.',
+  ),
+  'quiote-docs://api/queue/failed-job-record' => 
+  array (
+    'file' => 'api/queue/failed-job-record.md',
+    'path' => 'api/queue/failed-job-record',
+    'title' => 'FailedJobRecord',
+    'description' => 'A stored dead-letter row, as returned by InspectableFailedJobStoreInterface.',
+  ),
+  'quiote-docs://api/queue/failed-job-store-interface' => 
+  array (
+    'file' => 'api/queue/failed-job-store-interface.md',
+    'path' => 'api/queue/failed-job-store-interface',
+    'title' => 'FailedJobStoreInterface',
+    'description' => 'Dead-letter sink for jobs that exhausted their retries.',
+  ),
+  'quiote-docs://api/queue/index' => 
+  array (
+    'file' => 'api/queue/index.md',
+    'path' => 'api/queue/index',
+    'title' => 'Queue',
+    'description' => 'The Quiote\\\\Queue namespace — 29 documented types.',
+  ),
+  'quiote-docs://api/queue/inspectable-failed-job-store-interface' => 
+  array (
+    'file' => 'api/queue/inspectable-failed-job-store-interface.md',
+    'path' => 'api/queue/inspectable-failed-job-store-interface',
+    'title' => 'InspectableFailedJobStoreInterface',
+    'description' => 'A FailedJobStoreInterface whose dead-letter records can be listed, looked up, and removed — the query side needed by `queue:failed:list`/`queue:failed:retry`/`queue:failed:forget` (see QueueFailedListCommand and friends).',
+  ),
+  'quiote-docs://api/queue/job' => 
+  array (
+    'file' => 'api/queue/job.md',
+    'path' => 'api/queue/job',
+    'title' => 'Job',
+    'description' => 'A unit of background work.',
+  ),
+  'quiote-docs://api/queue/job-executor' => 
+  array (
+    'file' => 'api/queue/job-executor.md',
+    'path' => 'api/queue/job-executor',
+    'title' => 'JobExecutor',
+    'description' => 'Shared retry/backoff decision logic used by both SyncQueueDriver (in-process blocking retry loop) and QueueWorker (one attempt per poll, deferred retry via the driver), so the policy is not duplicated per driver.',
+  ),
+  'quiote-docs://api/queue/job-payload' => 
+  array (
+    'file' => 'api/queue/job-payload.md',
+    'path' => 'api/queue/job-payload',
+    'title' => 'JobPayload',
+    'description' => 'A queued job identified by class + constructor params, not a serialized object — on execution the class is rebuilt via Container::make(), so constructor-injected services autowire normally.',
+  ),
+  'quiote-docs://api/queue/log-failed-job-store' => 
+  array (
+    'file' => 'api/queue/log-failed-job-store.md',
+    'path' => 'api/queue/log-failed-job-store',
+    'title' => 'LogFailedJobStore',
+    'description' => 'Default FailedJobStoreInterface: logs the failure and drops it.',
+  ),
+  'quiote-docs://api/queue/pollable-queue-driver-interface' => 
+  array (
+    'file' => 'api/queue/pollable-queue-driver-interface.md',
+    'path' => 'api/queue/pollable-queue-driver-interface',
+    'title' => 'PollableQueueDriverInterface',
+    'description' => 'A queue driver with a persistent backlog that an out-of-process worker (`queue:work`, see QueueWorker) can poll.',
+  ),
+  'quiote-docs://api/queue/queue-config' => 
+  array (
+    'file' => 'api/queue/queue-config.md',
+    'path' => 'api/queue/queue-config',
+    'title' => 'QueueConfig',
+    'description' => 'Typed snapshot of the `queue.*` settings family.',
+  ),
+  'quiote-docs://api/queue/queue-driver-interface' => 
+  array (
+    'file' => 'api/queue/queue-driver-interface.md',
+    'path' => 'api/queue/queue-driver-interface',
+    'title' => 'QueueDriverInterface',
+    'description' => 'Minimal contract every queue driver implements.',
+  ),
+  'quiote-docs://api/queue/queue-driver-registry' => 
+  array (
+    'file' => 'api/queue/queue-driver-registry.md',
+    'path' => 'api/queue/queue-driver-registry',
+    'title' => 'QueueDriverRegistry',
+    'description' => 'Process-global registry mapping short driver aliases (e.g.',
+  ),
+  'quiote-docs://api/queue/queue-manager' => 
+  array (
+    'file' => 'api/queue/queue-manager.md',
+    'path' => 'api/queue/queue-manager',
+    'title' => 'QueueManager',
+    'description' => 'App-facing entry point: `$container->get(QueueManager::class)->push(SendWelcomeEmail::class, [\'userId\' => 5])`.',
+  ),
+  'quiote-docs://api/queue/queue-plugin' => 
+  array (
+    'file' => 'api/queue/queue-plugin.md',
+    'path' => 'api/queue/queue-plugin',
+    'title' => 'QueuePlugin',
+    'description' => 'Registers the queue subsystem: `queue.*` setting defaults (`sync` driver, out of the box), a default LogFailedJobStore, the QueueManager/QueueWorker services, `queue:work`, and the `queue:failed:*` dead-letter inspection commands (a no-op error, not a crash, against the default store — see AbstractQueueFailedCommand::resolveInspectableStore()).',
+  ),
+  'quiote-docs://api/queue/queue-worker' => 
+  array (
+    'file' => 'api/queue/queue-worker.md',
+    'path' => 'api/queue/queue-worker',
+    'title' => 'QueueWorker',
+    'description' => 'Drives a PollableQueueDriverInterface\'s backlog one job at a time; used by `queue:work`.',
+  ),
+  'quiote-docs://api/queue/redis/index' => 
+  array (
+    'file' => 'api/queue/redis/index.md',
+    'path' => 'api/queue/redis/index',
+    'title' => 'Redis',
+    'description' => 'The Quiote\\\\Queue\\\\Redis namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/queue/redis/queue-redis-plugin' => 
+  array (
+    'file' => 'api/queue/redis/queue-redis-plugin.md',
+    'path' => 'api/queue/redis/queue-redis-plugin',
+    'title' => 'QueueRedisPlugin',
+    'description' => 'Registers the `redis` queue driver alias and publishes `queue.redis.*` config defaults.',
+  ),
+  'quiote-docs://api/queue/redis/redis-queue-driver' => 
+  array (
+    'file' => 'api/queue/redis/redis-queue-driver.md',
+    'path' => 'api/queue/redis/redis-queue-driver',
+    'title' => 'RedisQueueDriver',
+    'description' => 'Redis-backed PollableQueueDriverInterface.',
+  ),
+  'quiote-docs://api/queue/reserved-job' => 
+  array (
+    'file' => 'api/queue/reserved-job.md',
+    'path' => 'api/queue/reserved-job',
+    'title' => 'ReservedJob',
+    'description' => 'A JobPayload claimed off a PollableQueueDriverInterface by `reserve()`.',
+  ),
+  'quiote-docs://api/queue/retryable-job' => 
+  array (
+    'file' => 'api/queue/retryable-job.md',
+    'path' => 'api/queue/retryable-job',
+    'title' => 'RetryableJob',
+    'description' => 'Opt-in per-job retry policy.',
+  ),
+  'quiote-docs://api/queue/sync-queue-driver' => 
+  array (
+    'file' => 'api/queue/sync-queue-driver.md',
+    'path' => 'api/queue/sync-queue-driver',
+    'title' => 'SyncQueueDriver',
+    'description' => 'The always-available default driver (`queue.default_driver = sync`): `push()` executes the job inline, in-process, with blocking retries via JobExecutor::executeWithRetries().',
+  ),
+  'quiote-docs://api/quiote' => 
+  array (
+    'file' => 'api/quiote.md',
+    'path' => 'api/quiote',
+    'title' => 'Quiote',
+    'description' => 'Main framework class used for autoloading and initial bootstrapping of Quiote.',
+  ),
+  'quiote-docs://api/rector/index' => 
+  array (
+    'file' => 'api/rector/index.md',
+    'path' => 'api/rector/index',
+    'title' => 'Rector',
+    'description' => 'The Quiote\\\\Rector namespace — 11 documented types.',
+  ),
+  'quiote-docs://api/rector/node-analyzer/context-call-analyzer' => 
+  array (
+    'file' => 'api/rector/node-analyzer/context-call-analyzer.md',
+    'path' => 'api/rector/node-analyzer/context-call-analyzer',
+    'title' => 'ContextCallAnalyzer',
+    'description' => 'Decides whether a method call actually reaches a Quiote Context.',
+  ),
+  'quiote-docs://api/rector/node-analyzer/extended-class-index' => 
+  array (
+    'file' => 'api/rector/node-analyzer/extended-class-index.md',
+    'path' => 'api/rector/node-analyzer/extended-class-index',
+    'title' => 'ExtendedClassIndex',
+    'description' => 'Whether anything in the codebase extends a given class.',
+  ),
+  'quiote-docs://api/rector/node-analyzer/index' => 
+  array (
+    'file' => 'api/rector/node-analyzer/index.md',
+    'path' => 'api/rector/node-analyzer/index',
+    'title' => 'NodeAnalyzer',
+    'description' => 'The Quiote\\\\Rector\\\\NodeAnalyzer namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/rector/rector/abstract-context-injection-rector' => 
+  array (
+    'file' => 'api/rector/rector/abstract-context-injection-rector.md',
+    'path' => 'api/rector/rector/abstract-context-injection-rector',
+    'title' => 'AbstractContextInjectionRector',
+    'description' => 'Shared machinery for the rules that replace a Context accessor with an injected collaborator.',
+  ),
+  'quiote-docs://api/rector/rector/context-accessor-to-constructor-injection-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-accessor-to-constructor-injection-rector.md',
+    'path' => 'api/rector/rector/context-accessor-to-constructor-injection-rector',
+    'title' => 'ContextAccessorToConstructorInjectionRector',
+    'description' => 'Process-lifetime Context accessors to injected collaborators.',
+  ),
+  'quiote-docs://api/rector/rector/context-get-instance-to-registry-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-get-instance-to-registry-rector.md',
+    'path' => 'api/rector/rector/context-get-instance-to-registry-rector',
+    'title' => 'ContextGetInstanceToRegistryRector',
+    'description' => '`Context::getInstance(\'web\')` to an injected `ContextRegistry`.',
+  ),
+  'quiote-docs://api/rector/rector/context-get-model-to-locator-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-get-model-to-locator-rector.md',
+    'path' => 'api/rector/rector/context-get-model-to-locator-rector',
+    'title' => 'ContextGetModelToLocatorRector',
+    'description' => '`$this->getContext()->getModel(…)` to an injected `ModelLocator`.',
+  ),
+  'quiote-docs://api/rector/rector/context-request-to-request-state-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-request-to-request-state-rector.md',
+    'path' => 'api/rector/rector/context-request-to-request-state-rector',
+    'title' => 'ContextRequestToRequestStateRector',
+    'description' => 'The request half of the plan\'s rule 3, targeting `RequestState` instead of the `$rd` parameter.',
+  ),
+  'quiote-docs://api/rector/rector/context-residue-reporter' => 
+  array (
+    'file' => 'api/rector/rector/context-residue-reporter.md',
+    'path' => 'api/rector/rector/context-residue-reporter',
+    'title' => 'ContextResidueReporter',
+    'description' => 'Reports the Context call sites the rewriting rules cannot touch, with a reason for each.',
+  ),
+  'quiote-docs://api/rector/rector/context-service-to-constructor-injection-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-service-to-constructor-injection-rector.md',
+    'path' => 'api/rector/rector/context-service-to-constructor-injection-rector',
+    'title' => 'ContextServiceToConstructorInjectionRector',
+    'description' => '`$this->getContext()->getService(Foo::class)` to an injected `Foo`.',
+  ),
+  'quiote-docs://api/rector/rector/context-user-to-constructor-injection-rector' => 
+  array (
+    'file' => 'api/rector/rector/context-user-to-constructor-injection-rector.md',
+    'path' => 'api/rector/rector/context-user-to-constructor-injection-rector',
+    'title' => 'ContextUserToConstructorInjectionRector',
+    'description' => '`Context::getUser()` to an injected user, or to an injected CurrentUser where holding one would be wrong.',
+  ),
+  'quiote-docs://api/rector/rector/index' => 
+  array (
+    'file' => 'api/rector/rector/index.md',
+    'path' => 'api/rector/rector/index',
+    'title' => 'Rector',
+    'description' => 'The Quiote\\\\Rector\\\\Rector namespace — 8 documented types.',
+  ),
+  'quiote-docs://api/rector/residue/index' => 
+  array (
+    'file' => 'api/rector/residue/index.md',
+    'path' => 'api/rector/residue/index',
+    'title' => 'Residue',
+    'description' => 'The Quiote\\\\Rector\\\\Residue namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/rector/residue/residue-report' => 
+  array (
+    'file' => 'api/rector/residue/residue-report.md',
+    'path' => 'api/rector/residue/residue-report',
+    'title' => 'ResidueReport',
+    'description' => 'Collects the Context call sites no rewriting rule could handle, and writes them out once.',
+  ),
+  'quiote-docs://api/renderer/i-reusable-renderer' => 
+  array (
+    'file' => 'api/renderer/i-reusable-renderer.md',
+    'path' => 'api/renderer/i-reusable-renderer',
+    'title' => 'IReusableRenderer',
+    'description' => 'This interface can be implemented by Renderers to indicate that their instances may be used more than once for rendering.',
+  ),
+  'quiote-docs://api/renderer/index' => 
+  array (
+    'file' => 'api/renderer/index.md',
+    'path' => 'api/renderer/index',
+    'title' => 'Renderer',
+    'description' => 'The Quiote\\\\Renderer namespace — 7 documented types.',
+  ),
+  'quiote-docs://api/renderer/php-renderer' => 
+  array (
+    'file' => 'api/renderer/php-renderer.md',
+    'path' => 'api/renderer/php-renderer',
+    'title' => 'PhpRenderer',
+    'description' => 'A renderer produces the output as defined by a View',
+  ),
+  'quiote-docs://api/renderer/phptal/index' => 
+  array (
+    'file' => 'api/renderer/phptal/index.md',
+    'path' => 'api/renderer/phptal/index',
+    'title' => 'Phptal',
+    'description' => 'The Quiote\\\\Renderer\\\\Phptal namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/renderer/phptal/phptal-renderer' => 
+  array (
+    'file' => 'api/renderer/phptal/phptal-renderer.md',
+    'path' => 'api/renderer/phptal/phptal-renderer',
+    'title' => 'PhptalRenderer',
+    'description' => 'Renders PHPTAL (`.tal`) templates through the standalone phptal/phptal engine.',
+  ),
+  'quiote-docs://api/renderer/renderer' => 
+  array (
+    'file' => 'api/renderer/renderer.md',
+    'path' => 'api/renderer/renderer',
+    'title' => 'Renderer',
+    'description' => 'A renderer produces the output as defined by a View',
+  ),
+  'quiote-docs://api/renderer/twig/index' => 
+  array (
+    'file' => 'api/renderer/twig/index.md',
+    'path' => 'api/renderer/twig/index',
+    'title' => 'Twig',
+    'description' => 'The Quiote\\\\Renderer\\\\Twig namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/renderer/twig/template-layer-loader' => 
+  array (
+    'file' => 'api/renderer/twig/template-layer-loader.md',
+    'path' => 'api/renderer/twig/template-layer-loader',
+    'title' => 'TemplateLayerLoader',
+    'description' => 'Twig loader that treats the template \\"name\\" Twig is given as a literal, already-resolved filesystem path.',
+  ),
+  'quiote-docs://api/renderer/twig/twig-renderer' => 
+  array (
+    'file' => 'api/renderer/twig/twig-renderer.md',
+    'path' => 'api/renderer/twig/twig-renderer',
+    'title' => 'TwigRenderer',
+    'description' => 'Renders Twig (`.twig`) templates via twig/twig.',
+  ),
+  'quiote-docs://api/renderer/xslt/index' => 
+  array (
+    'file' => 'api/renderer/xslt/index.md',
+    'path' => 'api/renderer/xslt/index',
+    'title' => 'Xslt',
+    'description' => 'The Quiote\\\\Renderer\\\\Xslt namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/renderer/xslt/xslt-renderer' => 
+  array (
+    'file' => 'api/renderer/xslt/xslt-renderer.md',
+    'path' => 'api/renderer/xslt/xslt-renderer',
+    'title' => 'XsltRenderer',
+    'description' => 'Renders `.xsl` stylesheets against an \\"inner\\" XML document (from `$moreAssigns[\'inner\']`) via ext-xsl.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/boolean-type' => 
+  array (
+    'file' => 'api/request/attribute/constraint/boolean-type.md',
+    'path' => 'api/request/attribute/constraint/boolean-type',
+    'title' => 'BooleanType',
+    'description' => 'Requires the property\'s value to be a boolean.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/choice' => 
+  array (
+    'file' => 'api/request/attribute/constraint/choice.md',
+    'path' => 'api/request/attribute/constraint/choice',
+    'title' => 'Choice',
+    'description' => 'Requires the property\'s value to be one of a fixed allowlist.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/date-time-type' => 
+  array (
+    'file' => 'api/request/attribute/constraint/date-time-type.md',
+    'path' => 'api/request/attribute/constraint/date-time-type',
+    'title' => 'DateTimeType',
+    'description' => 'Requires the property\'s value to be a parseable date/time.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/email' => 
+  array (
+    'file' => 'api/request/attribute/constraint/email.md',
+    'path' => 'api/request/attribute/constraint/email',
+    'title' => 'Email',
+    'description' => 'Requires the property\'s value to be a valid email address.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/index' => 
+  array (
+    'file' => 'api/request/attribute/constraint/index.md',
+    'path' => 'api/request/attribute/constraint/index',
+    'title' => 'Constraint',
+    'description' => 'The Quiote\\\\Request\\\\Attribute\\\\Constraint namespace — 9 documented types.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/json-type' => 
+  array (
+    'file' => 'api/request/attribute/constraint/json-type.md',
+    'path' => 'api/request/attribute/constraint/json-type',
+    'title' => 'JsonType',
+    'description' => 'Requires the property\'s value to be a syntactically valid JSON string.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/not-blank' => 
+  array (
+    'file' => 'api/request/attribute/constraint/not-blank.md',
+    'path' => 'api/request/attribute/constraint/not-blank',
+    'title' => 'NotBlank',
+    'description' => 'Requires the property\'s value to be present and non-empty.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/range' => 
+  array (
+    'file' => 'api/request/attribute/constraint/range.md',
+    'path' => 'api/request/attribute/constraint/range',
+    'title' => 'Range',
+    'description' => 'Constrains a numeric property\'s value.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/regexp' => 
+  array (
+    'file' => 'api/request/attribute/constraint/regexp.md',
+    'path' => 'api/request/attribute/constraint/regexp',
+    'title' => 'Regexp',
+    'description' => 'Constrains a string property\'s value against a regular expression.',
+  ),
+  'quiote-docs://api/request/attribute/constraint/string-length' => 
+  array (
+    'file' => 'api/request/attribute/constraint/string-length.md',
+    'path' => 'api/request/attribute/constraint/string-length',
+    'title' => 'StringLength',
+    'description' => 'Constrains a string property\'s length.',
+  ),
+  'quiote-docs://api/request/attribute/index' => 
+  array (
+    'file' => 'api/request/attribute/index.md',
+    'path' => 'api/request/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\Request\\\\Attribute namespace — 10 documented types.',
+  ),
+  'quiote-docs://api/request/attribute/map-request' => 
+  array (
+    'file' => 'api/request/attribute/map-request.md',
+    'path' => 'api/request/attribute/map-request',
+    'title' => 'MapRequest',
+    'description' => 'Marks a class as a request-mappable DTO.',
+  ),
+  'quiote-docs://api/request/bracket-path' => 
+  array (
+    'file' => 'api/request/bracket-path.md',
+    'path' => 'api/request/bracket-path',
+    'title' => 'BracketPath',
+    'description' => 'Stateless resolution of legacy bracket-path parameter names (e.g.',
+  ),
+  'quiote-docs://api/request/compiler/index' => 
+  array (
+    'file' => 'api/request/compiler/index.md',
+    'path' => 'api/request/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Request\\\\Compiler namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/request/compiler/request-dto-definition' => 
+  array (
+    'file' => 'api/request/compiler/request-dto-definition.md',
+    'path' => 'api/request/compiler/request-dto-definition',
+    'title' => 'RequestDtoDefinition',
+    'description' => 'Format-independent description of a #[MapRequest] DTO class: its constructor-promoted properties, in declaration order.',
+  ),
+  'quiote-docs://api/request/compiler/request-dto-property' => 
+  array (
+    'file' => 'api/request/compiler/request-dto-property.md',
+    'path' => 'api/request/compiler/request-dto-property',
+    'title' => 'RequestDtoProperty',
+    'description' => 'One constructor-promoted property of a #[MapRequest] DTO, as reflected by RequestDtoScanner.',
+  ),
+  'quiote-docs://api/request/compiler/request-dto-scanner' => 
+  array (
+    'file' => 'api/request/compiler/request-dto-scanner.md',
+    'path' => 'api/request/compiler/request-dto-scanner',
+    'title' => 'RequestDtoScanner',
+    'description' => 'Reflects a #[MapRequest] DTO class exactly once (results are cached by RequestDtoRegistry) to produce two independent things from the same walk of its constructor-promoted properties:',
+  ),
+  'quiote-docs://api/request/index' => 
+  array (
+    'file' => 'api/request/index.md',
+    'path' => 'api/request/index',
+    'title' => 'Request',
+    'description' => 'The Quiote\\\\Request namespace — 25 documented types.',
+  ),
+  'quiote-docs://api/request/psr7-delegation-trait' => 
+  array (
+    'file' => 'api/request/psr7-delegation-trait.md',
+    'path' => 'api/request/psr7-delegation-trait',
+    'title' => 'Psr7DelegationTrait',
+    'description' => 'Pure one-line delegations to the wrapped Nyholm\\\\Psr7\\\\ServerRequest.',
+  ),
+  'quiote-docs://api/request/psr7-request-trait' => 
+  array (
+    'file' => 'api/request/psr7-request-trait.md',
+    'path' => 'api/request/psr7-request-trait',
+    'title' => 'Psr7RequestTrait',
+    'description' => 'Reading and stripping of intrinsic PSR-7 request data, used by WebRequest.',
+  ),
+  'quiote-docs://api/request/request-dto-mapper' => 
+  array (
+    'file' => 'api/request/request-dto-mapper.md',
+    'path' => 'api/request/request-dto-mapper',
+    'title' => 'RequestDtoMapper',
+    'description' => 'Constructs a #[MapRequest] DTO instance from an already-validated WebRequest.',
+  ),
+  'quiote-docs://api/request/request-dto-registry' => 
+  array (
+    'file' => 'api/request/request-dto-registry.md',
+    'path' => 'api/request/request-dto-registry',
+    'title' => 'RequestDtoRegistry',
+    'description' => 'In-process cache for #[MapRequest] reflection results, mirroring Quiote\\\\DI\\\\Container::classPlan()\'s per-class caching style: a DTO\'s shape never changes mid-process, so both the parsed RequestDtoDefinition and the \\"which execute*() parameter (if any) is a #[MapRequest] DTO\\" lookup are computed once and reused for the life of the worker/request.',
+  ),
+  'quiote-docs://api/request/request-inspection-trait' => 
+  array (
+    'file' => 'api/request/request-inspection-trait.md',
+    'path' => 'api/request/request-inspection-trait',
+    'title' => 'RequestInspectionTrait',
+    'description' => '\\"Is this field empty/absent?\\" convenience helpers shared by WebRequest, one per input source (parameter, cookie, header, file).',
+  ),
+  'quiote-docs://api/request/request-parameter-store' => 
+  array (
+    'file' => 'api/request/request-parameter-store.md',
+    'path' => 'api/request/request-parameter-store',
+    'title' => 'RequestParameterStore',
+    'description' => 'Immutable holder for WebRequest\'s runtime (internal) parameters and the strict-validation whitelist.',
+  ),
+  'quiote-docs://api/request/request-state' => 
+  array (
+    'file' => 'api/request/request-state.md',
+    'path' => 'api/request/request-state',
+    'title' => 'RequestState',
+    'description' => 'The seam onto the request that is current *now*.',
+  ),
+  'quiote-docs://api/request/request-url' => 
+  array (
+    'file' => 'api/request/request-url.md',
+    'path' => 'api/request/request-url',
+    'title' => 'RequestUrl',
+    'description' => 'Immutable holder for the URL metadata WebRequest exposes alongside the wrapped PSR-7 request: scheme, host, port, path, query, and the derived request URI / full URL / protocol string.',
+  ),
+  'quiote-docs://api/request/trusted-hosts' => 
+  array (
+    'file' => 'api/request/trusted-hosts.md',
+    'path' => 'api/request/trusted-hosts',
+    'title' => 'TrustedHosts',
+    'description' => 'The `core.trusted_hosts` allow-list, applied to a hostname taken from the request.',
+  ),
+  'quiote-docs://api/request/uploaded-file-access-trait' => 
+  array (
+    'file' => 'api/request/uploaded-file-access-trait.md',
+    'path' => 'api/request/uploaded-file-access-trait',
+    'title' => 'UploadedFileAccessTrait',
+    'description' => 'Convenience accessors returning flat lists of UploadedFileInterface instances, hiding PSR-7\'s nested-array upload structure from callers.',
+  ),
+  'quiote-docs://api/request/web-request' => 
+  array (
+    'file' => 'api/request/web-request.md',
+    'path' => 'api/request/web-request',
+    'title' => 'WebRequest',
+    'description' => 'WebRequest provides additional support for web-only client requests such as cookie and file manipulation.',
+  ),
+  'quiote-docs://api/response/cookie-serializer' => 
+  array (
+    'file' => 'api/response/cookie-serializer.md',
+    'path' => 'api/response/cookie-serializer',
+    'title' => 'CookieSerializer',
+    'description' => 'Turns the cookie definitions queued on a response into `Set-Cookie` header lines.',
+  ),
+  'quiote-docs://api/response/index' => 
+  array (
+    'file' => 'api/response/index.md',
+    'path' => 'api/response/index',
+    'title' => 'Response',
+    'description' => 'The Quiote\\\\Response namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/response/psr-response-builder' => 
+  array (
+    'file' => 'api/response/psr-response-builder.md',
+    'path' => 'api/response/psr-response-builder',
+    'title' => 'PsrResponseBuilder',
+    'description' => 'Assembles a PSR-7 response from already-resolved status, headers, cookies and body.',
+  ),
+  'quiote-docs://api/response/web-response' => 
+  array (
+    'file' => 'api/response/web-response.md',
+    'path' => 'api/response/web-response',
+    'title' => 'WebResponse',
+    'description' => 'WebResponse handles the HTTP response: status code, headers, cookies, redirects and the content sent back to the client.',
+  ),
+  'quiote-docs://api/response/web-response-interface' => 
+  array (
+    'file' => 'api/response/web-response-interface.md',
+    'path' => 'api/response/web-response-interface',
+    'title' => 'WebResponseInterface',
+    'description' => 'The response an action or view writes to: body, status, headers, cookies, redirect and content type, plus the conversion to PSR-7 the runtime emits.',
+  ),
+  'quiote-docs://api/routing/attribute-routes' => 
+  array (
+    'file' => 'api/routing/attribute-routes.md',
+    'path' => 'api/routing/attribute-routes',
+    'title' => 'AttributeRoutes',
+    'description' => 'Entry point for combining #[Route]-attributed actions with hand-written routes in the same Routing subclass.',
+  ),
+  'quiote-docs://api/routing/attribute-routing' => 
+  array (
+    'file' => 'api/routing/attribute-routing.md',
+    'path' => 'api/routing/attribute-routing',
+    'title' => 'AttributeRouting',
+    'description' => 'Opt-in Routing implementation: builds its RouteCollection + meta by scanning #[Route] attributes on action classes instead of a committed Routing/Generated/ tree.',
+  ),
+  'quiote-docs://api/routing/attribute/index' => 
+  array (
+    'file' => 'api/routing/attribute/index.md',
+    'path' => 'api/routing/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\Routing\\\\Attribute namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/routing/attribute/route' => 
+  array (
+    'file' => 'api/routing/attribute/route.md',
+    'path' => 'api/routing/attribute/route',
+    'title' => 'Route',
+    'description' => 'Declares a route on an action class.',
+  ),
+  'quiote-docs://api/routing/compat-router' => 
+  array (
+    'file' => 'api/routing/compat-router.md',
+    'path' => 'api/routing/compat-router',
+    'title' => 'CompatRouter',
+    'description' => 'The CompatRouter class in Quiote\\\\Routing.',
+  ),
+  'quiote-docs://api/routing/compiler/attribute-route-scanner' => 
+  array (
+    'file' => 'api/routing/compiler/attribute-route-scanner.md',
+    'path' => 'api/routing/compiler/attribute-route-scanner',
+    'title' => 'AttributeRouteScanner',
+    'description' => 'Discovers #[Route] attributes on action classes under one or more module directories and builds a RoutePlan from them.',
+  ),
+  'quiote-docs://api/routing/compiler/compiled-matcher-dumper' => 
+  array (
+    'file' => 'api/routing/compiler/compiled-matcher-dumper.md',
+    'path' => 'api/routing/compiler/compiled-matcher-dumper',
+    'title' => 'CompiledMatcherDumper',
+    'description' => 'Back-end that dumps a RouteCollection to a Symfony CompiledUrlMatcher blob (the same technique Symfony\'s own router uses: a static-prefix tree + merged regexes emitted as plain PHP, so matching is opcache-native instead of iterating/compiling the collection at runtime).',
+  ),
+  'quiote-docs://api/routing/compiler/index' => 
+  array (
+    'file' => 'api/routing/compiler/index.md',
+    'path' => 'api/routing/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Routing\\\\Compiler namespace — 11 documented types.',
+  ),
+  'quiote-docs://api/routing/compiler/module-action-discovery' => 
+  array (
+    'file' => 'api/routing/compiler/module-action-discovery.md',
+    'path' => 'api/routing/compiler/module-action-discovery',
+    'title' => 'ModuleActionDiscovery',
+    'description' => 'Filesystem discovery of every `{Module}/Actions/**\\\\/*Action.php` file under one or more module directories, independent of whether the action carries a #[Route] attribute.',
+  ),
+  'quiote-docs://api/routing/compiler/module-action-entry' => 
+  array (
+    'file' => 'api/routing/compiler/module-action-entry.md',
+    'path' => 'api/routing/compiler/module-action-entry',
+    'title' => 'ModuleActionEntry',
+    'description' => 'One `{Module}/Actions/...Action.php` file found by ModuleActionDiscovery, before any attempt to load or reflect it.',
+  ),
+  'quiote-docs://api/routing/compiler/route-collection-builder' => 
+  array (
+    'file' => 'api/routing/compiler/route-collection-builder.md',
+    'path' => 'api/routing/compiler/route-collection-builder',
+    'title' => 'RouteCollectionBuilder',
+    'description' => 'Runtime back-end: turns a RoutePlan into the [RouteCollection, meta] pair Routing::build() already expects (the same pair the committed Routing/Generated/*Routes::addRoutes() files produce).',
+  ),
+  'quiote-docs://api/routing/compiler/route-collection-introspector' => 
+  array (
+    'file' => 'api/routing/compiler/route-collection-introspector.md',
+    'path' => 'api/routing/compiler/route-collection-introspector',
+    'title' => 'RouteCollectionIntrospector',
+    'description' => 'The inverse of RouteCollectionBuilder: lifts the live RouteCollection a configured Routing service exposes back into the routing IR.',
+  ),
+  'quiote-docs://api/routing/compiler/route-definition' => 
+  array (
+    'file' => 'api/routing/compiler/route-definition.md',
+    'path' => 'api/routing/compiler/route-definition',
+    'title' => 'RouteDefinition',
+    'description' => 'Format-independent description of one route, whatever front-end produced it (today: a #[Route] attribute; later, possibly routing.xml or a programmatic builder).',
+  ),
+  'quiote-docs://api/routing/compiler/route-plan' => 
+  array (
+    'file' => 'api/routing/compiler/route-plan.md',
+    'path' => 'api/routing/compiler/route-plan',
+    'title' => 'RoutePlan',
+    'description' => 'The routing IR: an ordered set of RouteDefinitions gathered from one or more sources (today: an AttributeRouteScanner pass).',
+  ),
+  'quiote-docs://api/routing/compiler/routing-ir-dumper' => 
+  array (
+    'file' => 'api/routing/compiler/routing-ir-dumper.md',
+    'path' => 'api/routing/compiler/routing-ir-dumper',
+    'title' => 'RoutingIrDumper',
+    'description' => 'Dumps/loads the routing IR (a RoutePlan\'s RouteDefinitions) as an opcache-friendly `return [...]` PHP artifact, so AttributeRouting::build() can skip AttributeRouteScanner\'s live scan (recursive glob() per module Actions/ tree, require_once + ReflectionClass per action class) on every Routing construction -- a per-request cost under classic PHP-FPM.',
+  ),
+  'quiote-docs://api/routing/compiler/triad-diagnostics-scanner' => 
+  array (
+    'file' => 'api/routing/compiler/triad-diagnostics-scanner.md',
+    'path' => 'api/routing/compiler/triad-diagnostics-scanner',
+    'title' => 'TriadDiagnosticsScanner',
+    'description' => 'Diagnoses the Action/View/Template triad convention (`Actions/{Action}Action.php` <-> `Views/{Action}{ViewName}View.php` <-> `Templates/{Action}{ViewName}.php`) for every action ModuleActionDiscovery finds, independent of whether the action is ever actually routed to.',
+  ),
+  'quiote-docs://api/routing/compiler/triad-view-resolver' => 
+  array (
+    'file' => 'api/routing/compiler/triad-view-resolver.md',
+    'path' => 'api/routing/compiler/triad-view-resolver',
+    'title' => 'TriadViewResolver',
+    'description' => 'Shared Action -> View -> Template resolution for the triad convention (`Actions/{Action}Action.php` <-> `Views/{Action}{ViewName}View.php` <-> `Templates/{Action}{ViewName}.php`), used by both TriadDiagnosticsScanner (which only needs existence) and `Quiote\\\\Introspection\\\\AppIntrospectionCompiler` (which needs the resolved file paths for the introspection artifact), so the naming convention is decoded in exactly one place.',
+  ),
+  'quiote-docs://api/routing/http-redirect-routing-callback' => 
+  array (
+    'file' => 'api/routing/http-redirect-routing-callback.md',
+    'path' => 'api/routing/http-redirect-routing-callback',
+    'title' => 'HttpRedirectRoutingCallback',
+    'description' => 'HttpRedirectRoutingCallback allows redirection of a matched route to a route or URL.',
+  ),
+  'quiote-docs://api/routing/i-legacy-routing-callback' => 
+  array (
+    'file' => 'api/routing/i-legacy-routing-callback.md',
+    'path' => 'api/routing/i-legacy-routing-callback',
+    'title' => 'ILegacyRoutingCallback',
+    'description' => 'ILegacyRoutingCallback',
+  ),
+  'quiote-docs://api/routing/i-routing-source' => 
+  array (
+    'file' => 'api/routing/i-routing-source.md',
+    'path' => 'api/routing/i-routing-source',
+    'title' => 'IRoutingSource',
+    'description' => 'IRoutingSource allows you to provide sources for the routing',
+  ),
+  'quiote-docs://api/routing/i-routing-value' => 
+  array (
+    'file' => 'api/routing/i-routing-value.md',
+    'path' => 'api/routing/i-routing-value',
+    'title' => 'IRoutingValue',
+    'description' => 'Routing values are used internally and, optionally, by users in gen() calls and callbacks to have more control over encoding behavior and values in pre- and postfixes',
+  ),
+  'quiote-docs://api/routing/index' => 
+  array (
+    'file' => 'api/routing/index.md',
+    'path' => 'api/routing/index',
+    'title' => 'Routing',
+    'description' => 'The Quiote\\\\Routing namespace — 27 documented types.',
+  ),
+  'quiote-docs://api/routing/routes' => 
+  array (
+    'file' => 'api/routing/routes.md',
+    'path' => 'api/routing/routes',
+    'title' => 'Routes',
+    'description' => 'Contract for a class that supplies a complete route table.',
+  ),
+  'quiote-docs://api/routing/routing' => 
+  array (
+    'file' => 'api/routing/routing.md',
+    'path' => 'api/routing/routing',
+    'title' => 'Routing',
+    'description' => 'Base class for an application\'s route table, and the matcher and URL generator built from it.',
+  ),
+  'quiote-docs://api/routing/routing-array-source' => 
+  array (
+    'file' => 'api/routing/routing-array-source.md',
+    'path' => 'api/routing/routing-array-source',
+    'title' => 'RoutingArraySource',
+    'description' => 'RoutingArraySource allows you to provide array sources for the routing',
+  ),
+  'quiote-docs://api/routing/routing-callback' => 
+  array (
+    'file' => 'api/routing/routing-callback.md',
+    'path' => 'api/routing/routing-callback',
+    'title' => 'RoutingCallback',
+    'description' => 'RoutingCallback allows you to provide callbacks into the routing',
+  ),
+  'quiote-docs://api/routing/routing-callback-pool' => 
+  array (
+    'file' => 'api/routing/routing-callback-pool.md',
+    'path' => 'api/routing/routing-callback-pool',
+    'title' => 'RoutingCallbackPool',
+    'description' => 'Quiote Routing Callback Pool - Reuses callback instances for performance This class maintains a pool of callback instances to avoid the overhead of creating new instances for each route match.',
+  ),
+  'quiote-docs://api/routing/routing-result' => 
+  array (
+    'file' => 'api/routing/routing-result.md',
+    'path' => 'api/routing/routing-result',
+    'title' => 'RoutingResult',
+    'description' => 'Immutable routing result facade providing legacy-like getters.',
+  ),
+  'quiote-docs://api/routing/routing-user-source' => 
+  array (
+    'file' => 'api/routing/routing-user-source.md',
+    'path' => 'api/routing/routing-user-source',
+    'title' => 'RoutingUserSource',
+    'description' => 'RoutingUserSource allows you to provide an user source for the routing',
+  ),
+  'quiote-docs://api/routing/routing-value' => 
+  array (
+    'file' => 'api/routing/routing-value.md',
+    'path' => 'api/routing/routing-value',
+    'title' => 'RoutingValue',
+    'description' => 'Routing values are used internally and, optionally, by users in gen() calls and callbacks to have more control over encoding behavior and values in pre- and postfixes',
+  ),
+  'quiote-docs://api/runtime/context-request-handler' => 
+  array (
+    'file' => 'api/runtime/context-request-handler.md',
+    'path' => 'api/runtime/context-request-handler',
+    'title' => 'ContextRequestHandler',
+    'description' => 'Turns a PSR-7 request into a response for one context.',
+  ),
+  'quiote-docs://api/runtime/emitter/index' => 
+  array (
+    'file' => 'api/runtime/emitter/index.md',
+    'path' => 'api/runtime/emitter/index',
+    'title' => 'Emitter',
+    'description' => 'The Quiote\\\\Runtime\\\\Emitter namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/runtime/emitter/response-emitter-interface' => 
+  array (
+    'file' => 'api/runtime/emitter/response-emitter-interface.md',
+    'path' => 'api/runtime/emitter/response-emitter-interface',
+    'title' => 'ResponseEmitterInterface',
+    'description' => 'Sends a PSR-7 response back to whatever is on the other end of the current worker runtime: the SAPI (header()/echo), a RoadRunner relay, a Swoole response object.',
+  ),
+  'quiote-docs://api/runtime/emitter/sapi-emitter' => 
+  array (
+    'file' => 'api/runtime/emitter/sapi-emitter.md',
+    'path' => 'api/runtime/emitter/sapi-emitter',
+    'title' => 'SapiEmitter',
+    'description' => 'Emits through the PHP SAPI: http_response_code(), header(), echo.',
+  ),
+  'quiote-docs://api/runtime/error-response-factory' => 
+  array (
+    'file' => 'api/runtime/error-response-factory.md',
+    'path' => 'api/runtime/error-response-factory',
+    'title' => 'ErrorResponseFactory',
+    'description' => 'Turns a throwable that escaped the middleware pipeline into a response.',
+  ),
+  'quiote-docs://api/runtime/http-emitter' => 
+  array (
+    'file' => 'api/runtime/http-emitter.md',
+    'path' => 'api/runtime/http-emitter',
+    'title' => 'HttpEmitter',
+    'description' => 'The original SAPI emitter, kept as the name apps and tests already reference.',
+  ),
+  'quiote-docs://api/runtime/index' => 
+  array (
+    'file' => 'api/runtime/index.md',
+    'path' => 'api/runtime/index',
+    'title' => 'Runtime',
+    'description' => 'The Quiote\\\\Runtime namespace — 35 documented types.',
+  ),
+  'quiote-docs://api/runtime/kernel' => 
+  array (
+    'file' => 'api/runtime/kernel.md',
+    'path' => 'api/runtime/kernel',
+    'title' => 'Kernel',
+    'description' => 'Boots the framework and hands the request loop to a worker runtime.',
+  ),
+  'quiote-docs://api/runtime/output-capture' => 
+  array (
+    'file' => 'api/runtime/output-capture.md',
+    'path' => 'api/runtime/output-capture',
+    'title' => 'OutputCapture',
+    'description' => 'Catches anything the application echoes outside the response body while a runtime with no SAPI output channel is handling the request.',
+  ),
+  'quiote-docs://api/runtime/proxy/forwarded-authority' => 
+  array (
+    'file' => 'api/runtime/proxy/forwarded-authority.md',
+    'path' => 'api/runtime/proxy/forwarded-authority',
+    'title' => 'ForwardedAuthority',
+    'description' => 'The scheme/host/port a reverse proxy says the client actually used, as resolved by ForwardedHeaderResolver.',
+  ),
+  'quiote-docs://api/runtime/proxy/forwarded-header-resolver' => 
+  array (
+    'file' => 'api/runtime/proxy/forwarded-header-resolver.md',
+    'path' => 'api/runtime/proxy/forwarded-header-resolver',
+    'title' => 'ForwardedHeaderResolver',
+    'description' => 'Reads the reverse-proxy headers off a PSR-7 request and reports the scheme/host/port the client actually used.',
+  ),
+  'quiote-docs://api/runtime/proxy/index' => 
+  array (
+    'file' => 'api/runtime/proxy/index.md',
+    'path' => 'api/runtime/proxy/index',
+    'title' => 'Proxy',
+    'description' => 'The Quiote\\\\Runtime\\\\Proxy namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/runtime/request/index' => 
+  array (
+    'file' => 'api/runtime/request/index.md',
+    'path' => 'api/runtime/request/index',
+    'title' => 'Request',
+    'description' => 'The Quiote\\\\Runtime\\\\Request namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/runtime/request/worker-request-factory' => 
+  array (
+    'file' => 'api/runtime/request/worker-request-factory.md',
+    'path' => 'api/runtime/request/worker-request-factory',
+    'title' => 'WorkerRequestFactory',
+    'description' => 'The single seam every worker runtime funnels its inbound request through, so reverse-proxy correction happens identically whether the request came from superglobals (a SAPI) or from a server that handed us a PSR-7 object (RoadRunner, Swoole).',
+  ),
+  'quiote-docs://api/runtime/road-runner/index' => 
+  array (
+    'file' => 'api/runtime/road-runner/index.md',
+    'path' => 'api/runtime/road-runner/index',
+    'title' => 'RoadRunner',
+    'description' => 'The Quiote\\\\Runtime\\\\RoadRunner namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/runtime/road-runner/road-runner-response-emitter' => 
+  array (
+    'file' => 'api/runtime/road-runner/road-runner-response-emitter.md',
+    'path' => 'api/runtime/road-runner/road-runner-response-emitter',
+    'title' => 'RoadRunnerResponseEmitter',
+    'description' => 'Hands the response back to RoadRunner over the worker relay.',
+  ),
+  'quiote-docs://api/runtime/road-runner/road-runner-runtime' => 
+  array (
+    'file' => 'api/runtime/road-runner/road-runner-runtime.md',
+    'path' => 'api/runtime/road-runner/road-runner-runtime',
+    'title' => 'RoadRunnerRuntime',
+    'description' => 'Serves requests as a RoadRunner PSR-7 worker.',
+  ),
+  'quiote-docs://api/runtime/road-runner/worker-road-runner-plugin' => 
+  array (
+    'file' => 'api/runtime/road-runner/worker-road-runner-plugin.md',
+    'path' => 'api/runtime/road-runner/worker-road-runner-plugin',
+    'title' => 'WorkerRoadRunnerPlugin',
+    'description' => 'Registers the `roadrunner` worker-runtime alias.',
+  ),
+  'quiote-docs://api/runtime/superglobals/index' => 
+  array (
+    'file' => 'api/runtime/superglobals/index.md',
+    'path' => 'api/runtime/superglobals/index',
+    'title' => 'Superglobals',
+    'description' => 'The Quiote\\\\Runtime\\\\Superglobals namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/runtime/superglobals/superglobal-bridge' => 
+  array (
+    'file' => 'api/runtime/superglobals/superglobal-bridge.md',
+    'path' => 'api/runtime/superglobals/superglobal-bridge',
+    'title' => 'SuperglobalBridge',
+    'description' => 'Populates PHP\'s request superglobals from a PSR-7 request, for runtimes that don\'t do it themselves (RoadRunner, Swoole), and empties them again at the request boundary.',
+  ),
+  'quiote-docs://api/runtime/swoole/console/index' => 
+  array (
+    'file' => 'api/runtime/swoole/console/index.md',
+    'path' => 'api/runtime/swoole/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Runtime\\\\Swoole\\\\Console namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/runtime/swoole/console/swoole-serve-command' => 
+  array (
+    'file' => 'api/runtime/swoole/console/swoole-serve-command.md',
+    'path' => 'api/runtime/swoole/console/swoole-serve-command',
+    'title' => 'SwooleServeCommand',
+    'description' => 'Starts the app\'s Swoole server as a child process, the same shape as ServeCommand wrapping `frankenphp php-server`.',
+  ),
+  'quiote-docs://api/runtime/swoole/index' => 
+  array (
+    'file' => 'api/runtime/swoole/index.md',
+    'path' => 'api/runtime/swoole/index',
+    'title' => 'Swoole',
+    'description' => 'The Quiote\\\\Runtime\\\\Swoole namespace — 14 documented types.',
+  ),
+  'quiote-docs://api/runtime/swoole/native-swoole-server' => 
+  array (
+    'file' => 'api/runtime/swoole/native-swoole-server.md',
+    'path' => 'api/runtime/swoole/native-swoole-server',
+    'title' => 'NativeSwooleServer',
+    'description' => 'Pure delegation onto the real Swoole server.',
+  ),
+  'quiote-docs://api/runtime/swoole/native-swoole-server-factory' => 
+  array (
+    'file' => 'api/runtime/swoole/native-swoole-server-factory.md',
+    'path' => 'api/runtime/swoole/native-swoole-server-factory',
+    'title' => 'NativeSwooleServerFactory',
+    'description' => 'Builds the real \\\\Swoole\\\\Http\\\\Server.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-converter-options' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-converter-options.md',
+    'path' => 'api/runtime/swoole/swoole-converter-options',
+    'title' => 'SwooleConverterOptions',
+    'description' => 'The handful of things a Swoole request cannot tell us and the server operator has to.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-request-converter' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-request-converter.md',
+    'path' => 'api/runtime/swoole/swoole-request-converter',
+    'title' => 'SwooleRequestConverter',
+    'description' => 'Turns a SwooleRequestSnapshot into a PSR-7 request.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-request-snapshot' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-request-snapshot.md',
+    'path' => 'api/runtime/swoole/swoole-request-snapshot',
+    'title' => 'SwooleRequestSnapshot',
+    'description' => 'A Swoole HTTP request reduced to plain arrays.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-request-snapshot-factory' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-request-snapshot-factory.md',
+    'path' => 'api/runtime/swoole/swoole-request-snapshot-factory',
+    'title' => 'SwooleRequestSnapshotFactory',
+    'description' => 'The only place in this package that touches \\\\Swoole\\\\Http\\\\Request.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-response-emitter' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-response-emitter.md',
+    'path' => 'api/runtime/swoole/swoole-response-emitter',
+    'title' => 'SwooleResponseEmitter',
+    'description' => 'Writes the response to Swoole\'s per-request response object.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-response-writer' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-response-writer.md',
+    'path' => 'api/runtime/swoole/swoole-response-writer',
+    'title' => 'SwooleResponseWriter',
+    'description' => 'The only place in this package that touches \\\\Swoole\\\\Http\\\\Response.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-response-writer-interface' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-response-writer-interface.md',
+    'path' => 'api/runtime/swoole/swoole-response-writer-interface',
+    'title' => 'SwooleResponseWriterInterface',
+    'description' => 'The slice of \\\\Swoole\\\\Http\\\\Response the emitter needs, so the emitter can be tested against a recording double on a machine with no ext-swoole.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-runtime' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-runtime.md',
+    'path' => 'api/runtime/swoole/swoole-runtime',
+    'title' => 'SwooleRuntime',
+    'description' => 'Serves requests from an embedded Swoole HTTP server.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-server-factory' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-server-factory.md',
+    'path' => 'api/runtime/swoole/swoole-server-factory',
+    'title' => 'SwooleServerFactory',
+    'description' => 'Creates the HTTP server SwooleRuntime binds and runs.',
+  ),
+  'quiote-docs://api/runtime/swoole/swoole-server-interface' => 
+  array (
+    'file' => 'api/runtime/swoole/swoole-server-interface.md',
+    'path' => 'api/runtime/swoole/swoole-server-interface',
+    'title' => 'SwooleServerInterface',
+    'description' => 'The slice of \\\\Swoole\\\\Http\\\\Server the runtime drives, so the loop\'s wiring can be asserted without ext-swoole (and without actually binding a port).',
+  ),
+  'quiote-docs://api/runtime/swoole/worker-swoole-plugin' => 
+  array (
+    'file' => 'api/runtime/swoole/worker-swoole-plugin.md',
+    'path' => 'api/runtime/swoole/worker-swoole-plugin',
+    'title' => 'WorkerSwoolePlugin',
+    'description' => 'Registers the `swoole` worker-runtime alias, its settings, and the `swoole:serve` launcher.',
+  ),
+  'quiote-docs://api/runtime/worker/franken-php-runtime' => 
+  array (
+    'file' => 'api/runtime/worker/franken-php-runtime.md',
+    'path' => 'api/runtime/worker/franken-php-runtime',
+    'title' => 'FrankenPhpRuntime',
+    'description' => 'FrankenPHP worker mode: a persistent process that parks in frankenphp_handle_request() and gets its superglobals refilled per request.',
+  ),
+  'quiote-docs://api/runtime/worker/index' => 
+  array (
+    'file' => 'api/runtime/worker/index.md',
+    'path' => 'api/runtime/worker/index',
+    'title' => 'Worker',
+    'description' => 'The Quiote\\\\Runtime\\\\Worker namespace — 7 documented types.',
+  ),
+  'quiote-docs://api/runtime/worker/sapi-runtime' => 
+  array (
+    'file' => 'api/runtime/worker/sapi-runtime.md',
+    'path' => 'api/runtime/worker/sapi-runtime',
+    'title' => 'SapiRuntime',
+    'description' => 'The classic one-request-per-process host: php-fpm, mod_php, `php -S`, and the CLI when something calls Kernel::run() directly.',
+  ),
+  'quiote-docs://api/runtime/worker/worker-loop' => 
+  array (
+    'file' => 'api/runtime/worker/worker-loop.md',
+    'path' => 'api/runtime/worker/worker-loop',
+    'title' => 'WorkerLoop',
+    'description' => 'Everything a worker runtime needs from the framework, so a runtime only has to know how to get a request in and a response out.',
+  ),
+  'quiote-docs://api/runtime/worker/worker-runtime-capabilities' => 
+  array (
+    'file' => 'api/runtime/worker/worker-runtime-capabilities.md',
+    'path' => 'api/runtime/worker/worker-runtime-capabilities',
+    'title' => 'WorkerRuntimeCapabilities',
+    'description' => 'What a WorkerRuntimeInterface can and cannot do, so the shared WorkerLoop knows which compensations to install rather than every runtime re-deciding.',
+  ),
+  'quiote-docs://api/runtime/worker/worker-runtime-info' => 
+  array (
+    'file' => 'api/runtime/worker/worker-runtime-info.md',
+    'path' => 'api/runtime/worker/worker-runtime-info',
+    'title' => 'WorkerRuntimeInfo',
+    'description' => '\\"Which runtime are we on, and what can it do?\\" -- the process-wide query surface for code outside the Runtime namespace that needs to behave differently in a persistent worker.',
+  ),
+  'quiote-docs://api/runtime/worker/worker-runtime-interface' => 
+  array (
+    'file' => 'api/runtime/worker/worker-runtime-interface.md',
+    'path' => 'api/runtime/worker/worker-runtime-interface',
+    'title' => 'WorkerRuntimeInterface',
+    'description' => 'A host that drives Quiote\'s request loop: the PHP SAPI, a FrankenPHP worker, a RoadRunner worker, a Swoole HTTP server.',
+  ),
+  'quiote-docs://api/runtime/worker/worker-runtime-registry' => 
+  array (
+    'file' => 'api/runtime/worker/worker-runtime-registry.md',
+    'path' => 'api/runtime/worker/worker-runtime-registry',
+    'title' => 'WorkerRuntimeRegistry',
+    'description' => 'Process-global registry mapping short runtime aliases (e.g.',
+  ),
+  'quiote-docs://api/scheduler/console/index' => 
+  array (
+    'file' => 'api/scheduler/console/index.md',
+    'path' => 'api/scheduler/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Scheduler\\\\Console namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/scheduler/console/schedule-run-command' => 
+  array (
+    'file' => 'api/scheduler/console/schedule-run-command.md',
+    'path' => 'api/scheduler/console/schedule-run-command',
+    'title' => 'ScheduleRunCommand',
+    'description' => 'Evaluates every task in the app\'s Schedule against \\"now\\" and runs the due ones once, then exits — this is meant to be invoked by the OS\'s own crontab (`* * * * * php bin/quiote schedule:run`) every minute, like every cron-based scheduler, not a long-running daemon loop.',
+  ),
+  'quiote-docs://api/scheduler/dispatch-job-task' => 
+  array (
+    'file' => 'api/scheduler/dispatch-job-task.md',
+    'path' => 'api/scheduler/dispatch-job-task',
+    'title' => 'DispatchJobTask',
+    'description' => 'Pushes a Job onto QueueManager rather than running it in-process — honors whatever queue driver the app has configured (sync or persistent).',
+  ),
+  'quiote-docs://api/scheduler/index' => 
+  array (
+    'file' => 'api/scheduler/index.md',
+    'path' => 'api/scheduler/index',
+    'title' => 'Scheduler',
+    'description' => 'The Quiote\\\\Scheduler namespace — 8 documented types.',
+  ),
+  'quiote-docs://api/scheduler/inline-callback-task' => 
+  array (
+    'file' => 'api/scheduler/inline-callback-task.md',
+    'path' => 'api/scheduler/inline-callback-task',
+    'title' => 'InlineCallbackTask',
+    'description' => 'Runs a callback synchronously in-process, for tasks cheap enough not to need the queue.',
+  ),
+  'quiote-docs://api/scheduler/schedule' => 
+  array (
+    'file' => 'api/scheduler/schedule.md',
+    'path' => 'api/scheduler/schedule',
+    'title' => 'Schedule',
+    'description' => 'App-facing base class for defining scheduled tasks — mirrors how an app subclasses `Quiote\\\\Routing\\\\Routing` for its route table.',
+  ),
+  'quiote-docs://api/scheduler/scheduled-task-action' => 
+  array (
+    'file' => 'api/scheduler/scheduled-task-action.md',
+    'path' => 'api/scheduler/scheduled-task-action',
+    'title' => 'ScheduledTaskAction',
+    'description' => 'The \\"how to invoke it\\" strategy for a ScheduledTaskDefinition — either run inline (InlineCallbackTask) or dispatch onto the queue (DispatchJobTask).',
+  ),
+  'quiote-docs://api/scheduler/scheduled-task-definition' => 
+  array (
+    'file' => 'api/scheduler/scheduled-task-definition.md',
+    'path' => 'api/scheduler/scheduled-task-definition',
+    'title' => 'ScheduledTaskDefinition',
+    'description' => 'Fluent builder for a single scheduled task: its cron spec, the action to run when due, and optional overlap-prevention locking.',
+  ),
+  'quiote-docs://api/scheduler/scheduler-lock' => 
+  array (
+    'file' => 'api/scheduler/scheduler-lock.md',
+    'path' => 'api/scheduler/scheduler-lock',
+    'title' => 'SchedulerLock',
+    'description' => 'Best-effort overlap-prevention lock for ScheduledTaskDefinition::withoutOverlapping(), built on the app\'s existing PSR-16 CacheInterface rather than a new lock subsystem.',
+  ),
+  'quiote-docs://api/scheduler/scheduler-plugin' => 
+  array (
+    'file' => 'api/scheduler/scheduler-plugin.md',
+    'path' => 'api/scheduler/scheduler-plugin',
+    'title' => 'SchedulerPlugin',
+    'description' => 'Registers the scheduler subsystem: a default no-op Schedule (so an app with nothing configured just runs zero tasks instead of erroring), the SchedulerLock service, and `schedule:run`.',
+  ),
+  'quiote-docs://api/security/auth/auth-plugin' => 
+  array (
+    'file' => 'api/security/auth/auth-plugin.md',
+    'path' => 'api/security/auth/auth-plugin',
+    'title' => 'AuthPlugin',
+    'description' => 'Registers the authentication foundation: a default PasswordHasherInterface, an empty (no-op) default FirewallMap, and two `AuthenticationMiddleware` placements (StatelessAuthenticationMiddleware before `Quiote\\\\Middleware\\\\SessionMiddleware`, so a machine token can flip a request to sessionless before session startup; SessionAuthenticationMiddleware before `Quiote\\\\Middleware\\\\SecurityMiddleware`, so a successful login is visible to the same request\'s authorization decision).',
+  ),
+  'quiote-docs://api/security/auth/authentication-exception' => 
+  array (
+    'file' => 'api/security/auth/authentication-exception.md',
+    'path' => 'api/security/auth/authentication-exception',
+    'title' => 'AuthenticationException',
+    'description' => 'Thrown by an AuthenticatorInterface when a presented credential (password, Basic header, bearer token, ...) fails to establish an identity.',
+  ),
+  'quiote-docs://api/security/auth/authentication-manager' => 
+  array (
+    'file' => 'api/security/auth/authentication-manager.md',
+    'path' => 'api/security/auth/authentication-manager',
+    'title' => 'AuthenticationManager',
+    'description' => 'Runs a firewall\'s authenticator chain against a request and, on success, populates the request\'s `SecurityUser`/`RbacSecurityUser`.',
+  ),
+  'quiote-docs://api/security/auth/authenticator-interface' => 
+  array (
+    'file' => 'api/security/auth/authenticator-interface.md',
+    'path' => 'api/security/auth/authenticator-interface',
+    'title' => 'AuthenticatorInterface',
+    'description' => 'Generalizes `Quiote\\\\Mcp\\\\Auth\\\\McpAuthenticatorInterface` into a framework-wide contract: one implementation per credential mechanism (form login, HTTP Basic, bearer/JWT, OIDC).',
+  ),
+  'quiote-docs://api/security/auth/authenticator/form-login-authenticator' => 
+  array (
+    'file' => 'api/security/auth/authenticator/form-login-authenticator.md',
+    'path' => 'api/security/auth/authenticator/form-login-authenticator',
+    'title' => 'FormLoginAuthenticator',
+    'description' => 'Verifies a username/password login POST via a UserProviderInterface/PasswordHasherInterface pair.',
+  ),
+  'quiote-docs://api/security/auth/authenticator/http-basic-authenticator' => 
+  array (
+    'file' => 'api/security/auth/authenticator/http-basic-authenticator.md',
+    'path' => 'api/security/auth/authenticator/http-basic-authenticator',
+    'title' => 'HttpBasicAuthenticator',
+    'description' => 'Decodes an `Authorization: Basic` header and verifies it against a UserProviderInterface/PasswordHasherInterface pair.',
+  ),
+  'quiote-docs://api/security/auth/authenticator/index' => 
+  array (
+    'file' => 'api/security/auth/authenticator/index.md',
+    'path' => 'api/security/auth/authenticator/index',
+    'title' => 'Authenticator',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Authenticator namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/auth/authorization-header' => 
+  array (
+    'file' => 'api/security/auth/authorization-header.md',
+    'path' => 'api/security/auth/authorization-header',
+    'title' => 'AuthorizationHeader',
+    'description' => 'Parses an `Authorization` header into its scheme and credential, the way RFC 9110 §11.6.2 actually specifies it rather than the way the wire format usually looks.',
+  ),
+  'quiote-docs://api/security/auth/bearer-token-authenticator' => 
+  array (
+    'file' => 'api/security/auth/bearer-token-authenticator.md',
+    'path' => 'api/security/auth/bearer-token-authenticator',
+    'title' => 'BearerTokenAuthenticator',
+    'description' => 'Validates an `Authorization: Bearer` token via a TokenValidatorInterface (JWS verify + `iss`/`aud`), derives its ClientType via a ClientTypeResolverInterface, and resolves the identity via UserProviderInterface::loadByToken().',
+  ),
+  'quiote-docs://api/security/auth/client-address' => 
+  array (
+    'file' => 'api/security/auth/client-address.md',
+    'path' => 'api/security/auth/client-address',
+    'title' => 'ClientAddress',
+    'description' => 'The connecting peer\'s address, for use as a throttle key.',
+  ),
+  'quiote-docs://api/security/auth/client-credentials-client' => 
+  array (
+    'file' => 'api/security/auth/client-credentials-client.md',
+    'path' => 'api/security/auth/client-credentials-client',
+    'title' => 'ClientCredentialsClient',
+    'description' => 'Outbound M2M: fetches an access token via the Client Credentials grant for the app to present to another service.',
+  ),
+  'quiote-docs://api/security/auth/client-type' => 
+  array (
+    'file' => 'api/security/auth/client-type.md',
+    'path' => 'api/security/auth/client-type',
+    'title' => 'ClientType',
+    'description' => 'Distinguishes a human end-user from a machine/service caller, per the RFC 9068 rule applied by ClientTypeResolverInterface: `Service` when the token\'s `sub` equals its `client_id`/`azp`, otherwise `User`.',
+  ),
+  'quiote-docs://api/security/auth/client-type-resolver' => 
+  array (
+    'file' => 'api/security/auth/client-type-resolver.md',
+    'path' => 'api/security/auth/client-type-resolver',
+    'title' => 'ClientTypeResolver',
+    'description' => 'The default ClientTypeResolverInterface: applies the RFC 9068 rule -- `service` when the token\'s `sub` equals its `client_id`/`azp` (the authority mints machine/client-credentials tokens this way), otherwise `user`.',
+  ),
+  'quiote-docs://api/security/auth/client-type-resolver-interface' => 
+  array (
+    'file' => 'api/security/auth/client-type-resolver-interface.md',
+    'path' => 'api/security/auth/client-type-resolver-interface',
+    'title' => 'ClientTypeResolverInterface',
+    'description' => 'Derives ClientType from a set of already-validated token claims.',
+  ),
+  'quiote-docs://api/security/auth/config/firewall-factory' => 
+  array (
+    'file' => 'api/security/auth/config/firewall-factory.md',
+    'path' => 'api/security/auth/config/firewall-factory',
+    'title' => 'FirewallFactory',
+    'description' => 'Builds a live FirewallMap from SecurityConfigHandler\'s canonical array, resolving each firewall\'s `<authenticator ref=\\"...\\">` and `entry-point` against explicit registries the app assembles itself -- no implicit global service-locator lookups, so wiring stays visible and testable.',
+  ),
+  'quiote-docs://api/security/auth/config/index' => 
+  array (
+    'file' => 'api/security/auth/config/index.md',
+    'path' => 'api/security/auth/config/index',
+    'title' => 'Config',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Config namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/auth/config/security-config-handler' => 
+  array (
+    'file' => 'api/security/auth/config/security-config-handler.md',
+    'path' => 'api/security/auth/config/security-config-handler',
+    'title' => 'SecurityConfigHandler',
+    'description' => 'Parses a `security.{php,xml,yml,yaml}` file -- `<password_hashers>`, `<providers>`, `<firewalls>` (each `<firewall>` carrying `pattern`, `stateless`, `sessionless`, `entry-point`, `provider`, and an ordered list of `<authenticator ref=\\"...\\">` elements) -- into a canonical array of password-hasher/provider/firewall definitions.',
+  ),
+  'quiote-docs://api/security/auth/entry-point-interface' => 
+  array (
+    'file' => 'api/security/auth/entry-point-interface.md',
+    'path' => 'api/security/auth/entry-point-interface',
+    'title' => 'EntryPointInterface',
+    'description' => 'Produces the failure response for a firewall when authentication is required but absent/invalid: a `LoginRedirectEntryPoint` (reuses the existing `ForwardService` login flow) for session/form firewalls, or an `HttpChallengeEntryPoint` (401 + `WWW-Authenticate`, RFC 7807 JSON, matching `Quiote\\\\Mcp\\\\Middleware\\\\McpAuthMiddleware`) for token firewalls.',
+  ),
+  'quiote-docs://api/security/auth/entry-point/http-challenge-entry-point' => 
+  array (
+    'file' => 'api/security/auth/entry-point/http-challenge-entry-point.md',
+    'path' => 'api/security/auth/entry-point/http-challenge-entry-point',
+    'title' => 'HttpChallengeEntryPoint',
+    'description' => 'The entry point for stateless (token/Basic) firewalls: a `401` RFC 9457 Problem Details body plus a `WWW-Authenticate` challenge, matching `Quiote\\\\Mcp\\\\Middleware\\\\McpAuthMiddleware`\'s existing shape so API clients see one consistent failure format across the framework.',
+  ),
+  'quiote-docs://api/security/auth/entry-point/index' => 
+  array (
+    'file' => 'api/security/auth/entry-point/index.md',
+    'path' => 'api/security/auth/entry-point/index',
+    'title' => 'EntryPoint',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\EntryPoint namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/auth/entry-point/login-redirect-entry-point' => 
+  array (
+    'file' => 'api/security/auth/entry-point/login-redirect-entry-point.md',
+    'path' => 'api/security/auth/entry-point/login-redirect-entry-point',
+    'title' => 'LoginRedirectEntryPoint',
+    'description' => 'The entry point for the session/form-login firewall: a `302` redirect back to the login path.',
+  ),
+  'quiote-docs://api/security/auth/firewall' => 
+  array (
+    'file' => 'api/security/auth/firewall.md',
+    'path' => 'api/security/auth/firewall',
+    'title' => 'Firewall',
+    'description' => 'A named, path-matched set of authenticators plus the entry point that handles a failed authentication attempt for that path -- the runtime counterpart of a `security.xml` `<firewall>` element.',
+  ),
+  'quiote-docs://api/security/auth/firewall-map' => 
+  array (
+    'file' => 'api/security/auth/firewall-map.md',
+    'path' => 'api/security/auth/firewall-map',
+    'title' => 'FirewallMap',
+    'description' => 'An ordered list of Firewall definitions, matched by request path.',
+  ),
+  'quiote-docs://api/security/auth/hasher/default-password-hasher' => 
+  array (
+    'file' => 'api/security/auth/hasher/default-password-hasher.md',
+    'path' => 'api/security/auth/hasher/default-password-hasher',
+    'title' => 'DefaultPasswordHasher',
+    'description' => 'Thin wrapper over PHP\'s `password_hash()` family: argon2id by default, falling back to bcrypt only when the running PHP build lacks argon2 support (no libargon2 at compile time).',
+  ),
+  'quiote-docs://api/security/auth/hasher/dummy-password-hash' => 
+  array (
+    'file' => 'api/security/auth/hasher/dummy-password-hash.md',
+    'path' => 'api/security/auth/hasher/dummy-password-hash',
+    'title' => 'DummyPasswordHash',
+    'description' => 'A valid hash of a value no submitted password can match, used to spend the same key-derivation time on an unknown identifier as on a known one.',
+  ),
+  'quiote-docs://api/security/auth/hasher/index' => 
+  array (
+    'file' => 'api/security/auth/hasher/index.md',
+    'path' => 'api/security/auth/hasher/index',
+    'title' => 'Hasher',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Hasher namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/auth/identity/in-memory-user-identity' => 
+  array (
+    'file' => 'api/security/auth/identity/in-memory-user-identity.md',
+    'path' => 'api/security/auth/identity/in-memory-user-identity',
+    'title' => 'InMemoryUserIdentity',
+    'description' => 'A plain value-object PasswordProtectedUserIdentity, returned by every foundation `UserProviderInterface` implementation (`InMemoryUserProvider`, `PdoUserProvider`, `CallableUserProvider`).',
+  ),
+  'quiote-docs://api/security/auth/identity/index' => 
+  array (
+    'file' => 'api/security/auth/identity/index.md',
+    'path' => 'api/security/auth/identity/index',
+    'title' => 'Identity',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Identity namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/security/auth/index' => 
+  array (
+    'file' => 'api/security/auth/index.md',
+    'path' => 'api/security/auth/index',
+    'title' => 'Auth',
+    'description' => 'The Quiote\\\\Security\\\\Auth namespace — 46 documented types.',
+  ),
+  'quiote-docs://api/security/auth/introspection-client' => 
+  array (
+    'file' => 'api/security/auth/introspection-client.md',
+    'path' => 'api/security/auth/introspection-client',
+    'title' => 'IntrospectionClient',
+    'description' => 'A ~30-line RFC 7662 (OAuth 2.0 Token Introspection) POST helper -- `league/oauth2-client` has none.',
+  ),
+  'quiote-docs://api/security/auth/jwt-auth-plugin' => 
+  array (
+    'file' => 'api/security/auth/jwt-auth-plugin.md',
+    'path' => 'api/security/auth/jwt-auth-plugin',
+    'title' => 'JwtAuthPlugin',
+    'description' => 'Registers the default ClientTypeResolverInterface (the RFC 9068 rule -- see ClientTypeResolver).',
+  ),
+  'quiote-docs://api/security/auth/jwt-token-validator' => 
+  array (
+    'file' => 'api/security/auth/jwt-token-validator.md',
+    'path' => 'api/security/auth/jwt-token-validator',
+    'title' => 'JwtTokenValidator',
+    'description' => 'Verifies a JWS via `firebase/php-jwt` (JWKS + rotation via CachedKeySet for RS256/ES256, or a single Key for a shared HS256 secret) and enforces `iss`/`aud` -- the library itself only checks `exp`/`nbf`/`iat`.',
+  ),
+  'quiote-docs://api/security/auth/middleware/index' => 
+  array (
+    'file' => 'api/security/auth/middleware/index.md',
+    'path' => 'api/security/auth/middleware/index',
+    'title' => 'Middleware',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Middleware namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/auth/middleware/session-authentication-middleware' => 
+  array (
+    'file' => 'api/security/auth/middleware/session-authentication-middleware.md',
+    'path' => 'api/security/auth/middleware/session-authentication-middleware',
+    'title' => 'SessionAuthenticationMiddleware',
+    'description' => 'Runs the session/form-login firewall\'s authenticator chain in `before_action`, after `Quiote\\\\Middleware\\\\RoutingMiddleware` (so `SecurityUser` is already rehydrated) and before `Quiote\\\\Middleware\\\\SecurityMiddleware` (so a successful login is visible to the authZ decision made later in the same request).',
+  ),
+  'quiote-docs://api/security/auth/middleware/stateless-authentication-middleware' => 
+  array (
+    'file' => 'api/security/auth/middleware/stateless-authentication-middleware.md',
+    'path' => 'api/security/auth/middleware/stateless-authentication-middleware',
+    'title' => 'StatelessAuthenticationMiddleware',
+    'description' => 'Runs stateless firewalls\' authenticator chains (HTTP Basic, and -- once `packages/auth-jwt` is installed -- bearer/JWT) before routing and before `Quiote\\\\Middleware\\\\SessionMiddleware`, matching firewalls by request path.',
+  ),
+  'quiote-docs://api/security/auth/oidc-authenticator' => 
+  array (
+    'file' => 'api/security/auth/oidc-authenticator.md',
+    'path' => 'api/security/auth/oidc-authenticator',
+    'title' => 'OidcAuthenticator',
+    'description' => 'The callback leg of the OIDC Authorization Code + PKCE flow: verifies `state` (exact, constant-time comparison), exchanges the code for tokens via OidcClient, validates the ID token (signature/`iss`/ `aud` via the injected TokenValidatorInterface, plus our own `nonce` check -- `at_hash` is intentionally not checked: it is only REQUIRED by OIDC core when an access token is returned from the *authorization* endpoint (implicit/hybrid flows), and OPTIONAL for a pure Authorization Code exchange at the *token* endpoint, which is the only flow this class implements), then maps the claims to a `UserIdentity` via `UserProviderInterface::loadByToken()` -- the same seam `packages/auth-jwt`\'s `BearerTokenAuthenticator` uses.',
+  ),
+  'quiote-docs://api/security/auth/oidc-authorization-request' => 
+  array (
+    'file' => 'api/security/auth/oidc-authorization-request.md',
+    'path' => 'api/security/auth/oidc-authorization-request',
+    'title' => 'OidcAuthorizationRequest',
+    'description' => 'The result of OidcClient::buildAuthorizationRequest(): the URL to redirect the browser to, plus the state/PKCE-verifier/nonce the caller must persist (e.g.',
+  ),
+  'quiote-docs://api/security/auth/oidc-authorization-state' => 
+  array (
+    'file' => 'api/security/auth/oidc-authorization-state.md',
+    'path' => 'api/security/auth/oidc-authorization-state',
+    'title' => 'OidcAuthorizationState',
+    'description' => 'The per-attempt secrets an OIDC auth-code + PKCE flow must round-trip through the user\'s session between the authorization redirect and the callback: the CSRF-style `state`, the PKCE `code_verifier`, and the OIDC `nonce` (replay/injection protection for the ID token).',
+  ),
+  'quiote-docs://api/security/auth/oidc-client' => 
+  array (
+    'file' => 'api/security/auth/oidc-client.md',
+    'path' => 'api/security/auth/oidc-client',
+    'title' => 'OidcClient',
+    'description' => 'Wraps `league/oauth2-client`\'s generic provider (via SpaceDelimitedScopeProvider, which fixes the library\'s comma-delimited `scope` parameter) for the OIDC Authorization Code flow.',
+  ),
+  'quiote-docs://api/security/auth/oidc-discovery-client' => 
+  array (
+    'file' => 'api/security/auth/oidc-discovery-client.md',
+    'path' => 'api/security/auth/oidc-discovery-client',
+    'title' => 'OidcDiscoveryClient',
+    'description' => 'Fetches an OpenID provider\'s metadata from `{issuer}/.well-known/openid-configuration` (OpenID Connect Discovery 1.0 §4) so an app can wire OidcClient, ClientCredentialsClient, IntrospectionClient and `auth-jwt`\'s JWKS key set from one issuer URL instead of five hand-copied endpoint strings that silently rot when the provider moves them.',
+  ),
+  'quiote-docs://api/security/auth/oidc-discovery-document' => 
+  array (
+    'file' => 'api/security/auth/oidc-discovery-document.md',
+    'path' => 'api/security/auth/oidc-discovery-document',
+    'title' => 'OidcDiscoveryDocument',
+    'description' => 'An immutable OpenID Provider metadata document (OpenID Connect Discovery 1.0 §3, a superset of RFC 8414 authorization-server metadata), as fetched by OidcDiscoveryClient.',
+  ),
+  'quiote-docs://api/security/auth/oidc-state-storage' => 
+  array (
+    'file' => 'api/security/auth/oidc-state-storage.md',
+    'path' => 'api/security/auth/oidc-state-storage',
+    'title' => 'OidcStateStorage',
+    'description' => 'Persists a single in-flight OidcAuthorizationState in the session-backed `Context` storage, keyed by its own `state` value so a concurrent second login attempt in another tab doesn\'t clobber the first.',
+  ),
+  'quiote-docs://api/security/auth/passport' => 
+  array (
+    'file' => 'api/security/auth/passport.md',
+    'path' => 'api/security/auth/passport',
+    'title' => 'Passport',
+    'description' => 'The resolved outcome of a successful AuthenticatorInterface::authenticate() call: the identity plus the credentials/roles to grant, and whether the identity is stateless (re-derived from the credential every request rather than read back from the session).',
+  ),
+  'quiote-docs://api/security/auth/password-hasher-interface' => 
+  array (
+    'file' => 'api/security/auth/password-hasher-interface.md',
+    'path' => 'api/security/auth/password-hasher-interface',
+    'title' => 'PasswordHasherInterface',
+    'description' => 'Thin contract over PHP\'s `password_hash()` family, so `FormLoginAuthenticator`/`HttpBasicAuthenticator` (both in the future `packages/auth`) depend on an interface rather than the global functions directly.',
+  ),
+  'quiote-docs://api/security/auth/password-protected-user-identity' => 
+  array (
+    'file' => 'api/security/auth/password-protected-user-identity.md',
+    'path' => 'api/security/auth/password-protected-user-identity',
+    'title' => 'PasswordProtectedUserIdentity',
+    'description' => 'A UserIdentity that can be checked against a password, resolved by `InMemoryUserProvider`/`PdoUserProvider`/`CallableUserProvider` and consumed by `FormLoginAuthenticator`/`HttpBasicAuthenticator` via PasswordHasherInterface.',
+  ),
+  'quiote-docs://api/security/auth/provider/callable-user-provider' => 
+  array (
+    'file' => 'api/security/auth/provider/callable-user-provider.md',
+    'path' => 'api/security/auth/provider/callable-user-provider',
+    'title' => 'CallableUserProvider',
+    'description' => 'Delegates identity/claim resolution to app-supplied callables, for lookups that don\'t fit `InMemoryUserProvider`\'s static list or `PdoUserProvider`\'s single-table convention (e.g.',
+  ),
+  'quiote-docs://api/security/auth/provider/in-memory-user-provider' => 
+  array (
+    'file' => 'api/security/auth/provider/in-memory-user-provider.md',
+    'path' => 'api/security/auth/provider/in-memory-user-provider',
+    'title' => 'InMemoryUserProvider',
+    'description' => 'A config-driven `UserProviderInterface`, for apps with a small, static user list (the `security.xml` `<provider type=\\"in_memory\\">` shape).',
+  ),
+  'quiote-docs://api/security/auth/provider/index' => 
+  array (
+    'file' => 'api/security/auth/provider/index.md',
+    'path' => 'api/security/auth/provider/index',
+    'title' => 'Provider',
+    'description' => 'The Quiote\\\\Security\\\\Auth\\\\Provider namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/security/auth/provider/pdo-user-provider' => 
+  array (
+    'file' => 'api/security/auth/provider/pdo-user-provider.md',
+    'path' => 'api/security/auth/provider/pdo-user-provider',
+    'title' => 'PdoUserProvider',
+    'description' => 'Resolves identities from a single users table via the framework\'s `DatabaseManager`, matching the `security.xml` `<provider type=\\"pdo\\" connection=\\"main\\" table=\\"users\\" identifier-column=\\"email\\" password-column=\\"password_hash\\">` shape.',
+  ),
+  'quiote-docs://api/security/auth/space-delimited-scope-provider' => 
+  array (
+    'file' => 'api/security/auth/space-delimited-scope-provider.md',
+    'path' => 'api/security/auth/space-delimited-scope-provider',
+    'title' => 'SpaceDelimitedScopeProvider',
+    'description' => '`league/oauth2-client`\'s `AbstractProvider::getScopeSeparator()` returns a comma and `GenericProvider` does not override it, so a multi-scope authorization request comes out as `scope=openid%2Cprofile%2Cemail`.',
+  ),
+  'quiote-docs://api/security/auth/token-claims' => 
+  array (
+    'file' => 'api/security/auth/token-claims.md',
+    'path' => 'api/security/auth/token-claims',
+    'title' => 'TokenClaims',
+    'description' => 'Validated claims from a bearer/JWT/OIDC token, plus the ClientType derived from them by a ClientTypeResolverInterface.',
+  ),
+  'quiote-docs://api/security/auth/token-validator-interface' => 
+  array (
+    'file' => 'api/security/auth/token-validator-interface.md',
+    'path' => 'api/security/auth/token-validator-interface',
+    'title' => 'TokenValidatorInterface',
+    'description' => 'Verifies a bearer token\'s signature and standard time claims (`exp`/`nbf`/`iat`) and returns its raw claim set.',
+  ),
+  'quiote-docs://api/security/auth/user-identity' => 
+  array (
+    'file' => 'api/security/auth/user-identity.md',
+    'path' => 'api/security/auth/user-identity',
+    'title' => 'UserIdentity',
+    'description' => 'The identity a UserProviderInterface resolves a credential to, before it is mapped onto a `Quiote\\\\User\\\\SecurityUser`/`RbacSecurityUser` by `Quiote\\\\Security\\\\Auth\\\\AuthenticationManager` (`packages/auth`).',
+  ),
+  'quiote-docs://api/security/auth/user-provider-interface' => 
+  array (
+    'file' => 'api/security/auth/user-provider-interface.md',
+    'path' => 'api/security/auth/user-provider-interface',
+    'title' => 'UserProviderInterface',
+    'description' => 'Loads a UserIdentity either by a stable identifier (form login, HTTP Basic) or from validated token claims (bearer/JWT/OIDC).',
+  ),
+  'quiote-docs://api/security/cors/cors-middleware' => 
+  array (
+    'file' => 'api/security/cors/cors-middleware.md',
+    'path' => 'api/security/cors/cors-middleware',
+    'title' => 'CorsMiddleware',
+    'description' => 'Cross-Origin Resource Sharing (CORS) handling.',
+  ),
+  'quiote-docs://api/security/cors/cors-plugin' => 
+  array (
+    'file' => 'api/security/cors/cors-plugin.md',
+    'path' => 'api/security/cors/cors-plugin',
+    'title' => 'CorsPlugin',
+    'description' => 'Registers CorsMiddleware through the generic plugin seam, opt-in via `cors.enabled` (the middleware itself no-ops when it\'s false, so simply installing this package doesn\'t turn CORS on for every app).',
+  ),
+  'quiote-docs://api/security/cors/index' => 
+  array (
+    'file' => 'api/security/cors/index.md',
+    'path' => 'api/security/cors/index',
+    'title' => 'Cors',
+    'description' => 'The Quiote\\\\Security\\\\Cors namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/csrf/csrf-manager' => 
+  array (
+    'file' => 'api/security/csrf/csrf-manager.md',
+    'path' => 'api/security/csrf/csrf-manager',
+    'title' => 'CsrfManager',
+    'description' => 'Application-facing CSRF helper.',
+  ),
+  'quiote-docs://api/security/csrf/csrf-plugin' => 
+  array (
+    'file' => 'api/security/csrf/csrf-plugin.md',
+    'path' => 'api/security/csrf/csrf-plugin',
+    'title' => 'CsrfPlugin',
+    'description' => 'Registers the CSRF middleware pair through the generic plugin seam instead of MiddlewarePipeline hardcoding them.',
+  ),
+  'quiote-docs://api/security/csrf/index' => 
+  array (
+    'file' => 'api/security/csrf/index.md',
+    'path' => 'api/security/csrf/index',
+    'title' => 'Csrf',
+    'description' => 'The Quiote\\\\Security\\\\Csrf namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/security/csrf/middleware/csrf-injection-middleware' => 
+  array (
+    'file' => 'api/security/csrf/middleware/csrf-injection-middleware.md',
+    'path' => 'api/security/csrf/middleware/csrf-injection-middleware',
+    'title' => 'CsrfInjectionMiddleware',
+    'description' => 'Delivers the CSRF token to clients so they can echo it back on unsafe requests.',
+  ),
+  'quiote-docs://api/security/csrf/middleware/csrf-validation-middleware' => 
+  array (
+    'file' => 'api/security/csrf/middleware/csrf-validation-middleware.md',
+    'path' => 'api/security/csrf/middleware/csrf-validation-middleware',
+    'title' => 'CsrfValidationMiddleware',
+    'description' => 'Verifies a CSRF token on every unsafe (state-changing) request before the action is dispatched.',
+  ),
+  'quiote-docs://api/security/csrf/middleware/index' => 
+  array (
+    'file' => 'api/security/csrf/middleware/index.md',
+    'path' => 'api/security/csrf/middleware/index',
+    'title' => 'Middleware',
+    'description' => 'The Quiote\\\\Security\\\\Csrf\\\\Middleware namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/csrf/session-token-storage' => 
+  array (
+    'file' => 'api/security/csrf/session-token-storage.md',
+    'path' => 'api/security/csrf/session-token-storage',
+    'title' => 'SessionTokenStorage',
+    'description' => 'Symfony CSRF TokenStorage backed by Quiote\'s session.',
+  ),
+  'quiote-docs://api/security/headers/index' => 
+  array (
+    'file' => 'api/security/headers/index.md',
+    'path' => 'api/security/headers/index',
+    'title' => 'Headers',
+    'description' => 'The Quiote\\\\Security\\\\Headers namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/headers/security-headers-middleware' => 
+  array (
+    'file' => 'api/security/headers/security-headers-middleware.md',
+    'path' => 'api/security/headers/security-headers-middleware',
+    'title' => 'SecurityHeadersMiddleware',
+    'description' => 'Adds standard hardening response headers (CSP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS).',
+  ),
+  'quiote-docs://api/security/headers/security-headers-plugin' => 
+  array (
+    'file' => 'api/security/headers/security-headers-plugin.md',
+    'path' => 'api/security/headers/security-headers-plugin',
+    'title' => 'SecurityHeadersPlugin',
+    'description' => 'Registers SecurityHeadersMiddleware through the generic plugin seam.',
+  ),
+  'quiote-docs://api/security/index' => 
+  array (
+    'file' => 'api/security/index.md',
+    'path' => 'api/security/index',
+    'title' => 'Security',
+    'description' => 'The Quiote\\\\Security namespace — 59 documented types.',
+  ),
+  'quiote-docs://api/security/rate-limit/index' => 
+  array (
+    'file' => 'api/security/rate-limit/index.md',
+    'path' => 'api/security/rate-limit/index',
+    'title' => 'RateLimit',
+    'description' => 'The Quiote\\\\Security\\\\RateLimit namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/security/rate-limit/login-throttle' => 
+  array (
+    'file' => 'api/security/rate-limit/login-throttle.md',
+    'path' => 'api/security/rate-limit/login-throttle',
+    'title' => 'LoginThrottle',
+    'description' => 'A small login/auth throttle on top of symfony/rate-limiter.',
+  ),
+  'quiote-docs://api/security/rate-limit/pdo-rate-limiter-storage' => 
+  array (
+    'file' => 'api/security/rate-limit/pdo-rate-limiter-storage.md',
+    'path' => 'api/security/rate-limit/pdo-rate-limiter-storage',
+    'title' => 'PdoRateLimiterStorage',
+    'description' => 'A symfony/rate-limiter StorageInterface backed by a relational database via PDO.',
+  ),
+  'quiote-docs://api/security/rate-limit/rate-limit-middleware' => 
+  array (
+    'file' => 'api/security/rate-limit/rate-limit-middleware.md',
+    'path' => 'api/security/rate-limit/rate-limit-middleware',
+    'title' => 'RateLimitMiddleware',
+    'description' => 'General-purpose per-client HTTP rate limiting, built on the same symfony/rate-limiter primitives as LoginThrottle but keyed by client IP rather than a login identifier.',
+  ),
+  'quiote-docs://api/security/rate-limit/rate-limit-plugin' => 
+  array (
+    'file' => 'api/security/rate-limit/rate-limit-plugin.md',
+    'path' => 'api/security/rate-limit/rate-limit-plugin',
+    'title' => 'RateLimitPlugin',
+    'description' => 'Registers RateLimitMiddleware through the generic plugin seam, opt-in via `ratelimit.http.enabled`.',
+  ),
+  'quiote-docs://api/service/index' => 
+  array (
+    'file' => 'api/service/index.md',
+    'path' => 'api/service/index',
+    'title' => 'Service',
+    'description' => 'The Quiote\\\\Service namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/service/service' => 
+  array (
+    'file' => 'api/service/service.md',
+    'path' => 'api/service/service',
+    'title' => 'Service',
+    'description' => 'Optional, transitional base for services.',
+  ),
+  'quiote-docs://api/service/service-interface' => 
+  array (
+    'file' => 'api/service/service-interface.md',
+    'path' => 'api/service/service-interface',
+    'title' => 'ServiceInterface',
+    'description' => 'Marker interface for the DI Service layer.',
+  ),
+  'quiote-docs://api/session/file-session-factory' => 
+  array (
+    'file' => 'api/session/file-session-factory.md',
+    'path' => 'api/session/file-session-factory',
+    'title' => 'FileSessionFactory',
+    'description' => 'The default `session` slot factory: file-backed, zero dependencies, no database required.',
+  ),
+  'quiote-docs://api/session/file-session-persistence' => 
+  array (
+    'file' => 'api/session/file-session-persistence.md',
+    'path' => 'api/session/file-session-persistence',
+    'title' => 'FileSessionPersistence',
+    'description' => 'File-backed SessionPersistenceInterface implementation — the zero-dependency default backend.',
+  ),
+  'quiote-docs://api/session/index' => 
+  array (
+    'file' => 'api/session/index.md',
+    'path' => 'api/session/index',
+    'title' => 'Session',
+    'description' => 'The Quiote\\\\Session namespace — 19 documented types.',
+  ),
+  'quiote-docs://api/session/null-session-bag' => 
+  array (
+    'file' => 'api/session/null-session-bag.md',
+    'path' => 'api/session/null-session-bag',
+    'title' => 'NullSessionBag',
+    'description' => 'A SessionBagInterface that stores nothing.',
+  ),
+  'quiote-docs://api/session/object-store-session-persistence' => 
+  array (
+    'file' => 'api/session/object-store-session-persistence.md',
+    'path' => 'api/session/object-store-session-persistence',
+    'title' => 'ObjectStoreSessionPersistence',
+    'description' => 'A SessionPersistenceInterface storing one object per session id in any ObjectStoreClientInterface.',
+  ),
+  'quiote-docs://api/session/pdo-session-factory' => 
+  array (
+    'file' => 'api/session/pdo-session-factory.md',
+    'path' => 'api/session/pdo-session-factory',
+    'title' => 'PdoSessionFactory',
+    'description' => '`session` slot factory for PdoSessionPersistence, taking its connection from the application\'s own database manager so sessions live alongside everything else rather than needing separate credentials.',
+  ),
+  'quiote-docs://api/session/pdo-session-persistence' => 
+  array (
+    'file' => 'api/session/pdo-session-persistence.md',
+    'path' => 'api/session/pdo-session-persistence',
+    'title' => 'PdoSessionPersistence',
+    'description' => 'Default PDO-backed SessionPersistenceInterface implementation.',
+  ),
+  'quiote-docs://api/session/pdo/index' => 
+  array (
+    'file' => 'api/session/pdo/index.md',
+    'path' => 'api/session/pdo/index',
+    'title' => 'Pdo',
+    'description' => 'The Quiote\\\\Session\\\\Pdo namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/session/pdo/pdo-session-factory' => 
+  array (
+    'file' => 'api/session/pdo/pdo-session-factory.md',
+    'path' => 'api/session/pdo/pdo-session-factory',
+    'title' => 'PdoSessionFactory',
+    'description' => '`session` slot factory for this package\'s PdoSessionPersistence.',
+  ),
+  'quiote-docs://api/session/pdo/pdo-session-persistence' => 
+  array (
+    'file' => 'api/session/pdo/pdo-session-persistence.md',
+    'path' => 'api/session/pdo/pdo-session-persistence',
+    'title' => 'PdoSessionPersistence',
+    'description' => 'PDO-backed SessionPersistenceInterface for SessionManager.',
+  ),
+  'quiote-docs://api/session/quiote-session-bag' => 
+  array (
+    'file' => 'api/session/quiote-session-bag.md',
+    'path' => 'api/session/quiote-session-bag',
+    'title' => 'QuioteSessionBag',
+    'description' => 'SessionBagInterface over the PSR-7-native SessionManager stack.',
+  ),
+  'quiote-docs://api/session/redis/index' => 
+  array (
+    'file' => 'api/session/redis/index.md',
+    'path' => 'api/session/redis/index',
+    'title' => 'Redis',
+    'description' => 'The Quiote\\\\Session\\\\Redis namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/session/redis/redis-session-factory' => 
+  array (
+    'file' => 'api/session/redis/redis-session-factory.md',
+    'path' => 'api/session/redis/redis-session-factory',
+    'title' => 'RedisSessionFactory',
+    'description' => '`session` slot factory for RedisSessionPersistence.',
+  ),
+  'quiote-docs://api/session/redis/redis-session-persistence' => 
+  array (
+    'file' => 'api/session/redis/redis-session-persistence.md',
+    'path' => 'api/session/redis/redis-session-persistence',
+    'title' => 'RedisSessionPersistence',
+    'description' => 'Redis-backed SessionPersistenceInterface for SessionManager.',
+  ),
+  'quiote-docs://api/session/session' => 
+  array (
+    'file' => 'api/session/session.md',
+    'path' => 'api/session/session',
+    'title' => 'Session',
+    'description' => 'Mutable session handle.',
+  ),
+  'quiote-docs://api/session/session-bag-interface' => 
+  array (
+    'file' => 'api/session/session-bag-interface.md',
+    'path' => 'api/session/session-bag-interface',
+    'title' => 'SessionBagInterface',
+    'description' => 'The narrow per-session key/value contract everything that needs session state talks to: the User hierarchy, CSRF token storage, OIDC state, and application code.',
+  ),
+  'quiote-docs://api/session/session-codec' => 
+  array (
+    'file' => 'api/session/session-codec.md',
+    'path' => 'api/session/session-codec',
+    'title' => 'SessionCodec',
+    'description' => 'The shipped session codec: igbinary when it is available and wanted, JSON otherwise, and reads both regardless of which it writes.',
+  ),
+  'quiote-docs://api/session/session-codec-interface' => 
+  array (
+    'file' => 'api/session/session-codec-interface.md',
+    'path' => 'api/session/session-codec-interface',
+    'title' => 'SessionCodecInterface',
+    'description' => 'Serializes a session payload for storage, and reads it back.',
+  ),
+  'quiote-docs://api/session/session-factory-interface' => 
+  array (
+    'file' => 'api/session/session-factory-interface.md',
+    'path' => 'api/session/session-factory-interface',
+    'title' => 'SessionFactoryInterface',
+    'description' => 'Builds the persistence backend for the `session` factory slot.',
+  ),
+  'quiote-docs://api/session/session-manager' => 
+  array (
+    'file' => 'api/session/session-manager.md',
+    'path' => 'api/session/session-manager',
+    'title' => 'SessionManager',
+    'description' => 'Opinionated, PSR-7-based session handling: a cookie carrying a session id, and a pluggable SessionPersistenceInterface backend for the data.',
+  ),
+  'quiote-docs://api/session/session-middleware' => 
+  array (
+    'file' => 'api/session/session-middleware.md',
+    'path' => 'api/session/session-middleware',
+    'title' => 'SessionMiddleware',
+    'description' => 'Opt-in PSR-15 middleware wiring SessionManager into the request lifecycle: loads/creates the session before the handler runs and attaches it to the request as an attribute keyed by self::class, then persists + bakes the Set-Cookie header onto the response afterwards.',
+  ),
+  'quiote-docs://api/session/session-persistence-interface' => 
+  array (
+    'file' => 'api/session/session-persistence-interface.md',
+    'path' => 'api/session/session-persistence-interface',
+    'title' => 'SessionPersistenceInterface',
+    'description' => 'Storage backend contract for SessionManager.',
+  ),
+  'quiote-docs://api/shutdown-sequence' => 
+  array (
+    'file' => 'api/shutdown-sequence.md',
+    'path' => 'api/shutdown-sequence',
+    'title' => 'ShutdownSequence',
+    'description' => 'The ordered list of components to shut down, and the operations on that order.',
+  ),
+  'quiote-docs://api/storage/azure/azure-blob-client' => 
+  array (
+    'file' => 'api/storage/azure/azure-blob-client.md',
+    'path' => 'api/storage/azure/azure-blob-client',
+    'title' => 'AzureBlobClient',
+    'description' => 'Minimal Azure Blob Storage REST client using Shared Key authentication — deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST + signing algorithm has proven more maintainable in production).',
+  ),
+  'quiote-docs://api/storage/azure/azure-blob-container-client' => 
+  array (
+    'file' => 'api/storage/azure/azure-blob-container-client.md',
+    'path' => 'api/storage/azure/azure-blob-container-client',
+    'title' => 'AzureBlobContainerClient',
+    'description' => 'AzureBlobClient bound to one container, so it satisfies ObjectStoreClientInterface like the S3 and GCS clients do.',
+  ),
+  'quiote-docs://api/storage/azure/azure-blob-session-factory' => 
+  array (
+    'file' => 'api/storage/azure/azure-blob-session-factory.md',
+    'path' => 'api/storage/azure/azure-blob-session-factory',
+    'title' => 'AzureBlobSessionFactory',
+    'description' => '`session` slot factory for AzureBlobSessionPersistence.',
+  ),
+  'quiote-docs://api/storage/azure/azure-blob-session-persistence' => 
+  array (
+    'file' => 'api/storage/azure/azure-blob-session-persistence.md',
+    'path' => 'api/storage/azure/azure-blob-session-persistence',
+    'title' => 'AzureBlobSessionPersistence',
+    'description' => 'SessionPersistenceInterface storing one JSON blob per session id (named `<sid>.json`) in a single Azure Blob container.',
+  ),
+  'quiote-docs://api/storage/azure/azure-storage-exception' => 
+  array (
+    'file' => 'api/storage/azure/azure-storage-exception.md',
+    'path' => 'api/storage/azure/azure-storage-exception',
+    'title' => 'AzureStorageException',
+    'description' => 'A failure talking to Azure storage.',
+  ),
+  'quiote-docs://api/storage/azure/azure-table-client' => 
+  array (
+    'file' => 'api/storage/azure/azure-table-client.md',
+    'path' => 'api/storage/azure/azure-table-client',
+    'title' => 'AzureTableClient',
+    'description' => 'Minimal Azure Table Storage REST client using the Table service\'s \\"Shared Key Lite\\" authentication scheme — a cheaper option than Blob Storage for small key/value-shaped session payloads (no per-account container needed; entities are addressed by table + partition/row key).',
+  ),
+  'quiote-docs://api/storage/azure/azure-table-session-factory' => 
+  array (
+    'file' => 'api/storage/azure/azure-table-session-factory.md',
+    'path' => 'api/storage/azure/azure-table-session-factory',
+    'title' => 'AzureTableSessionFactory',
+    'description' => '`session` slot factory for AzureTableSessionPersistence.',
+  ),
+  'quiote-docs://api/storage/azure/azure-table-session-persistence' => 
+  array (
+    'file' => 'api/storage/azure/azure-table-session-persistence.md',
+    'path' => 'api/storage/azure/azure-table-session-persistence',
+    'title' => 'AzureTableSessionPersistence',
+    'description' => 'SessionPersistenceInterface storing one entity per session id in a single Azure Table Storage table — cheaper than AzureBlobSessionPersistence for small key/value-shaped session payloads, with no per-account container to manage.',
+  ),
+  'quiote-docs://api/storage/azure/index' => 
+  array (
+    'file' => 'api/storage/azure/index.md',
+    'path' => 'api/storage/azure/index',
+    'title' => 'Azure',
+    'description' => 'The Quiote\\\\Storage\\\\Azure namespace — 8 documented types.',
+  ),
+  'quiote-docs://api/storage/gcs/gcs-client' => 
+  array (
+    'file' => 'api/storage/gcs/gcs-client.md',
+    'path' => 'api/storage/gcs/gcs-client',
+    'title' => 'GcsClient',
+    'description' => 'Minimal Google Cloud Storage REST client authenticating with an HMAC key pair (GCS\'s \\"interoperability\\" auth mode, meant for exactly this kind of S3-like tool) rather than a service-account OAuth2/JWT flow — no `google/cloud-storage` dependency, no token exchange round-trip, just the operations a session or filesystem backend needs against the XML API: get, put, delete and head a single object.',
+  ),
+  'quiote-docs://api/storage/gcs/gcs-session-factory' => 
+  array (
+    'file' => 'api/storage/gcs/gcs-session-factory.md',
+    'path' => 'api/storage/gcs/gcs-session-factory',
+    'title' => 'GcsSessionFactory',
+    'description' => '`session` slot factory for GcsSessionPersistence.',
+  ),
+  'quiote-docs://api/storage/gcs/gcs-session-persistence' => 
+  array (
+    'file' => 'api/storage/gcs/gcs-session-persistence.md',
+    'path' => 'api/storage/gcs/gcs-session-persistence',
+    'title' => 'GcsSessionPersistence',
+    'description' => 'SessionPersistenceInterface storing one JSON object per session id (object `<prefix><sid>.json`) in a single GCS bucket.',
+  ),
+  'quiote-docs://api/storage/gcs/gcs-storage-exception' => 
+  array (
+    'file' => 'api/storage/gcs/gcs-storage-exception.md',
+    'path' => 'api/storage/gcs/gcs-storage-exception',
+    'title' => 'GcsStorageException',
+    'description' => 'A failure talking to GCS storage.',
+  ),
+  'quiote-docs://api/storage/gcs/index' => 
+  array (
+    'file' => 'api/storage/gcs/index.md',
+    'path' => 'api/storage/gcs/index',
+    'title' => 'Gcs',
+    'description' => 'The Quiote\\\\Storage\\\\Gcs namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/storage/index' => 
+  array (
+    'file' => 'api/storage/index.md',
+    'path' => 'api/storage/index',
+    'title' => 'Storage',
+    'description' => 'The Quiote\\\\Storage namespace — 19 documented types.',
+  ),
+  'quiote-docs://api/storage/object-metadata' => 
+  array (
+    'file' => 'api/storage/object-metadata.md',
+    'path' => 'api/storage/object-metadata',
+    'title' => 'ObjectMetadata',
+    'description' => 'The subset of a stored object\'s HEAD response worth typing: everything else a provider returns (storage class, versioning, generation, SSE and custom metadata headers) is available from the raw response via the client\'s own `request()` method for callers that need it.',
+  ),
+  'quiote-docs://api/storage/object-store-client-interface' => 
+  array (
+    'file' => 'api/storage/object-store-client-interface.md',
+    'path' => 'api/storage/object-store-client-interface',
+    'title' => 'ObjectStoreClientInterface',
+    'description' => 'Read, write, remove and stat a single object in a flat keyed store.',
+  ),
+  'quiote-docs://api/storage/object-store-exception' => 
+  array (
+    'file' => 'api/storage/object-store-exception.md',
+    'path' => 'api/storage/object-store-exception',
+    'title' => 'ObjectStoreException',
+    'description' => 'A failure talking to an object store.',
+  ),
+  'quiote-docs://api/storage/s3/index' => 
+  array (
+    'file' => 'api/storage/s3/index.md',
+    'path' => 'api/storage/s3/index',
+    'title' => 'S3',
+    'description' => 'The Quiote\\\\Storage\\\\S3 namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/storage/s3/s3-client' => 
+  array (
+    'file' => 'api/storage/s3/s3-client.md',
+    'path' => 'api/storage/s3/s3-client',
+    'title' => 'S3Client',
+    'description' => 'Minimal S3 REST client using AWS Signature Version 4 — deliberately not built on `aws/aws-sdk-php` (a heavy dependency pulling in a client for every AWS service) for the operations a session or filesystem backend needs: get, put, delete and head a single object.',
+  ),
+  'quiote-docs://api/storage/s3/s3-session-factory' => 
+  array (
+    'file' => 'api/storage/s3/s3-session-factory.md',
+    'path' => 'api/storage/s3/s3-session-factory',
+    'title' => 'S3SessionFactory',
+    'description' => '`session` slot factory for S3SessionPersistence.',
+  ),
+  'quiote-docs://api/storage/s3/s3-session-persistence' => 
+  array (
+    'file' => 'api/storage/s3/s3-session-persistence.md',
+    'path' => 'api/storage/s3/s3-session-persistence',
+    'title' => 'S3SessionPersistence',
+    'description' => 'SessionPersistenceInterface storing one JSON object per session id (key `<prefix><sid>.json`) in a single S3 bucket.',
+  ),
+  'quiote-docs://api/storage/s3/s3-storage-exception' => 
+  array (
+    'file' => 'api/storage/s3/s3-storage-exception.md',
+    'path' => 'api/storage/s3/s3-storage-exception',
+    'title' => 'S3StorageException',
+    'description' => 'A failure talking to S3 storage.',
+  ),
+  'quiote-docs://api/support/compiler/artifact-drift-checker' => 
+  array (
+    'file' => 'api/support/compiler/artifact-drift-checker.md',
+    'path' => 'api/support/compiler/artifact-drift-checker',
+    'title' => 'ArtifactDriftChecker',
+    'description' => 'gofmt-style drift check: does the committed file at $target already match what we\'d emit right now?',
+  ),
+  'quiote-docs://api/support/compiler/artifact-drift-result' => 
+  array (
+    'file' => 'api/support/compiler/artifact-drift-result.md',
+    'path' => 'api/support/compiler/artifact-drift-result',
+    'title' => 'ArtifactDriftResult',
+    'description' => 'The result of comparing a freshly emitted artifact against whatever is (or isn\'t) already on disk at its target path, without writing anything.',
+  ),
+  'quiote-docs://api/support/compiler/artifact-writer' => 
+  array (
+    'file' => 'api/support/compiler/artifact-writer.md',
+    'path' => 'api/support/compiler/artifact-writer',
+    'title' => 'ArtifactWriter',
+    'description' => 'Writes an EmittedArtifact to disk.',
+  ),
+  'quiote-docs://api/support/compiler/diagnostic' => 
+  array (
+    'file' => 'api/support/compiler/diagnostic.md',
+    'path' => 'api/support/compiler/diagnostic',
+    'title' => 'Diagnostic',
+    'description' => 'A single problem or note surfaced while building a ValidatorPlan or emitting from one.',
+  ),
+  'quiote-docs://api/support/compiler/emitted-artifact' => 
+  array (
+    'file' => 'api/support/compiler/emitted-artifact.md',
+    'path' => 'api/support/compiler/emitted-artifact',
+    'title' => 'EmittedArtifact',
+    'description' => 'The result of emitting a ValidatorPlan through a back-end: the PHP source text, a checksum of it (for --check drift detection without writing anything to disk), and a hint for where it would naturally be written.',
+  ),
+  'quiote-docs://api/support/compiler/filesystem-artifact-writer' => 
+  array (
+    'file' => 'api/support/compiler/filesystem-artifact-writer.md',
+    'path' => 'api/support/compiler/filesystem-artifact-writer',
+    'title' => 'FilesystemArtifactWriter',
+    'description' => 'Writes an EmittedArtifact to a real file, via a write-to-temp-then-rename so a concurrent request (or an opcache-warmed worker) never observes a partially written compiled validator file -- rename() is atomic on the same filesystem, unlike a direct file_put_contents() to the final path.',
+  ),
+  'quiote-docs://api/support/compiler/index' => 
+  array (
+    'file' => 'api/support/compiler/index.md',
+    'path' => 'api/support/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Support\\\\Compiler namespace — 6 documented types.',
+  ),
+  'quiote-docs://api/support/correlation-id' => 
+  array (
+    'file' => 'api/support/correlation-id.md',
+    'path' => 'api/support/correlation-id',
+    'title' => 'CorrelationId',
+    'description' => 'Resolves a per-request correlation ID: adopt a sane inbound header value if present, else generate a fresh one.',
+  ),
+  'quiote-docs://api/support/index' => 
+  array (
+    'file' => 'api/support/index.md',
+    'path' => 'api/support/index',
+    'title' => 'Support',
+    'description' => 'The Quiote\\\\Support namespace — 7 documented types.',
+  ),
+  'quiote-docs://api/telemetry/attribute-sanitizer' => 
+  array (
+    'file' => 'api/telemetry/attribute-sanitizer.md',
+    'path' => 'api/telemetry/attribute-sanitizer',
+    'title' => 'AttributeSanitizer',
+    'description' => 'Validates arbitrary attribute maps against the shape the OTel SDK\'s own span/meter APIs require: non-empty-string keys, and values that are `array|bool|float|int|string|null` (arrays homogeneous, one scalar type throughout).',
+  ),
+  'quiote-docs://api/telemetry/dashboard/bars' => 
+  array (
+    'file' => 'api/telemetry/dashboard/bars.md',
+    'path' => 'api/telemetry/dashboard/bars',
+    'title' => 'Bars',
+    'description' => 'Renders a value/ceiling ratio as a fixed-width filled/empty block bar -- the dashboard\'s stand-in for a Gauge widget (`symfony/tui` has none; see Spark\'s docblock for the same widget-gap note).',
+  ),
+  'quiote-docs://api/telemetry/dashboard/chart-widget' => 
+  array (
+    'file' => 'api/telemetry/dashboard/chart-widget.md',
+    'path' => 'api/telemetry/dashboard/chart-widget',
+    'title' => 'ChartWidget',
+    'description' => 'A leaf widget that renders a numeric series as a multi-row bar chart, filling whatever height and width it is assigned at render time.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/dashboard-snapshot' => 
+  array (
+    'file' => 'api/telemetry/dashboard/dashboard-snapshot.md',
+    'path' => 'api/telemetry/dashboard/dashboard-snapshot',
+    'title' => 'DashboardSnapshot',
+    'description' => 'An immutable read of DashboardState at one point in time -- everything DashboardView needs to draw one frame, with no further computation or I/O required.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/dashboard-state' => 
+  array (
+    'file' => 'api/telemetry/dashboard/dashboard-state.md',
+    'path' => 'api/telemetry/dashboard/dashboard-state',
+    'title' => 'DashboardState',
+    'description' => 'The rolling in-memory store fed by OtlpReceiver\'s decoded batches and read by the render loop via DashboardState::snapshot().',
+  ),
+  'quiote-docs://api/telemetry/dashboard/dashboard-view' => 
+  array (
+    'file' => 'api/telemetry/dashboard/dashboard-view.md',
+    'path' => 'api/telemetry/dashboard/dashboard-view',
+    'title' => 'DashboardView',
+    'description' => 'Pure state -> widget-tree builder for the dashboard\'s live view: no I/O, no `symfony/tui` runtime calls (`Tui::add()`/`requestRender()` etc.) -- only this class and TelemetryDashboardCommand touch `Symfony\\\\Component\\\\Tui\\\\*` directly, containing the experimental package\'s surface to two files.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/http-message-parser' => 
+  array (
+    'file' => 'api/telemetry/dashboard/http-message-parser.md',
+    'path' => 'api/telemetry/dashboard/http-message-parser',
+    'title' => 'HttpMessageParser',
+    'description' => 'Minimal, bounded HTTP/1.1 request parser for the dashboard\'s OTLP receiver (see OtlpReceiver).',
+  ),
+  'quiote-docs://api/telemetry/dashboard/index' => 
+  array (
+    'file' => 'api/telemetry/dashboard/index.md',
+    'path' => 'api/telemetry/dashboard/index',
+    'title' => 'Dashboard',
+    'description' => 'The Quiote\\\\Telemetry\\\\Dashboard namespace — 17 documented types.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/malformed-request-exception' => 
+  array (
+    'file' => 'api/telemetry/dashboard/malformed-request-exception.md',
+    'path' => 'api/telemetry/dashboard/malformed-request-exception',
+    'title' => 'MalformedRequestException',
+    'description' => 'Thrown by HttpMessageParser for anything outside the narrow OTLP/HTTP shape the OTel PHP exporter sends (see that class\'s docblock).',
+  ),
+  'quiote-docs://api/telemetry/dashboard/otlp-decoder' => 
+  array (
+    'file' => 'api/telemetry/dashboard/otlp-decoder.md',
+    'path' => 'api/telemetry/dashboard/otlp-decoder',
+    'title' => 'OtlpDecoder',
+    'description' => 'Decodes OTLP `ExportTraceServiceRequest`/`ExportMetricsServiceRequest` protobuf (or JSON) payloads -- exactly what the OTel PHP OTLP/HTTP exporter sends, per `telemetry.otlp.protocol` -- into plain ReceivedSpan/ ReceivedMetric value objects.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/otlp-receiver' => 
+  array (
+    'file' => 'api/telemetry/dashboard/otlp-receiver.md',
+    'path' => 'api/telemetry/dashboard/otlp-receiver',
+    'title' => 'OtlpReceiver',
+    'description' => 'A minimal OTLP/HTTP receiver: binds a TCP socket and services it on the global Revolt event loop, exactly the pattern `symfony/tui`\'s own `Terminal::start()` uses for STDIN (`EventLoop::onReadable()`) -- so this runs cooperatively alongside a `Tui::run()` loop in the same process, no threads or second process needed.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/parsed-http-request' => 
+  array (
+    'file' => 'api/telemetry/dashboard/parsed-http-request.md',
+    'path' => 'api/telemetry/dashboard/parsed-http-request',
+    'title' => 'ParsedHttpRequest',
+    'description' => 'The result of HttpMessageParser::tryParse() -- method, path, headers (lower-cased names), and the fully-buffered request body.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/received-data-point' => 
+  array (
+    'file' => 'api/telemetry/dashboard/received-data-point.md',
+    'path' => 'api/telemetry/dashboard/received-data-point',
+    'title' => 'ReceivedDataPoint',
+    'description' => 'A single data point within a ReceivedMetric.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/received-metric' => 
+  array (
+    'file' => 'api/telemetry/dashboard/received-metric.md',
+    'path' => 'api/telemetry/dashboard/received-metric',
+    'title' => 'ReceivedMetric',
+    'description' => 'A metric decoded from an OTLP `ExportMetricsServiceRequest` by OtlpDecoder.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/received-span' => 
+  array (
+    'file' => 'api/telemetry/dashboard/received-span.md',
+    'path' => 'api/telemetry/dashboard/received-span',
+    'title' => 'ReceivedSpan',
+    'description' => 'A span decoded from an OTLP `ExportTraceServiceRequest` by OtlpDecoder, flattened into plain PHP values so nothing downstream (DashboardState, DashboardView, tests) needs to touch protobuf types.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/ring-buffer' => 
+  array (
+    'file' => 'api/telemetry/dashboard/ring-buffer.md',
+    'path' => 'api/telemetry/dashboard/ring-buffer',
+    'title' => 'RingBuffer',
+    'description' => 'A fixed-window, per-second time series.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/route-stats' => 
+  array (
+    'file' => 'api/telemetry/dashboard/route-stats.md',
+    'path' => 'api/telemetry/dashboard/route-stats',
+    'title' => 'RouteStats',
+    'description' => 'Per-route aggregates (count, avg latency, error %, cache-hit %, last seen) for the dashboard\'s route table.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/spark' => 
+  array (
+    'file' => 'api/telemetry/dashboard/spark.md',
+    'path' => 'api/telemetry/dashboard/spark',
+    'title' => 'Spark',
+    'description' => 'Renders a numeric series as a Unicode block-glyph bar chart, using eighth blocks (`▁▂▃▄▅▆▇█`) per character row to get sub-row vertical resolution across an arbitrary number of text rows.',
+  ),
+  'quiote-docs://api/telemetry/dashboard/text-sanitizer' => 
+  array (
+    'file' => 'api/telemetry/dashboard/text-sanitizer.md',
+    'path' => 'api/telemetry/dashboard/text-sanitizer',
+    'title' => 'TextSanitizer',
+    'description' => 'Strips terminal-escape introducer bytes from telemetry-derived strings (span names, status messages, route labels, attribute values) before they reach a `TextWidget`.',
+  ),
+  'quiote-docs://api/telemetry/force-sample-sampler' => 
+  array (
+    'file' => 'api/telemetry/force-sample-sampler.md',
+    'path' => 'api/telemetry/force-sample-sampler',
+    'title' => 'ForceSampleSampler',
+    'description' => 'Head-based force sampling: \\"trace this one request\\" without touching the global sampling ratio.',
+  ),
+  'quiote-docs://api/telemetry/index' => 
+  array (
+    'file' => 'api/telemetry/index.md',
+    'path' => 'api/telemetry/index',
+    'title' => 'Telemetry',
+    'description' => 'The Quiote\\\\Telemetry namespace — 36 documented types.',
+  ),
+  'quiote-docs://api/telemetry/meter-handle' => 
+  array (
+    'file' => 'api/telemetry/meter-handle.md',
+    'path' => 'api/telemetry/meter-handle',
+    'title' => 'MeterHandle',
+    'description' => 'Records metric instruments (histograms, counters, gauges).',
+  ),
+  'quiote-docs://api/telemetry/middleware-span-decorator' => 
+  array (
+    'file' => 'api/telemetry/middleware-span-decorator.md',
+    'path' => 'api/telemetry/middleware-span-decorator',
+    'title' => 'MiddlewareSpanDecorator',
+    'description' => 'Wraps a single pipeline middleware in a child span named by its FQCN.',
+  ),
+  'quiote-docs://api/telemetry/noop-meter-handle' => 
+  array (
+    'file' => 'api/telemetry/noop-meter-handle.md',
+    'path' => 'api/telemetry/noop-meter-handle',
+    'title' => 'NoopMeterHandle',
+    'description' => 'The disabled-state MeterHandle: every recording is a safe no-op.',
+  ),
+  'quiote-docs://api/telemetry/noop-span-handle' => 
+  array (
+    'file' => 'api/telemetry/noop-span-handle.md',
+    'path' => 'api/telemetry/noop-span-handle',
+    'title' => 'NoopSpanHandle',
+    'description' => 'The disabled-state SpanHandle: every call is a safe no-op.',
+  ),
+  'quiote-docs://api/telemetry/otel-meter-handle' => 
+  array (
+    'file' => 'api/telemetry/otel-meter-handle.md',
+    'path' => 'api/telemetry/otel-meter-handle',
+    'title' => 'OtelMeterHandle',
+    'description' => 'Real MeterHandle, wrapping an OpenTelemetry MeterInterface.',
+  ),
+  'quiote-docs://api/telemetry/otel-span-handle' => 
+  array (
+    'file' => 'api/telemetry/otel-span-handle.md',
+    'path' => 'api/telemetry/otel-span-handle',
+    'title' => 'OtelSpanHandle',
+    'description' => 'Real SpanHandle, wrapping an active OpenTelemetry SpanInterface.',
+  ),
+  'quiote-docs://api/telemetry/psr7-header-getter' => 
+  array (
+    'file' => 'api/telemetry/psr7-header-getter.md',
+    'path' => 'api/telemetry/psr7-header-getter',
+    'title' => 'Psr7HeaderGetter',
+    'description' => 'Reads W3C `traceparent`/`tracestate` (or any other propagated header) off a PSR-7 message for TraceContextPropagator::extract().',
+  ),
+  'quiote-docs://api/telemetry/psr7-header-setter' => 
+  array (
+    'file' => 'api/telemetry/psr7-header-setter.md',
+    'path' => 'api/telemetry/psr7-header-setter',
+    'title' => 'Psr7HeaderSetter',
+    'description' => 'The outbound counterpart to Psr7HeaderGetter: adapts a PSR-7 request to OpenTelemetry\'s propagation *setter* so `TraceContextPropagator::inject()` can write `traceparent`/`tracestate` onto an outgoing request.',
+  ),
+  'quiote-docs://api/telemetry/span-handle' => 
+  array (
+    'file' => 'api/telemetry/span-handle.md',
+    'path' => 'api/telemetry/span-handle',
+    'title' => 'SpanHandle',
+    'description' => 'A single unit of work in a trace.',
+  ),
+  'quiote-docs://api/telemetry/span-kind' => 
+  array (
+    'file' => 'api/telemetry/span-kind.md',
+    'path' => 'api/telemetry/span-kind',
+    'title' => 'SpanKind',
+    'description' => 'Mirrors OpenTelemetry\'s `SpanKind` constants (`OpenTelemetry\\\\API\\\\Trace\\\\SpanKind::KIND_*`) numerically 1:1, but as our own framework-owned enum so Trace::span()\'s signature never needs the optional open-telemetry/api package to exist — PHP resolves a default parameter value eagerly (unlike type hints, which resolve lazily at call time), so a default referencing an optional class\'s constant would crash every `Trace::span()` call with no explicit $kind when the SDK isn\'t installed.',
+  ),
+  'quiote-docs://api/telemetry/telemetry-bootstrap' => 
+  array (
+    'file' => 'api/telemetry/telemetry-bootstrap.md',
+    'path' => 'api/telemetry/telemetry-bootstrap',
+    'title' => 'TelemetryBootstrap',
+    'description' => 'Owns the telemetry lifecycle for a process: build the providers once, flush at each request boundary, and shut down on exit.',
+  ),
+  'quiote-docs://api/telemetry/telemetry-config' => 
+  array (
+    'file' => 'api/telemetry/telemetry-config.md',
+    'path' => 'api/telemetry/telemetry-config',
+    'title' => 'TelemetryConfig',
+    'description' => 'The `telemetry.*` settings, read once and resolved into concrete values.',
+  ),
+  'quiote-docs://api/telemetry/telemetry-exporter-factory' => 
+  array (
+    'file' => 'api/telemetry/telemetry-exporter-factory.md',
+    'path' => 'api/telemetry/telemetry-exporter-factory',
+    'title' => 'TelemetryExporterFactory',
+    'description' => 'Builds the span and metric exporters named by `telemetry.exporter`.',
+  ),
+  'quiote-docs://api/telemetry/telemetry-plugin' => 
+  array (
+    'file' => 'api/telemetry/telemetry-plugin.md',
+    'path' => 'api/telemetry/telemetry-plugin',
+    'title' => 'TelemetryPlugin',
+    'description' => 'Wires the OTel-SDK-dependent exporter bootstrap (TelemetryBootstrap) into the generic event seams instead of Kernel calling it by hard FQCN.',
+  ),
+  'quiote-docs://api/telemetry/telemetry-provider-factory' => 
+  array (
+    'file' => 'api/telemetry/telemetry-provider-factory.md',
+    'path' => 'api/telemetry/telemetry-provider-factory',
+    'title' => 'TelemetryProviderFactory',
+    'description' => 'Assembles the TracerProvider and MeterProvider: the resource describing this service, the sampler, the span processor, and the metric reader.',
+  ),
+  'quiote-docs://api/telemetry/trace' => 
+  array (
+    'file' => 'api/telemetry/trace.md',
+    'path' => 'api/telemetry/trace',
+    'title' => 'Trace',
+    'description' => 'Static facade for the telemetry subsystem (mirrors Log).',
+  ),
+  'quiote-docs://api/telemetry/trace-registry' => 
+  array (
+    'file' => 'api/telemetry/trace-registry.md',
+    'path' => 'api/telemetry/trace-registry',
+    'title' => 'TraceRegistry',
+    'description' => 'Process-global store of telemetry configuration AND (once TelemetryBootstrap has run) the worker-lifetime tracer/meter provider singletons.',
+  ),
+  'quiote-docs://api/testing/action-test-case' => 
+  array (
+    'file' => 'api/testing/action-test-case.md',
+    'path' => 'api/testing/action-test-case',
+    'title' => 'ActionTestCase',
+    'description' => 'ActionTestCase is the base class for all action testcases and provides the necessary assertions',
+  ),
+  'quiote-docs://api/testing/attributes/bootstrap' => 
+  array (
+    'file' => 'api/testing/attributes/bootstrap.md',
+    'path' => 'api/testing/attributes/bootstrap',
+    'title' => 'Bootstrap',
+    'description' => 'Attribute to specify whether Quiote should be bootstrapped in isolation tests',
+  ),
+  'quiote-docs://api/testing/attributes/clear-isolation-cache' => 
+  array (
+    'file' => 'api/testing/attributes/clear-isolation-cache.md',
+    'path' => 'api/testing/attributes/clear-isolation-cache',
+    'title' => 'ClearIsolationCache',
+    'description' => 'Attribute to specify that cache should be cleared in isolation tests',
+  ),
+  'quiote-docs://api/testing/attributes/index' => 
+  array (
+    'file' => 'api/testing/attributes/index.md',
+    'path' => 'api/testing/attributes/index',
+    'title' => 'Attributes',
+    'description' => 'The Quiote\\\\Testing\\\\Attributes namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/testing/attributes/isolation-default-context' => 
+  array (
+    'file' => 'api/testing/attributes/isolation-default-context.md',
+    'path' => 'api/testing/attributes/isolation-default-context',
+    'title' => 'IsolationDefaultContext',
+    'description' => 'Attribute to specify the default context for Quiote isolation tests',
+  ),
+  'quiote-docs://api/testing/attributes/isolation-environment' => 
+  array (
+    'file' => 'api/testing/attributes/isolation-environment.md',
+    'path' => 'api/testing/attributes/isolation-environment',
+    'title' => 'IsolationEnvironment',
+    'description' => 'Attribute to specify the isolation environment for Quiote tests',
+  ),
+  'quiote-docs://api/testing/base-constraint-because-phpunit-sucks-at-backwards-compatibility' => 
+  array (
+    'file' => 'api/testing/base-constraint-because-phpunit-sucks-at-backwards-compatibility.md',
+    'path' => 'api/testing/base-constraint-because-phpunit-sucks-at-backwards-compatibility',
+    'title' => 'BaseConstraintBecausePhpunitSucksAtBackwardsCompatibility',
+    'description' => 'Base constraint that caters for breaking changes between PHPUnit 3.5 and 3.6.',
+  ),
+  'quiote-docs://api/testing/container-test-case' => 
+  array (
+    'file' => 'api/testing/container-test-case.md',
+    'path' => 'api/testing/container-test-case',
+    'title' => 'ContainerTestCase',
+    'description' => 'ContainerTestCase is the base class for all tests that target a specific container execution and provides the necessary assertions',
+  ),
+  'quiote-docs://api/testing/fragment-test-case' => 
+  array (
+    'file' => 'api/testing/fragment-test-case.md',
+    'path' => 'api/testing/fragment-test-case',
+    'title' => 'FragmentTestCase',
+    'description' => 'FragmentTestCase is the base class for all fragment tests and provides the necessary assertions',
+  ),
+  'quiote-docs://api/testing/http-test-case' => 
+  array (
+    'file' => 'api/testing/http-test-case.md',
+    'path' => 'api/testing/http-test-case',
+    'title' => 'HttpTestCase',
+    'description' => 'Base class for fluent, full-pipeline HTTP tests: builds a real PSR-7 request and dispatches it through Context::handle() (the same entry point production traffic uses), returning an assertable TestResponse.',
+  ),
+  'quiote-docs://api/testing/http/index' => 
+  array (
+    'file' => 'api/testing/http/index.md',
+    'path' => 'api/testing/http/index',
+    'title' => 'Http',
+    'description' => 'The Quiote\\\\Testing\\\\Http namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/testing/http/test-response' => 
+  array (
+    'file' => 'api/testing/http/test-response.md',
+    'path' => 'api/testing/http/test-response',
+    'title' => 'TestResponse',
+    'description' => 'Assertable wrapper around a PSR-7 response, returned by HttpTestCase\'s get()/post()/json() etc.',
+  ),
+  'quiote-docs://api/testing/i-fragment-test-case' => 
+  array (
+    'file' => 'api/testing/i-fragment-test-case.md',
+    'path' => 'api/testing/i-fragment-test-case',
+    'title' => 'IFragmentTestCase',
+    'description' => 'IFragmentTestCase is the interface that all fragment tests must implement',
+  ),
+  'quiote-docs://api/testing/i-test-case' => 
+  array (
+    'file' => 'api/testing/i-test-case.md',
+    'path' => 'api/testing/i-test-case',
+    'title' => 'ITestCase',
+    'description' => 'ITestCase is the interface that all quiote tests must implement',
+  ),
+  'quiote-docs://api/testing/i-unit-test-case' => 
+  array (
+    'file' => 'api/testing/i-unit-test-case.md',
+    'path' => 'api/testing/i-unit-test-case',
+    'title' => 'IUnitTestCase',
+    'description' => 'IUnitTestCase is the interface that all unit tests must implement',
+  ),
+  'quiote-docs://api/testing/index' => 
+  array (
+    'file' => 'api/testing/index.md',
+    'path' => 'api/testing/index',
+    'title' => 'Testing',
+    'description' => 'The Quiote\\\\Testing namespace — 21 documented types.',
+  ),
+  'quiote-docs://api/testing/lightweight-test-container' => 
+  array (
+    'file' => 'api/testing/lightweight-test-container.md',
+    'path' => 'api/testing/lightweight-test-container',
+    'title' => 'LightweightTestContainer',
+    'description' => 'A minimal stand-in for the execution container, used only by the PHPUnit test harness.',
+  ),
+  'quiote-docs://api/testing/model-test-case' => 
+  array (
+    'file' => 'api/testing/model-test-case.md',
+    'path' => 'api/testing/model-test-case',
+    'title' => 'ModelTestCase',
+    'description' => 'ModelTestCase is the base class for all model testcases and provides the necessary assertions',
+  ),
+  'quiote-docs://api/testing/php-unit-test-case' => 
+  array (
+    'file' => 'api/testing/php-unit-test-case.md',
+    'path' => 'api/testing/php-unit-test-case',
+    'title' => 'PhpUnitTestCase',
+    'description' => 'PhpUnitTestCase is the base class for all Quiote Testcases.',
+  ),
+  'quiote-docs://api/testing/phpunit-test-case-methods' => 
+  array (
+    'file' => 'api/testing/phpunit-test-case-methods.md',
+    'path' => 'api/testing/phpunit-test-case-methods',
+    'title' => 'PHPUnitTestCaseMethods',
+    'description' => 'Trait for adding PHPUnit 12 compatibility to PhpUnitTestCase',
+  ),
+  'quiote-docs://api/testing/phpunit/constraint/constraint-action-handles-method' => 
+  array (
+    'file' => 'api/testing/phpunit/constraint/constraint-action-handles-method.md',
+    'path' => 'api/testing/phpunit/constraint/constraint-action-handles-method',
+    'title' => 'ConstraintActionHandlesMethod',
+    'description' => 'Constraint that checks if an Action handles an expected request method.',
+  ),
+  'quiote-docs://api/testing/phpunit/constraint/constraint-view-handles-output-type' => 
+  array (
+    'file' => 'api/testing/phpunit/constraint/constraint-view-handles-output-type.md',
+    'path' => 'api/testing/phpunit/constraint/constraint-view-handles-output-type',
+    'title' => 'ConstraintViewHandlesOutputType',
+    'description' => 'Constraint that checks if a View handles an expected Output Type.',
+  ),
+  'quiote-docs://api/testing/phpunit/constraint/index' => 
+  array (
+    'file' => 'api/testing/phpunit/constraint/index.md',
+    'path' => 'api/testing/phpunit/constraint/index',
+    'title' => 'Constraint',
+    'description' => 'The Quiote\\\\Testing\\\\PHPUnit\\\\Constraint namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/testing/phpunit/index' => 
+  array (
+    'file' => 'api/testing/phpunit/index.md',
+    'path' => 'api/testing/phpunit/index',
+    'title' => 'PHPUnit',
+    'description' => 'The Quiote\\\\Testing\\\\PHPUnit namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/testing/unit-test-case' => 
+  array (
+    'file' => 'api/testing/unit-test-case.md',
+    'path' => 'api/testing/unit-test-case',
+    'title' => 'UnitTestCase',
+    'description' => 'UnitTestCase is the base class for all unit testcases and provides the necessary assertions',
+  ),
+  'quiote-docs://api/testing/view-test-case' => 
+  array (
+    'file' => 'api/testing/view-test-case.md',
+    'path' => 'api/testing/view-test-case',
+    'title' => 'ViewTestCase',
+    'description' => 'ViewTestCase is the base class for all view testcases and provides the necessary assertions',
+  ),
+  'quiote-docs://api/translation/basic-translator' => 
+  array (
+    'file' => 'api/translation/basic-translator.md',
+    'path' => 'api/translation/basic-translator',
+    'title' => 'BasicTranslator',
+    'description' => 'BasicTranslator defines some base functions for all translators.',
+  ),
+  'quiote-docs://api/translation/currency-formatter' => 
+  array (
+    'file' => 'api/translation/currency-formatter.md',
+    'path' => 'api/translation/currency-formatter',
+    'title' => 'CurrencyFormatter',
+    'description' => 'The currency formatter will format numbers according to a given format and a given currency symbol',
+  ),
+  'quiote-docs://api/translation/date-formatter' => 
+  array (
+    'file' => 'api/translation/date-formatter.md',
+    'path' => 'api/translation/date-formatter',
+    'title' => 'DateFormatter',
+    'description' => 'The date formatter will dates numbers according to a given format',
+  ),
+  'quiote-docs://api/translation/gettext-translator' => 
+  array (
+    'file' => 'api/translation/gettext-translator.md',
+    'path' => 'api/translation/gettext-translator',
+    'title' => 'GettextTranslator',
+    'description' => 'GettextTranslator defines the translator interface for gettext.',
+  ),
+  'quiote-docs://api/translation/gettext/gettext-mo-reader' => 
+  array (
+    'file' => 'api/translation/gettext/gettext-mo-reader.md',
+    'path' => 'api/translation/gettext/gettext-mo-reader',
+    'title' => 'GettextMoReader',
+    'description' => 'GettextMoReader reads a .mo file into an array.',
+  ),
+  'quiote-docs://api/translation/gettext/index' => 
+  array (
+    'file' => 'api/translation/gettext/index.md',
+    'path' => 'api/translation/gettext/index',
+    'title' => 'Gettext',
+    'description' => 'The Quiote\\\\Translation\\\\Gettext namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/translation/i-translator' => 
+  array (
+    'file' => 'api/translation/i-translator.md',
+    'path' => 'api/translation/i-translator',
+    'title' => 'ITranslator',
+    'description' => 'ITranslator defines the interface for different translator implementations (like gettext, XLIFF, ...)',
+  ),
+  'quiote-docs://api/translation/index' => 
+  array (
+    'file' => 'api/translation/index.md',
+    'path' => 'api/translation/index',
+    'title' => 'Translation',
+    'description' => 'The Quiote\\\\Translation namespace — 11 documented types.',
+  ),
+  'quiote-docs://api/translation/quiote-locale' => 
+  array (
+    'file' => 'api/translation/quiote-locale.md',
+    'path' => 'api/translation/quiote-locale',
+    'title' => 'QuioteLocale',
+    'description' => 'Represents a single locale: its identifier plus the language/territory/ script/variant and the calendar/currency/timezone options carried in the identifier\'s \'@key=value\' suffix.',
+  ),
+  'quiote-docs://api/translation/quiote-number-formatter' => 
+  array (
+    'file' => 'api/translation/quiote-number-formatter.md',
+    'path' => 'api/translation/quiote-number-formatter',
+    'title' => 'QuioteNumberFormatter',
+    'description' => 'The number formatter will format numbers according to a given format',
+  ),
+  'quiote-docs://api/translation/simple-translator' => 
+  array (
+    'file' => 'api/translation/simple-translator.md',
+    'path' => 'api/translation/simple-translator',
+    'title' => 'SimpleTranslator',
+    'description' => 'SimpleTranslator defines the translator which loads the data from its parameters.',
+  ),
+  'quiote-docs://api/translation/translation-definitions' => 
+  array (
+    'file' => 'api/translation/translation-definitions.md',
+    'path' => 'api/translation/translation-definitions',
+    'title' => 'TranslationDefinitions',
+    'description' => 'What the compiled `translation` configuration declares, as data.',
+  ),
+  'quiote-docs://api/translation/translation-manager' => 
+  array (
+    'file' => 'api/translation/translation-manager.md',
+    'path' => 'api/translation/translation-manager',
+    'title' => 'TranslationManager',
+    'description' => 'The translation manager manages the interface between the application and the current translation engine implementation',
+  ),
+  'quiote-docs://api/user/current-user' => 
+  array (
+    'file' => 'api/user/current-user.md',
+    'path' => 'api/user/current-user',
+    'title' => 'CurrentUser',
+    'description' => 'The seam onto the user of the request being served *now*.',
+  ),
+  'quiote-docs://api/user/i-security-user' => 
+  array (
+    'file' => 'api/user/i-security-user.md',
+    'path' => 'api/user/i-security-user',
+    'title' => 'ISecurityUser',
+    'description' => 'SecurityUser provides advanced security manipulation methods.',
+  ),
+  'quiote-docs://api/user/index' => 
+  array (
+    'file' => 'api/user/index.md',
+    'path' => 'api/user/index',
+    'title' => 'User',
+    'description' => 'The Quiote\\\\User namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/user/rbac-security-user' => 
+  array (
+    'file' => 'api/user/rbac-security-user.md',
+    'path' => 'api/user/rbac-security-user',
+    'title' => 'RbacSecurityUser',
+    'description' => 'RbacUser will handle roles and permissions for users',
+  ),
+  'quiote-docs://api/user/security-user' => 
+  array (
+    'file' => 'api/user/security-user.md',
+    'path' => 'api/user/security-user',
+    'title' => 'SecurityUser',
+    'description' => 'BasicSecurityUser will handle any type of data as a credential.',
+  ),
+  'quiote-docs://api/user/user' => 
+  array (
+    'file' => 'api/user/user.md',
+    'path' => 'api/user/user',
+    'title' => 'User',
+    'description' => 'User wraps a client session and provides accessor methods for user attributes.',
+  ),
+  'quiote-docs://api/util/array-path-definition' => 
+  array (
+    'file' => 'api/util/array-path-definition.md',
+    'path' => 'api/util/array-path-definition',
+    'title' => 'ArrayPathDefinition',
+    'description' => 'Path implements handling of virtual paths This class does not implement real filesystem path handling, but uses virtual paths.',
+  ),
+  'quiote-docs://api/util/attribute-holder' => 
+  array (
+    'file' => 'api/util/attribute-holder.md',
+    'path' => 'api/util/attribute-holder',
+    'title' => 'AttributeHolder',
+    'description' => 'AttributeHolder provides a base class for managing attributes with namespaces.',
+  ),
+  'quiote-docs://api/util/decimal-formatter' => 
+  array (
+    'file' => 'api/util/decimal-formatter.md',
+    'path' => 'api/util/decimal-formatter',
+    'title' => 'DecimalFormatter',
+    'description' => 'The decimal formatter will format numbers according to a given format.',
+  ),
+  'quiote-docs://api/util/deprecation-silencer' => 
+  array (
+    'file' => 'api/util/deprecation-silencer.md',
+    'path' => 'api/util/deprecation-silencer',
+    'title' => 'DeprecationSilencer',
+    'description' => 'Central helper to reduce noise from repetitive deprecation/notice messages during test runs.',
+  ),
+  'quiote-docs://api/util/form-population-config' => 
+  array (
+    'file' => 'api/util/form-population-config.md',
+    'path' => 'api/util/form-population-config',
+    'title' => 'FormPopulationConfig',
+    'description' => 'Helper to bridge configuration storage for form population between legacy namespaced attributes and the PSR-7 attribute bag on WebRequest.',
+  ),
+  'quiote-docs://api/util/form-population-engine' => 
+  array (
+    'file' => 'api/util/form-population-engine.md',
+    'path' => 'api/util/form-population-engine',
+    'title' => 'FormPopulationEngine',
+    'description' => 'FormPopulationFilter automatically populates a form that is re-posted, which usually happens when a View::INPUT is returned again after a POST request because an error occurred during validation.',
+  ),
+  'quiote-docs://api/util/form-population/document-encoding' => 
+  array (
+    'file' => 'api/util/form-population/document-encoding.md',
+    'path' => 'api/util/form-population/document-encoding',
+    'title' => 'DocumentEncoding',
+    'description' => 'The character encoding a document is being populated in, and the conversions between it and UTF-8.',
+  ),
+  'quiote-docs://api/util/form-population/document-loader' => 
+  array (
+    'file' => 'api/util/form-population/document-loader.md',
+    'path' => 'api/util/form-population/document-loader',
+    'title' => 'DocumentLoader',
+    'description' => 'Parses a response body into a DOM, deciding as it goes whether the document is XHTML and how strictly to read it.',
+  ),
+  'quiote-docs://api/util/form-population/document-serializer' => 
+  array (
+    'file' => 'api/util/form-population/document-serializer.md',
+    'path' => 'api/util/form-population/document-serializer',
+    'title' => 'DocumentSerializer',
+    'description' => 'Turns the populated DOM back into the response body.',
+  ),
+  'quiote-docs://api/util/form-population/field-error-decorator' => 
+  array (
+    'file' => 'api/util/form-population/field-error-decorator.md',
+    'path' => 'api/util/form-population/field-error-decorator',
+    'title' => 'FieldErrorDecorator',
+    'description' => 'Marks a field that failed validation, by putting the configured error class on it and on whatever else the error class map points at.',
+  ),
+  'quiote-docs://api/util/form-population/field-name-resolver' => 
+  array (
+    'file' => 'api/util/form-population/field-name-resolver.md',
+    'path' => 'api/util/form-population/field-name-resolver',
+    'title' => 'FieldNameResolver',
+    'description' => 'Turns an element\'s `name` attribute into the parameter path its value lives under, resolving the empty brackets HTML uses for repeated fields.',
+  ),
+  'quiote-docs://api/util/form-population/field-value-applier' => 
+  array (
+    'file' => 'api/util/form-population/field-value-applier.md',
+    'path' => 'api/util/form-population/field-value-applier',
+    'title' => 'FieldValueApplier',
+    'description' => 'Writes a submitted value onto the form element that carries it.',
+  ),
+  'quiote-docs://api/util/form-population/form-finder' => 
+  array (
+    'file' => 'api/util/form-population/form-finder.md',
+    'path' => 'api/util/form-population/form-finder',
+    'title' => 'FormFinder',
+    'description' => 'Decides which forms in the document get populated, and from what.',
+  ),
+  'quiote-docs://api/util/form-population/index' => 
+  array (
+    'file' => 'api/util/form-population/index.md',
+    'path' => 'api/util/form-population/index',
+    'title' => 'FormPopulation',
+    'description' => 'The Quiote\\\\Util\\\\FormPopulation namespace — 10 documented types.',
+  ),
+  'quiote-docs://api/util/form-population/parsed-document' => 
+  array (
+    'file' => 'api/util/form-population/parsed-document.md',
+    'path' => 'api/util/form-population/parsed-document',
+    'title' => 'ParsedDocument',
+    'description' => 'A response body parsed into a DOM, with the decisions the parse made.',
+  ),
+  'quiote-docs://api/util/form-population/resolved-field-name' => 
+  array (
+    'file' => 'api/util/form-population/resolved-field-name.md',
+    'path' => 'api/util/form-population/resolved-field-name',
+    'title' => 'ResolvedFieldName',
+    'description' => 'A form element\'s name, resolved to the parameter path its value lives under.',
+  ),
+  'quiote-docs://api/util/form-population/skip-list' => 
+  array (
+    'file' => 'api/util/form-population/skip-list.md',
+    'path' => 'api/util/form-population/skip-list',
+    'title' => 'SkipList',
+    'description' => 'The fields configured to be left exactly as the view rendered them.',
+  ),
+  'quiote-docs://api/util/html-form-repopulator' => 
+  array (
+    'file' => 'api/util/html-form-repopulator.md',
+    'path' => 'api/util/html-form-repopulator',
+    'title' => 'HtmlFormRepopulator',
+    'description' => 'Lightweight HTML form repopulation utility replacing FormPopulationFilter for container-less pipeline.',
+  ),
+  'quiote-docs://api/util/index' => 
+  array (
+    'file' => 'api/util/index.md',
+    'path' => 'api/util/index',
+    'title' => 'Util',
+    'description' => 'The Quiote\\\\Util namespace — 26 documented types.',
+  ),
+  'quiote-docs://api/util/inflector' => 
+  array (
+    'file' => 'api/util/inflector.md',
+    'path' => 'api/util/inflector',
+    'title' => 'Inflector',
+    'description' => 'Inflector allows you to singularize or pluralize an English word',
+  ),
+  'quiote-docs://api/util/init-context-attribute-access' => 
+  array (
+    'file' => 'api/util/init-context-attribute-access.md',
+    'path' => 'api/util/init-context-attribute-access',
+    'title' => 'InitContextAttributeAccess',
+    'description' => 'The attribute accessor cluster shared by Action and View: a facade over the attributes an execution\'s init context holds, so an action or view reads and writes them without knowing where they live.',
+  ),
+  'quiote-docs://api/util/parameter-holder' => 
+  array (
+    'file' => 'api/util/parameter-holder.md',
+    'path' => 'api/util/parameter-holder',
+    'title' => 'ParameterHolder',
+    'description' => 'ParameterHolder provides a base class for managing parameters.',
+  ),
+  'quiote-docs://api/util/quiote-xslt-processor' => 
+  array (
+    'file' => 'api/util/quiote-xslt-processor.md',
+    'path' => 'api/util/quiote-xslt-processor',
+    'title' => 'QuioteXsltProcessor',
+    'description' => 'Extended XSLTProcessor class that throws exceptions on errors.',
+  ),
+  'quiote-docs://api/util/recursive-directory-filter-iterator' => 
+  array (
+    'file' => 'api/util/recursive-directory-filter-iterator.md',
+    'path' => 'api/util/recursive-directory-filter-iterator',
+    'title' => 'RecursiveDirectoryFilterIterator',
+    'description' => 'RecursiveDirectoryFilterIterator filters a RecursiveDirectoryIterator with a given set of include and exclude patterns.',
+  ),
+  'quiote-docs://api/util/schematron-processor' => 
+  array (
+    'file' => 'api/util/schematron-processor.md',
+    'path' => 'api/util/schematron-processor',
+    'title' => 'SchematronProcessor',
+    'description' => 'SchematronProcessor transforms DOM documents according to ISO Schematron validation and transformation rules into a document containing successful reports and failed assertions.',
+  ),
+  'quiote-docs://api/util/toolkit' => 
+  array (
+    'file' => 'api/util/toolkit.md',
+    'path' => 'api/util/toolkit',
+    'title' => 'Toolkit',
+    'description' => 'Toolkit provides basic utility methods.',
+  ),
+  'quiote-docs://api/util/virtual-array-path' => 
+  array (
+    'file' => 'api/util/virtual-array-path.md',
+    'path' => 'api/util/virtual-array-path',
+    'title' => 'VirtualArrayPath',
+    'description' => 'Path implements handling of virtual paths This class does not implement real filesystem path handling, but uses virtual paths.',
+  ),
+  'quiote-docs://api/util/worker-manager' => 
+  array (
+    'file' => 'api/util/worker-manager.md',
+    'path' => 'api/util/worker-manager',
+    'title' => 'WorkerManager',
+    'description' => 'Centralized state management for any persistent worker runtime (see WorkerRuntimeInterface), ensuring request-specific state is properly reset between requests while preserving performance-critical cached data.',
+  ),
+  'quiote-docs://api/validator/andoperator-validator' => 
+  array (
+    'file' => 'api/validator/andoperator-validator.md',
+    'path' => 'api/validator/andoperator-validator',
+    'title' => 'AndoperatorValidator',
+    'description' => 'ANDOperatorValidator only succeeds if all sub-validators succeeded Parameters: \'skip_errors\' do not submit errors of child validators to validator manager \'break\' break the execution of child validators after first failure',
+  ),
+  'quiote-docs://api/validator/arraylength-validator' => 
+  array (
+    'file' => 'api/validator/arraylength-validator.md',
+    'path' => 'api/validator/arraylength-validator',
+    'title' => 'ArraylengthValidator',
+    'description' => 'ArraylengthValidator verifies the length (count()) constraints for an array Parameters: \'min\' The array should contain at least \'min\' elements \'max\' The array should contain at most \'max\' elements',
+  ),
+  'quiote-docs://api/validator/base-file-validator' => 
+  array (
+    'file' => 'api/validator/base-file-validator.md',
+    'path' => 'api/validator/base-file-validator',
+    'title' => 'BaseFileValidator',
+    'description' => 'BaseFileValidator is the base validator when validating files.',
+  ),
+  'quiote-docs://api/validator/boolean-validator' => 
+  array (
+    'file' => 'api/validator/boolean-validator.md',
+    'path' => 'api/validator/boolean-validator',
+    'title' => 'BooleanValidator',
+    'description' => 'BooleanValidator verifies a parameter is a valid boolean Accepted values are string 0/1, int 0/1, bool true/false, string yes/no, string true/false, string on/off - basically all values that Toolkit::literalize() will accept.',
+  ),
+  'quiote-docs://api/validator/compiler/compilation-result' => 
+  array (
+    'file' => 'api/validator/compiler/compilation-result.md',
+    'path' => 'api/validator/compiler/compilation-result',
+    'title' => 'CompilationResult',
+    'description' => 'The outcome of compiling one ValidatorSource through an emitter: the artifact (null if a fatal diagnostic prevented emission) plus every diagnostic recorded along the way.',
+  ),
+  'quiote-docs://api/validator/compiler/emitter-interface' => 
+  array (
+    'file' => 'api/validator/compiler/emitter-interface.md',
+    'path' => 'api/validator/compiler/emitter-interface',
+    'title' => 'EmitterInterface',
+    'description' => 'A back-end that turns a format-independent ValidatorPlan into a committable/checkable PHP artifact (e.g.',
+  ),
+  'quiote-docs://api/validator/compiler/fluent-source-emitter' => 
+  array (
+    'file' => 'api/validator/compiler/fluent-source-emitter.md',
+    'path' => 'api/validator/compiler/fluent-source-emitter',
+    'title' => 'FluentSourceEmitter',
+    'description' => 'Emits a ValidatorPlan as committable, opcacheable PHP source that returns a closure over Quiote\\\\Validator\\\\Compiler\\\\Runtime\\\\ValidatorBuilder -- the same format a developer can hand-write for a validator that never had an XML config at all.',
+  ),
+  'quiote-docs://api/validator/compiler/index' => 
+  array (
+    'file' => 'api/validator/compiler/index.md',
+    'path' => 'api/validator/compiler/index',
+    'title' => 'Compiler',
+    'description' => 'The Quiote\\\\Validator\\\\Compiler namespace — 16 documented types.',
+  ),
+  'quiote-docs://api/validator/compiler/ir/index' => 
+  array (
+    'file' => 'api/validator/compiler/ir/index.md',
+    'path' => 'api/validator/compiler/ir/index',
+    'title' => 'Ir',
+    'description' => 'The Quiote\\\\Validator\\\\Compiler\\\\Ir namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/validator/compiler/ir/validator-node' => 
+  array (
+    'file' => 'api/validator/compiler/ir/validator-node.md',
+    'path' => 'api/validator/compiler/ir/validator-node',
+    'title' => 'ValidatorNode',
+    'description' => 'Format-independent description of a single <validator> declaration: the resolved class, its parameters/arguments, the request methods it applies to, and any nested validators (and/or/not/xor children).',
+  ),
+  'quiote-docs://api/validator/compiler/ir/validator-plan' => 
+  array (
+    'file' => 'api/validator/compiler/ir/validator-plan.md',
+    'path' => 'api/validator/compiler/ir/validator-plan',
+    'title' => 'ValidatorPlan',
+    'description' => 'Format-independent description of one validator config source (today: one validators.xml file, after XInclude/XSL normalization).',
+  ),
+  'quiote-docs://api/validator/compiler/json-schema/action-input-schema-resolver' => 
+  array (
+    'file' => 'api/validator/compiler/json-schema/action-input-schema-resolver.md',
+    'path' => 'api/validator/compiler/json-schema/action-input-schema-resolver',
+    'title' => 'ActionInputSchemaResolver',
+    'description' => 'Derives a JSON Schema for one action+method\'s request parameters from whatever validators that action declares, so a single declaration can drive HTTP validation, an MCP tool\'s `inputSchema` and an OpenAPI operation\'s parameters/requestBody.',
+  ),
+  'quiote-docs://api/validator/compiler/json-schema/index' => 
+  array (
+    'file' => 'api/validator/compiler/json-schema/index.md',
+    'path' => 'api/validator/compiler/json-schema/index',
+    'title' => 'JsonSchema',
+    'description' => 'The Quiote\\\\Validator\\\\Compiler\\\\JsonSchema namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/validator/compiler/json-schema/validator-schema-mapper' => 
+  array (
+    'file' => 'api/validator/compiler/json-schema/validator-schema-mapper.md',
+    'path' => 'api/validator/compiler/json-schema/validator-schema-mapper',
+    'title' => 'ValidatorSchemaMapper',
+    'description' => 'Maps a ValidatorPlan (the format-independent validator IR) to a JSON Schema object describing the request parameters an action accepts -- one validator declaration drives HTTP validation, the `inputSchema` of an action exposed as an MCP tool, and the parameters/requestBody of an OpenAPI operation alike.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime-declaration-emitter' => 
+  array (
+    'file' => 'api/validator/compiler/runtime-declaration-emitter.md',
+    'path' => 'api/validator/compiler/runtime-declaration-emitter',
+    'title' => 'RuntimeDeclarationEmitter',
+    'description' => 'Turns a ValidatorPlan into the declaration a compiled validator config returns: the validators to build, in registration order, bucketed by the request method they apply to.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime/compiled-validator-registry' => 
+  array (
+    'file' => 'api/validator/compiler/runtime/compiled-validator-registry.md',
+    'path' => 'api/validator/compiler/runtime/compiled-validator-registry',
+    'title' => 'CompiledValidatorRegistry',
+    'description' => 'Resolves and loads the compiled/hand-written PHP validator-builder file for a module/action, if one exists, and applies it to a ValidatorBuilder scoped to the given container.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime/index' => 
+  array (
+    'file' => 'api/validator/compiler/runtime/index.md',
+    'path' => 'api/validator/compiler/runtime/index',
+    'title' => 'Runtime',
+    'description' => 'The Quiote\\\\Validator\\\\Compiler\\\\Runtime namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime/validator-builder' => 
+  array (
+    'file' => 'api/validator/compiler/runtime/validator-builder.md',
+    'path' => 'api/validator/compiler/runtime/validator-builder',
+    'title' => 'ValidatorBuilder',
+    'description' => 'Fluent facade for registering validators directly in PHP, without an intervening XML file.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime/validator-declaration-applier' => 
+  array (
+    'file' => 'api/validator/compiler/runtime/validator-declaration-applier.md',
+    'path' => 'api/validator/compiler/runtime/validator-declaration-applier',
+    'title' => 'ValidatorDeclarationApplier',
+    'description' => 'Builds the validators a compiled validator config declares and attaches them to a validation manager.',
+  ),
+  'quiote-docs://api/validator/compiler/runtime/validator-spec' => 
+  array (
+    'file' => 'api/validator/compiler/runtime/validator-spec.md',
+    'path' => 'api/validator/compiler/runtime/validator-spec',
+    'title' => 'ValidatorSpec',
+    'description' => 'A fluent handle onto a single, already-registered Validator instance.',
+  ),
+  'quiote-docs://api/validator/compiler/validator-compiler' => 
+  array (
+    'file' => 'api/validator/compiler/validator-compiler.md',
+    'path' => 'api/validator/compiler/validator-compiler',
+    'title' => 'ValidatorCompiler',
+    'description' => 'Public entrypoint for validator compilation, independent of any CLI.',
+  ),
+  'quiote-docs://api/validator/compiler/validator-plan-builder' => 
+  array (
+    'file' => 'api/validator/compiler/validator-plan-builder.md',
+    'path' => 'api/validator/compiler/validator-plan-builder',
+    'title' => 'ValidatorPlanBuilder',
+    'description' => 'Walks a parsed validators.xml document and builds a format-independent ValidatorPlan (see Quiote\\\\Validator\\\\Compiler\\\\Ir).',
+  ),
+  'quiote-docs://api/validator/compiler/validator-source' => 
+  array (
+    'file' => 'api/validator/compiler/validator-source.md',
+    'path' => 'api/validator/compiler/validator-source',
+    'title' => 'ValidatorSource',
+    'description' => 'A discovered (or explicitly given) validators.xml file, ready to be parsed into a ValidatorPlan.',
+  ),
+  'quiote-docs://api/validator/compiler/validator-source-locator' => 
+  array (
+    'file' => 'api/validator/compiler/validator-source-locator.md',
+    'path' => 'api/validator/compiler/validator-source-locator',
+    'title' => 'ValidatorSourceLocator',
+    'description' => 'Finds validators.xml files on disk, the same way ConfigCache resolves config_handlers.xml\'s `%core.module_dir%/*&#47;Validate/*.xml` pattern for ValidatorConfigHandler -- except here the result is handed to a compiler, not compiled into the request-time cache.',
+  ),
+  'quiote-docs://api/validator/date-time-validator' => 
+  array (
+    'file' => 'api/validator/date-time-validator.md',
+    'path' => 'api/validator/date-time-validator',
+    'title' => 'DateTimeValidator',
+    'description' => 'DateTimeValidator verifies that a parameter is of a date and/or time format using native \\\\DateTimeImmutable and IntlDateFormatter APIs.',
+  ),
+  'quiote-docs://api/validator/dependency-manager' => 
+  array (
+    'file' => 'api/validator/dependency-manager.md',
+    'path' => 'api/validator/dependency-manager',
+    'title' => 'DependencyManager',
+    'description' => 'DependencyManager handles the dependencies in the validation process',
+  ),
+  'quiote-docs://api/validator/email-validator' => 
+  array (
+    'file' => 'api/validator/email-validator.md',
+    'path' => 'api/validator/email-validator',
+    'title' => 'EmailValidator',
+    'description' => 'EmailValidator verifies if a parameter contains a value that qualifies as an email address.',
+  ),
+  'quiote-docs://api/validator/equals-validator' => 
+  array (
+    'file' => 'api/validator/equals-validator.md',
+    'path' => 'api/validator/equals-validator',
+    'title' => 'EqualsValidator',
+    'description' => 'EqualsValidator verifies if a parameter equals to a given value The input is compared to a value and the validator fails if they differ.',
+  ),
+  'quiote-docs://api/validator/file-validator' => 
+  array (
+    'file' => 'api/validator/file-validator.md',
+    'path' => 'api/validator/file-validator',
+    'title' => 'FileValidator',
+    'description' => 'FileValidator verifies the size and extension of a file',
+  ),
+  'quiote-docs://api/validator/i-validation-report-query' => 
+  array (
+    'file' => 'api/validator/i-validation-report-query.md',
+    'path' => 'api/validator/i-validation-report-query',
+    'title' => 'IValidationReportQuery',
+    'description' => 'IValidationReportQuery allows queries against the validation run report.',
+  ),
+  'quiote-docs://api/validator/i-validator-container' => 
+  array (
+    'file' => 'api/validator/i-validator-container.md',
+    'path' => 'api/validator/i-validator-container',
+    'title' => 'IValidatorContainer',
+    'description' => 'IValidatorContainer is an interface for classes which contains several child validators',
+  ),
+  'quiote-docs://api/validator/image-file-validator' => 
+  array (
+    'file' => 'api/validator/image-file-validator.md',
+    'path' => 'api/validator/image-file-validator',
+    'title' => 'ImageFileValidator',
+    'description' => 'ImageFileValidator verifies a parameter is an uploaded image Parameters: \'min_width\' The minimum width of the image \'max_width\' The maximum width of the image \'min_height\' The minimum height of the image \'max_height\' The maximum height of the image \'format\' list of valid formats (gif,jpeg,png,bmp,psd,swf) Errors: \'no_image\' The uploaded file is no image \'min_width\' \'max_width\' \'min_height\' \'max_height\' \'format\' The image was not in the required format',
+  ),
+  'quiote-docs://api/validator/inarray-validator' => 
+  array (
+    'file' => 'api/validator/inarray-validator.md',
+    'path' => 'api/validator/inarray-validator',
+    'title' => 'InarrayValidator',
+    'description' => 'InArrayValidator verifies whether an input is one of a set of values Parameters: \'values\' list of values that form the array \'sep\' separator of values in the list \'case\' verifies case sensitive if true \'strict\' whether or not to do strict type comparisons with in_array()',
+  ),
+  'quiote-docs://api/validator/index' => 
+  array (
+    'file' => 'api/validator/index.md',
+    'path' => 'api/validator/index',
+    'title' => 'Validator',
+    'description' => 'The Quiote\\\\Validator namespace — 49 documented types.',
+  ),
+  'quiote-docs://api/validator/is-not-empty-validator' => 
+  array (
+    'file' => 'api/validator/is-not-empty-validator.md',
+    'path' => 'api/validator/is-not-empty-validator',
+    'title' => 'IsNotEmptyValidator',
+    'description' => 'IsNotEmptyValidator verifies a parameter is not empty The content of the input value is not verified in any manner, it is only checked if the input value exists and is not empty.',
+  ),
+  'quiote-docs://api/validator/isset-validator' => 
+  array (
+    'file' => 'api/validator/isset-validator.md',
+    'path' => 'api/validator/isset-validator',
+    'title' => 'IssetValidator',
+    'description' => 'IssetValidator verifies a parameter is set The content of the input value is not verified in any manner, it is only checked if the input value exists.',
+  ),
+  'quiote-docs://api/validator/json-validator' => 
+  array (
+    'file' => 'api/validator/json-validator.md',
+    'path' => 'api/validator/json-validator',
+    'title' => 'JsonValidator',
+    'description' => 'JsonValidator verifies if a parameter contains a value that is valid JSON and optionally exports the decoded value.',
+  ),
+  'quiote-docs://api/validator/notoperator-validator' => 
+  array (
+    'file' => 'api/validator/notoperator-validator.md',
+    'path' => 'api/validator/notoperator-validator',
+    'title' => 'NotoperatorValidator',
+    'description' => 'NOTOperatorValidator succeeds if the sub-validator failed Parameters: \'skip_errors\' do not submit errors of child validators to validator manager',
+  ),
+  'quiote-docs://api/validator/number-validator' => 
+  array (
+    'file' => 'api/validator/number-validator.md',
+    'path' => 'api/validator/number-validator',
+    'title' => 'NumberValidator',
+    'description' => 'NumberValidator verifies that a parameter is a number and allows you to apply size constraints.',
+  ),
+  'quiote-docs://api/validator/operator-validator' => 
+  array (
+    'file' => 'api/validator/operator-validator.md',
+    'path' => 'api/validator/operator-validator',
+    'title' => 'OperatorValidator',
+    'description' => 'OperatorValidator Operators group a couple if validators...',
+  ),
+  'quiote-docs://api/validator/oroperator-validator' => 
+  array (
+    'file' => 'api/validator/oroperator-validator.md',
+    'path' => 'api/validator/oroperator-validator',
+    'title' => 'OroperatorValidator',
+    'description' => 'OROperatorValidator succeeds if at least one sub-validators succeeded Parameters: \'skip_errors\' do not submit errors of child validators to validator manager \'break\' break the execution of child validators after first success',
+  ),
+  'quiote-docs://api/validator/regex-validator' => 
+  array (
+    'file' => 'api/validator/regex-validator.md',
+    'path' => 'api/validator/regex-validator',
+    'title' => 'RegexValidator',
+    'description' => 'RegexValidator allows you to match a value against a regular expression pattern.',
+  ),
+  'quiote-docs://api/validator/set-validator' => 
+  array (
+    'file' => 'api/validator/set-validator.md',
+    'path' => 'api/validator/set-validator',
+    'title' => 'SetValidator',
+    'description' => 'SetValidator only exports a value and always succeeds Parameters: \'value\' value that should be exported',
+  ),
+  'quiote-docs://api/validator/string-validator' => 
+  array (
+    'file' => 'api/validator/string-validator.md',
+    'path' => 'api/validator/string-validator',
+    'title' => 'StringValidator',
+    'description' => 'StringValidator allows you to apply string-related constraints to a parameter.',
+  ),
+  'quiote-docs://api/validator/validation-argument' => 
+  array (
+    'file' => 'api/validator/validation-argument.md',
+    'path' => 'api/validator/validation-argument',
+    'title' => 'ValidationArgument',
+    'description' => 'ValidationArgument is a tuple of argument name and source that specifies the argument to validate.',
+  ),
+  'quiote-docs://api/validator/validation-error' => 
+  array (
+    'file' => 'api/validator/validation-error.md',
+    'path' => 'api/validator/validation-error',
+    'title' => 'ValidationError',
+    'description' => 'ValidationError stores an error message and the fields of an error.',
+  ),
+  'quiote-docs://api/validator/validation-incident' => 
+  array (
+    'file' => 'api/validator/validation-incident.md',
+    'path' => 'api/validator/validation-incident',
+    'title' => 'ValidationIncident',
+    'description' => 'ValidationIncident is erroneous result of an validation run.',
+  ),
+  'quiote-docs://api/validator/validation-manager' => 
+  array (
+    'file' => 'api/validator/validation-manager.md',
+    'path' => 'api/validator/validation-manager',
+    'title' => 'ValidationManager',
+    'description' => 'ValidationManager provides management for request parameters and their associated validators.',
+  ),
+  'quiote-docs://api/validator/validation-report' => 
+  array (
+    'file' => 'api/validator/validation-report.md',
+    'path' => 'api/validator/validation-report',
+    'title' => 'ValidationReport',
+    'description' => 'ValidationReport stores the result of a validation run.',
+  ),
+  'quiote-docs://api/validator/validation-report-query' => 
+  array (
+    'file' => 'api/validator/validation-report-query.md',
+    'path' => 'api/validator/validation-report-query',
+    'title' => 'ValidationReportQuery',
+    'description' => 'ValidationReportQuery allows queries against the validation run report.',
+  ),
+  'quiote-docs://api/validator/validator' => 
+  array (
+    'file' => 'api/validator/validator.md',
+    'path' => 'api/validator/validator',
+    'title' => 'Validator',
+    'description' => 'Validator allows you to validate input Parameters for use in most validators: \'name\' name of validator \'base\' base path for validation of arrays \'arguments\' an array of input parameter keys to validate \'export\' destination for exported data \'depends\' list of dependencies needed by the validator \'provides\' list of dependencies the validator provides after success \'severity\' error severity in case of failure \'error\' error message when validation fails \'errors\' an array of errors with the reason as key \'required\' if true the validator will fail when the input parameter is not set',
+  ),
+  'quiote-docs://api/validator/validator-factory' => 
+  array (
+    'file' => 'api/validator/validator-factory.md',
+    'path' => 'api/validator/validator-factory',
+    'title' => 'ValidatorFactory',
+    'description' => 'Builds a validator from its class name.',
+  ),
+  'quiote-docs://api/validator/validator-interface' => 
+  array (
+    'file' => 'api/validator/validator-interface.md',
+    'path' => 'api/validator/validator-interface',
+    'title' => 'ValidatorInterface',
+    'description' => 'What a validator container asks of a validator: configure it, run it against a request, and read back what it named, decided and exported.',
+  ),
+  'quiote-docs://api/validator/xoroperator-validator' => 
+  array (
+    'file' => 'api/validator/xoroperator-validator.md',
+    'path' => 'api/validator/xoroperator-validator',
+    'title' => 'XoroperatorValidator',
+    'description' => 'XOROperatorValidator succeeds if only one of two sub-validators succeeded Parameters: \'skip_errors\' don\'t submit errors of child validators to validator manager',
+  ),
+  'quiote-docs://api/view/file-template-layer' => 
+  array (
+    'file' => 'api/view/file-template-layer.md',
+    'path' => 'api/view/file-template-layer',
+    'title' => 'FileTemplateLayer',
+    'description' => 'Template layer implementation for templates fetched using a PHP stream.',
+  ),
+  'quiote-docs://api/view/index' => 
+  array (
+    'file' => 'api/view/index.md',
+    'path' => 'api/view/index',
+    'title' => 'View',
+    'description' => 'The Quiote\\\\View namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/view/stream-template-layer' => 
+  array (
+    'file' => 'api/view/stream-template-layer.md',
+    'path' => 'api/view/stream-template-layer',
+    'title' => 'StreamTemplateLayer',
+    'description' => 'Template layer implementation for templates fetched using a PHP stream.',
+  ),
+  'quiote-docs://api/view/template-layer' => 
+  array (
+    'file' => 'api/view/template-layer.md',
+    'path' => 'api/view/template-layer',
+    'title' => 'TemplateLayer',
+    'description' => 'A template layer wraps information necessary to render a template.',
+  ),
+  'quiote-docs://api/view/view' => 
+  array (
+    'file' => 'api/view/view.md',
+    'path' => 'api/view/view',
+    'title' => 'View',
+    'description' => 'Base class for the presentation half of a dispatch: turns the attributes an action left behind into the body of the response.',
+  ),
   'quiote-docs://architecture/actions-and-views' => 
   array (
     'file' => 'architecture/actions-and-views.md',
@@ -110,6 +6291,13 @@ return array (
     'path' => 'architecture/container',
     'title' => 'The DI container',
     'description' => 'Quiote\'s dependency-injection container — how services are registered, resolved, autowired, and scoped, and where your own services fit in.',
+  ),
+  'quiote-docs://architecture/dependency-injection-in-practice' => 
+  array (
+    'file' => 'architecture/dependency-injection-in-practice.md',
+    'path' => 'architecture/dependency-injection-in-practice',
+    'title' => 'Dependency injection in practice',
+    'description' => 'A start-to-finish walkthrough — write a service, inject it into an action, grow its dependency graph, bind an interface, feed it configuration, and test the result.',
   ),
   'quiote-docs://architecture/deployment' => 
   array (

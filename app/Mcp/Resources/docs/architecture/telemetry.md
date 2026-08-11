@@ -175,7 +175,7 @@ Recorded every request (never sampled): `http.server.request.duration` (seconds)
 
 **Outbound:** requests made through Quiote's [HTTP client](/basics/http-client/) inject the `traceparent` header and open a `SpanKind::Client` span automatically, so a downstream service continues the same trace. This covers calls made through the framework client; a raw `curl`/socket call bypasses it.
 
-**Log correlation:** immediately after opening the root span, the middleware enriches `LogContext` with `trace_id` and `span_id`, so every log line for the rest of the request is cross-navigable with the trace — even for a sampled-out span (the IDs exist regardless of the export decision). This complements the `rid` correlation id already added in `Context::handle()`.
+**Log correlation:** immediately after opening the root span, the middleware enriches `LogContext` with `trace_id` and `span_id`, so every log line for the rest of the request is cross-navigable with the trace — even for a sampled-out span (the IDs exist regardless of the export decision). This complements the `rid` correlation id already added in `ContextRequestHandler::handle()`.
 
 ## Instrumenting your own code
 

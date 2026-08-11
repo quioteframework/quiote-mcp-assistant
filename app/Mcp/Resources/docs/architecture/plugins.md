@@ -65,6 +65,22 @@ The check is **skipped** for `PluginManager::add(new HealthPlugin())` — passin
 | `databaseDriver($alias, $adapterClass)` | A database adapter alias | `DatabaseDriverRegistry` (see [Databases](/basics/databases/)) |
 | `developerExceptionRenderer($factory)` | The developer-mode exception renderer (set-if-absent) | `ExceptionRendererRegistry::setDeveloperRenderer()` |
 
+### Say what scope your services have
+
+`service()`'s `$scope` is nullable, and leaving it out asks the binding: a class name keeps the lifetime its own `#[Service]` declares (request scope if it declares none), a factory or closure is request-scoped, and an already-built instance or a bound value is a singleton. See [what an omitted scope means](/architecture/container/#what-an-omitted-scope-means).
+
+**Write it out anyway.** A plugin's services are wired once at boot and then live in every application that enables it, under whatever runtime that application deploys — and the plugin author is the only person in a position to know whether the service holds per-request state. `Container::SCOPE_SINGLETON` on an object you have confirmed is stateless, `SCOPE_REQUEST` on anything that isn't, states that judgement where a reader of the plugin can see it:
+
+```php
+// Stateless: one HTTP client for the life of the worker.
+$r->service(HealthChecker::class, HealthChecker::class, Container::SCOPE_SINGLETON);
+
+// Holds the current request's findings: dropped at the request boundary.
+$r->service(HealthReport::class, fn() => new HealthReport(), Container::SCOPE_REQUEST);
+```
+
+The one case for omitting it is a registration made purely to add an alias, where the point is to *not* disturb the class's declared lifetime.
+
 ### Clearing your own state at the end of a request
 
 A plugin holding request-scoped state of its own — a per-request cache, a memo keyed on the current user — needs that state gone before the process serves the next request. Register a clear:

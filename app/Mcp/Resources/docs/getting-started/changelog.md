@@ -8,15 +8,34 @@ The raw, per-commit changelog lives in [`CHANGELOG.md`](https://github.com/quiot
 
 [Propulsion](/propulsion/) versions independently.
 
-## Unreleased — 4.0
+## 4.0.0
 
-Decomposing `Context` into the collaborators it was standing in for. **Nothing requires application changes**, but the config cache must be cleared once. See [Upgrading to 4.0](/getting-started/upgrading-to-4/).
+Decomposing `Context` into the collaborators it was standing in for, and deleting the accessors that stood in for them. The config cache must also be cleared once on the way in. See [Upgrading to 4.0](/getting-started/upgrading-to-4/).
 
 - **breaking** — Every config cache key now includes a framework fingerprint, so a framework upgrade recompiles automatically instead of reusing a cache compiled by an older version. Clear the cache once on the way in; from here it's automatic. [Configuration](/architecture/configuration/#a-framework-upgrade-invalidates-the-cache)
 - **breaking** — Compiled `factories`, `databases`, `output_types` and `translation` files return **data**, not executable PHP `include`d into the object that reads them. Source formats are untouched. The per-component `*FactoryInfo` properties on `Context` are gone.
 - **breaking** — Every remaining config handler (`settings`, `module`, `plugins`, `middleware`, `validators`) compiles to a declaration too, removing the last `eval()`s from the configuration cache. Breaking only for a hand-written config handler: `execute()`/`executeArray()` return the declaration (`mixed`) rather than generated PHP, `BaseConfigHandler::generate()` is gone, and a handler applied via `ConfigCache::load()` must implement the new `Quiote\Config\IDeclarationConfigHandler`. [Configuration](/architecture/configuration/#writing-your-own-config-handler)
-- `Context::handle()` moved behind `Quiote\Runtime\ContextRequestHandler`, a real PSR-15 handler. `Context::$psrKernel` and `$correlationId` are gone; use `getRequestHandler()->pipeline()` / `forgetPipeline()` and `getCorrelationId()`.
-- `ModelLocator`, `ContextRegistry`, `RequestState` and `CurrentUser` are separate, injectable classes. Every `Context` accessor still works and delegates. [Container](/architecture/container/#injecting-instead-of-reaching-through-the-context)
+- **breaking** — Every `Context` accessor that answered "some other service" is deleted: `getRouting()`, `getController()`, `getRequest()`/`setRequest()`, `getUser()`, `getService()`, `getModel()`, `getDatabaseManager()`, `getTranslationManager()`, the session pair, the execution helpers, `createInstanceFor()` and `handle()`. `ContextInterface` declares two methods where 3.2 declared seventeen. Inject the collaborator instead — `Quiote\Rector\Set\ContextDecompositionSetList` rewrites the common shapes. [Upgrading to 4.0](/getting-started/upgrading-to-4/#breaking-contexts-accessors-are-gone)
+- **breaking** — `Context::handle()` is gone; the per-request work lives in `Quiote\Runtime\ContextRequestHandler`, a real PSR-15 handler reached with `getRequestHandler()`. `Context::$psrKernel` and `$correlationId` are gone too; use `getRequestHandler()->pipeline()` / `forgetPipeline()` and `getCorrelationId()`.
+- `ModelLocator`, `ContextRegistry`, `RequestState` and `CurrentUser` are separate, injectable classes. [Container](/architecture/container/#framework-state-is-a-dependency-like-any-other)
+- **breaking, fixed** — An omitted `$scope` on `Container::set()`, `setFactory()` and `PluginRegistrar::service()` no longer means process lifetime. The argument is nullable, and omitting it asks the binding: a class name keeps the lifetime its own `#[Service]` declares, a factory is request-scoped, an instance or a bound value is a singleton. Registering a class purely to alias it no longer changes what it is. [Container](/architecture/container/#what-an-omitted-scope-means)
+- **breaking** — `ValidationService::xmlOnlyValidate()` is `validateDeclaredOnly()`. Same signature, same behaviour: validators haven't been XML-only for some time, and what the method skips is the action's own `validate()` methods, not a declaration format. [Upgrading to 4.0](/getting-started/upgrading-to-4/#breaking-validationservicexmlonlyvalidate-is-now-validatedeclaredonly)
+- **breaking** — Four deprecated validation methods are gone: `ValidationError::setMessageIndex()`/`getMessageIndex()` (use `setName()`/`getName()`) and `ValidationIncident::hasFieldError()`/`getFieldErrors()` (use `getArguments()`/`getErrors()`). `ValidationManager::getFieldErrors()` is a different method and is unaffected. [Upgrading to 4.0](/getting-started/upgrading-to-4/#breaking-four-deprecated-validation-methods-are-gone)
+- **breaking** — `Quiote\Execution\ViewResolver` (a deprecated stub forwarding to `ViewNameResolver`) and `ActionExecutionSession` (a transitional wrapper never wired into dispatch) are removed.
+- **breaking** — `QuioteException`'s four exception-page helpers — `getFixedTrace()`, `buildParamList()`, `highlightFile()`, `highlightString()` — are removed from it and from every exception extending it. Rendering an exception is `ExceptionRenderer`'s job. [Upgrading to 4.0](/getting-started/upgrading-to-4/#breaking-quioteexceptions-exception-page-helpers-are-gone)
+- **Fixed** — `ViewTestCase`'s response assertions compare what they document: a redirect target against the location, a header against one of its values, a cookie against its value. `runView()` hands the view the request rather than the request's parameter array, which was a `TypeError` against any view. [Testing](/advanced/testing/#the-fragment-harness)
+- **Fixed** — A category logger is re-resolved when the logging configuration changes, instead of serving a logger built against the old one.
+- **Fixed** — `Toolkit::overloadHelper()` returns the matching method, and `Database::reset()` honours the teardown contract. The `db-propulsion` adapter no longer discards live connections on every `initialize()`.
+- **Fixed** — `PropulsionDatabase::getConnection()`/`getResource()` re-resolve from Propulsion on every call instead of trusting a cached handle, so a reconfiguration on another instance can no longer leave this one silently pointed at a dropped connection. `EloquentDatabase::getCapsule()` follows the same fix through layer mode: it now re-checks the source database's current PDO on every access and rebinds it into the Illuminate connection when it has rotated underneath. [`PropulsionDatabase`](/api/database/adapter/propulsion/propulsion-database/#getconnection) · [`EloquentDatabase`](/api/database/adapter/eloquent/eloquent-database/#getcapsule)
+- `Quiote\Renderer\PhpRenderer` exposes the attributes array under the configured `var_name` (`template` by default), by reference and as the array itself — so reading a key the action never set is an undefined-key warning rather than silence. [Templates and rendering](/basics/templates-and-rendering/#template-variables)
+- New `core.stealth_mode` strips framework-identifying headers from every response — any `X-Quiote-*` header, plus the names in `core.stealth_additional_headers` (`X-Powered-By` by default). `StealthMiddleware` runs outside the error handler, so error and 404 responses are covered too. [Middleware reference](/architecture/middleware-reference/#stealthmiddleware)
+- A generated [API reference](/api/) — every public class, interface, trait and enum the framework ships, with its methods and their types, built from the source rather than maintained by hand.
+- Middleware holding per-request state can implement `Symfony\Contracts\Service\ResetInterface`; the context calls `reset()` on every middleware in the built stack at the end of each request. The stack itself is kept, and a `reset()` that throws is logged rather than silently skipping the rest. [Custom middleware](/advanced/custom-middleware/#one-instance-per-worker-not-per-request)
+- **Fixed** — A declared `session` factory was ignored: `FactoryConfigHandler` answered "is this slot optional?" and "is it switched off?" with one flag, so the optional session slot was never read and every app declaring one silently got a `NullSessionBag`. Declarations are now read regardless, and a `session` factory naming a class that doesn't implement `SessionFactoryInterface` is rejected at compile time instead of ignored. The reverse case is fixed too: an optional slot whose subsystem is switched off (a `translation_manager` with `core.use_translation` false) is no longer built anyway. [Sessions](/basics/sessions/#the-session-slot)
+- **Fixed** — A bearer-authenticated identity that then logged in through the session kept its session id; the id is rotated on that transition like any other privilege change.
+- **Fixed** — A Postgres session blob is read as a stream rather than a string, so `bytea` sessions load.
+- **Fixed** — Slot parameters are restored from the validated request, and `RoutingValue::reset()` no longer unsets a shared static property.
+- The `_original_psr_request` attribute is gone. It carried a copy of the request as the client sent it — unvalidated input under a well-known name, readable from any middleware, action or view — past the pruned canonical request that strict validation produces. Nothing in the framework read it.
 - New `Quiote\ContextLifecycle` owns the per-request state machine, and `PluginManager::addRequestEndClear()` lets a plugin clear its own request-scoped state at the boundary. [Plugins](/architecture/plugins/#clearing-your-own-state-at-the-end-of-a-request)
 - Validators can declare constructor dependencies; construction goes through the container. [Custom validators](/advanced/custom-validators/#constructor-dependencies)
 - **Fixed** — Injecting `WebRequest`, `User`, `ISecurityUser`, `Routing`, `TranslationManager` or `DatabaseManager` by base class autowired a fresh, empty instance instead of the request's real one. The base classes are bound alongside the concrete class now; the same wiring in a *singleton* throws at wiring time rather than leaking one request's identity into the next.
@@ -25,7 +44,7 @@ Decomposing `Context` into the collaborators it was standing in for. **Nothing r
 - **breaking, fixed** — An unregistered, autowired class defaulted to **singleton** scope — the container's most dangerous default. It now defaults to **request** scope; opt into process lifetime explicitly. This is what a singleton constructor-injecting `RbacSecurityUser` or `WebRequest` was silently doing. [Container](/architecture/container/#what-a-class-gets-when-nothing-says-otherwise)
 - **breaking, fixed** — A bare `#[Service]` (no `scope:` argument) defaulted to singleton, disagreeing with `ServiceInterface`'s transient default — so adding the attribute to an existing service for discoverability silently promoted its lifetime. Both now default to transient. [Services and models](/basics/services-and-models/#marking-a-service)
 
-## Unreleased — 3.2
+## 3.2
 
 Tightening contracts that were quietly wrong. Most applications need no changes; see [Upgrading to 3.2](/getting-started/upgrading-to-3-2/) for the three worth grepping for.
 
@@ -42,7 +61,7 @@ Tightening contracts that were quietly wrong. Most applications need no changes;
 - New contracts: `ContextInterface`, `ControllerInterface`, `WebResponseInterface`, `ValidatorInterface`, `ContextComponentInterface`. `TelemetryBootstrap` is decomposed with its API unchanged.
 - Failures on the dispatch path — dropped status, headers, redirects, cookies — are logged instead of vanishing.
 
-## 3.1.0 — 2026-07-29
+## 3.1.0
 
 A security release. Every entry closes a gap that was silently ineffective rather than loudly broken, so there's nothing to change in application code — but several change what your app actually enforces.
 
@@ -77,7 +96,7 @@ Object metadata for the cloud file storage disks.
 - All three clients expose `request()`, which signs an arbitrary request and returns the raw PSR-7 response, so a bucket listing — `ListObjectsV2`, `List Blobs`, pagination included — can be built without reimplementing SigV4, HMAC or Shared-Key signing. See [Listing from the bucket](/basics/filesystem/#listing-from-the-bucket).
 - `listContents()` still throws on all three cloud disks: there is no list operation behind the typed client surface.
 
-## 3.0.0 — 2026-07-29
+## 3.0.0
 
 The session overhaul. Sessions became PSR-7-native and the ext/session-backed `storage` component was removed.
 
@@ -105,12 +124,12 @@ The session overhaul. Sessions became PSR-7-native and the ext/session-backed `s
 - The native session lifecycle is repaired under worker runtimes.
 - `Quiote\Middleware\SessionMiddleware` resolves session ids through the bag.
 
-## 2.0.1 — 2026-07-28
+## 2.0.1
 
 - The scheduler rebinds the default schedule per test, stopping cross-test leakage.
 - Redundant `Before`/`After` attributes dropped from the HTTP client's `setUp`/`tearDown`.
 
-## 2.0.0 — 2026-07-28
+## 2.0.0
 
 A broad feature release: worker runtimes, queues, scheduling, and a large performance pass.
 
@@ -143,11 +162,11 @@ A framework-wide audit: OPcache preloading of core classes for FrankenPHP worker
 - Gettext plural forms selected the wrong `msgstr`.
 - Dead XML routing config path removed.
 
-## 1.2.x — 2026-07-09 to 2026-07-10
+## 1.2.x
 
 Packaging and release-tooling fixes: per-output-type template resolution in app introspection, and several `composer.json` corrections for the split packages.
 
-## 1.0.0 — 2026-07-09
+## 1.0.0
 
 The first stable release.
 

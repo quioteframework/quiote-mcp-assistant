@@ -114,11 +114,20 @@ final class ConventionCards
                     long-lived).
 
                     Register with `set($id, $concrete, $scope, $params)`, `setFactory($id, $fn)`,
-                    `alias($interface, $id)` — there is no `bind()`/`register()`.
+                    `alias($interface, $id)` — there is no `bind()`/`register()`. `unset($id)`
+                    removes a binding.
 
                     Resolve with `get()` (memoized per scope, detects cycles), `make()` (always
                     fresh — used for actions/views), `has()` (explicit registrations only).
                     Autowiring resolves constructor params by registered value, then by type.
+
+                    **Two scope defaults flipped in 4.0** (closing cross-request identity leaks):
+                    an unregistered autowired class with no `#[Service]`/`ServiceInterface` now
+                    defaults to `SCOPE_REQUEST` (was singleton); a bare `#[Service]` with no
+                    `scope:` now defaults to `SCOPE_TRANSIENT` (was singleton, disagreeing with
+                    `ServiceInterface`'s own default). Injecting `WebRequest`/`User` into a
+                    singleton now throws `ContainerException` at wiring time instead of silently
+                    handing back an empty instance — inject `RequestState`/`CurrentUser` instead.
 
                     See `quiote-docs://architecture/container`.
                     MD,
@@ -181,10 +190,13 @@ final class ConventionCards
                     `core.use_database = true` in settings.
 
                     Each connection is a `Quiote\Database\Database` **lifecycle wrapper**, not the
-                    raw connection. Get it via the context / DI:
+                    raw connection. Get it by injecting `Quiote\Database\DatabaseManager` — as of
+                    4.0, `Context` no longer exposes `getDatabaseManager()`:
 
                     ```php
-                    $db   = $context->getDatabaseManager()->getDatabase('main');
+                    public function __construct(private readonly DatabaseManager $databases) {}
+
+                    $db   = $this->databases->getDatabase('main');
                     $conn = $db->getConnection(); // PDO, or the ORM object for that adapter
                     ```
 
@@ -331,13 +343,15 @@ final class ConventionCards
                     cookie, `CsrfValidationMiddleware` treats *every* request as CSRF-exempt
                     while injection still adds the field, so it only looks protected.
 
-                    **Read/write through the bag**, `$context->getSessionBag()`:
+                    **Read/write through the bag** — inject `Quiote\Session\SessionBagInterface`
+                    (as of 4.0, `Context` no longer exposes `getSessionBag()`):
 
                     ```php
-                    $bag = $this->getContext()->getSessionBag();
-                    $bag->get($k, $default);  $bag->set($k, $v);   $bag->has($k);
-                    $bag->remove($k);         $bag->exists();      $bag->getId();
-                    $bag->regenerate(true);   $bag->destroy();
+                    public function __construct(private readonly SessionBagInterface $bag) {}
+
+                    $this->bag->get($k, $default);  $this->bag->set($k, $v);   $this->bag->has($k);
+                    $this->bag->remove($k);         $this->bag->exists();      $this->bag->getId();
+                    $this->bag->regenerate(true);   $this->bag->destroy();
                     ```
 
                     `get()` normalizes "missing" to `$default`. `exists()` answers "does a
@@ -349,7 +363,8 @@ final class ConventionCards
                     `setAuthenticated(false)` now discards contents and rotates the id.
 
                     See `quiote-docs://basics/sessions` and, for migrating a 2.x app,
-                    `quiote-docs://getting-started/upgrading-to-3`.
+                    `quiote-docs://getting-started/upgrading-to-3`; for the 4.0 removal of
+                    `Context::getSessionBag()`/`setSessionBag()`, `quiote-docs://getting-started/upgrading-to-4`.
                     MD,
             ],
             'queues' => [

@@ -183,11 +183,11 @@ Two styles, and the difference matters:
 - **`push()`** returns a `ScopeToken`. **You must hold it** — an unheld `push([...])` pops immediately, because the token is a temporary destroyed at the end of the statement. Use it for block-scoped context.
 - **`enrich()`** pushes a frame with no token; it lasts until `clear()`. Use it for request-lifetime enrichers where there is no natural block.
 
-Quiote already enriches every request with a correlation id: the `quiote.rid` id minted in `Context::handle()` is pushed as a scope property, so every line for a request is correlatable.
+Quiote already enriches every request with a correlation id: the `quiote.rid` id minted in `ContextRequestHandler::handle()` is pushed as a scope property, so every line for a request is correlatable.
 
 ### Correlation IDs
 
-Rather than always minting a fresh id, `Context::handle()` adopts an **inbound** correlation-id header when the request carries one — so a gateway or upstream service can tie its request to your logs. The inbound value is sanitized (control bytes stripped, length-capped) because it becomes a log field and a response header. When no header is present, an id is generated as before. The id is echoed back on the response under the same header name.
+Rather than always minting a fresh id, `ContextRequestHandler::handle()` adopts an **inbound** correlation-id header when the request carries one — so a gateway or upstream service can tie its request to your logs. The inbound value is sanitized (control bytes stripped, length-capped) because it becomes a log field and a response header. When no header is present, an id is generated as before. The id is echoed back on the response under the same header name.
 
 | Setting | Default | Effect |
 |---|---|---|

@@ -210,8 +210,12 @@ final class RecipeBook
                 'steps' => [
                     ['description' => 'Set core.use_database = true in Config/settings.php.'],
                     ['description' => 'Declare the connection in Config/databases.xml, naming a driver (pdo, or an ORM adapter alias like eloquent/doctrine_orm/doctrine_dbal/cycle/propulsion if that plugin is enabled).'],
-                    ['description' => 'Get the lifecycle wrapper via the context, then the real connection/ORM object from it.', 'code' => <<<'PHP'
-                        $db   = $context->getDatabaseManager()->getDatabase('main'); // Quiote\Database\Database
+                    ['description' => 'Get the lifecycle wrapper by injecting DatabaseManager (as of 4.0, Context no longer exposes getDatabaseManager() -- it must be constructor-injected), then the real connection/ORM object from it.', 'code' => <<<'PHP'
+                        use Quiote\Database\DatabaseManager;
+
+                        public function __construct(private readonly DatabaseManager $databases) {}
+
+                        $db   = $this->databases->getDatabase('main'); // Quiote\Database\Database
                         $conn = $db->getConnection(); // PDO, or the adapter's ORM object
                         PHP],
                 ],
@@ -222,22 +226,25 @@ final class RecipeBook
                     ['description' => 'Install quioteframework/ratelimit -- a plain library, not a plugin (no "plugins" entry). It provides LoginThrottle (sliding-window counter per key, e.g. IP or username) and PdoRateLimiterStorage (state kept in your own database, no Redis needed).', 'code' => <<<'BASH'
                         composer require quioteframework/ratelimit
                         BASH],
-                    ['description' => 'Create the storage table once (PdoRateLimiterStorage::schema() returns Postgres/SQLite-compatible DDL) -- e.g. from a one-off console command or migration, using the same PDO connection the app already has via the DatabaseManager.', 'code' => <<<'PHP'
+                    ['description' => 'Create the storage table once (PdoRateLimiterStorage::schema() returns Postgres/SQLite-compatible DDL) -- e.g. from a one-off console command or migration, using the same PDO connection the app already has via an injected DatabaseManager.', 'code' => <<<'PHP'
                         <?php
-                        $conn = $context->getDatabaseManager()->getDatabase('main')->getConnection(); // PDO
+                        $conn = $databases->getDatabase('main')->getConnection(); // PDO, DatabaseManager injected
                         $conn->exec(\Quiote\Security\RateLimit\PdoRateLimiterStorage::schema());
                         PHP],
-                    ['description' => 'Wire it into the login action: peek with retryAfter() before doing any real auth work (cheap rejection of a flood), registerFailure() on a bad password, reset() on success so a legitimate user is never penalized for an earlier typo. Build LoginThrottle lazily inside execute*(), not the constructor -- getContext() (needed to reach the DatabaseManager) returns null until the executor calls initialize() on the action, which happens after the constructor runs. maxAttempts/interval are constructor args -- this example is 5 attempts per 60 seconds; the constructor defaults to 10 per 15 minutes if omitted. Do NOT add isSimple(): true here, even though other scaffolded actions have it -- isSimple() skips execute*() entirely and always renders getDefaultViewName() directly, which only looks harmless on an action whose default view happens to match its execute*() return value. This action must return a different view per outcome (Throttled/Error/Success), so isSimple() must stay at its default (false) or the throttle/auth logic below silently never runs.', 'code' => <<<'PHP'
+                    ['description' => 'Wire it into the login action: peek with retryAfter() before doing any real auth work (cheap rejection of a flood), registerFailure() on a bad password, reset() on success so a legitimate user is never penalized for an earlier typo. Build LoginThrottle lazily inside execute*() from a constructor-injected DatabaseManager -- as of 4.0, Context no longer exposes getDatabaseManager() at all, so it must be injected rather than reached through the context. maxAttempts/interval are constructor args -- this example is 5 attempts per 60 seconds; the constructor defaults to 10 per 15 minutes if omitted. Do NOT add isSimple(): true here, even though other scaffolded actions have it -- isSimple() skips execute*() entirely and always renders getDefaultViewName() directly, which only looks harmless on an action whose default view happens to match its execute*() return value. This action must return a different view per outcome (Throttled/Error/Success), so isSimple() must stay at its default (false) or the throttle/auth logic below silently never runs.', 'code' => <<<'PHP'
                         <?php
                         namespace App\Modules\Auth\Actions;
 
                         use Quiote\Action\Action;
+                        use Quiote\Database\DatabaseManager;
                         use Quiote\Request\WebRequest;
                         use Quiote\Security\RateLimit\LoginThrottle;
                         use Quiote\Security\RateLimit\PdoRateLimiterStorage;
 
                         class LoginAction extends Action
                         {
+                            public function __construct(private readonly DatabaseManager $databases) {}
+
                             public function executeWrite(WebRequest $rd)
                             {
                                 $throttle = $this->throttle();
@@ -271,7 +278,7 @@ final class RecipeBook
 
                             private function throttle(): LoginThrottle
                             {
-                                $conn = $this->getContext()->getDatabaseManager()->getDatabase('main')->getConnection();
+                                $conn = $this->databases->getDatabase('main')->getConnection();
                                 return new LoginThrottle(new PdoRateLimiterStorage($conn), maxAttempts: 5, interval: '60 seconds', id: 'login');
                             }
                         }
@@ -305,7 +312,7 @@ final class RecipeBook
                             'mcp.expose_actions' => true,
                         ];
                         PHP],
-                    ['description' => 'The action\'s DI, verb dispatch, and validators are reused as-is via the same request pipeline a real HTTP call would go through -- Quiote\Mcp\Bridge\ActionToolAdapter drives a synthetic request through Context::handle() (not ActionExecutor::execute() directly), so a tool call gets the exact same DI resolution, verb dispatch, and validation a real HTTP request would. The tool\'s inputSchema is derived automatically from the action\'s validators (scoped to the verb the route dispatches to) -- string minLength/maxLength, number min/max, email format, enum values, regex pattern, and so on -- so one validator declaration drives both HTTP validation and the advertised schema. A field only falls back to a looser/no schema entry when its rule genuinely can\'t map to JSON Schema (e.g. a negative regex); validation still runs for real on dispatch either way, and additionalProperties stays true.'],
+                    ['description' => 'The action\'s DI, verb dispatch, and validators are reused as-is via the same request pipeline a real HTTP call would go through -- Quiote\Mcp\Bridge\ActionToolAdapter drives a synthetic request through $context->getRequestHandler()->handle() (not ActionExecutor::execute() directly, and not Context::handle(), which 4.0 removed), so a tool call gets the exact same DI resolution, verb dispatch, and validation a real HTTP request would. The tool\'s inputSchema is derived automatically from the action\'s validators (scoped to the verb the route dispatches to) -- string minLength/maxLength, number min/max, email format, enum values, regex pattern, and so on -- so one validator declaration drives both HTTP validation and the advertised schema. A field only falls back to a looser/no schema entry when its rule genuinely can\'t map to JSON Schema (e.g. a negative regex); validation still runs for real on dispatch either way, and additionalProperties stays true.'],
                     ['description' => 'A forwarded request fails the tool call rather than silently succeeding. Status alone can\'t distinguish success from failure here -- a security forward renders the login/secure action and still returns HTTP 200, so without this a tool call against a protected action would report success and hand the connected model the login page\'s markup as though it were the action\'s real output. The adapter attaches its own ExecutionState to the synthetic request and raises a ToolCallException (surfacing as isError: true, naming the action actually reached) if the request was forwarded -- any forward fails the call, not only a security one.'],
                     ['description' => 'The HTTP transport\'s own auth (mcp.auth: bearer/oauth2/none) is a separate concern from this recipe -- see the "secure-mcp-endpoint" recipe for wiring OAuth2 resource-server auth onto the endpoint itself.'],
                 ],
@@ -507,8 +514,12 @@ final class RecipeBook
                         #     table: session
                         YAML],
                     ['description' => 'Redis/S3/GCS/Azure backends each ship a slot factory in their own package (session-redis, session-s3, session-gcs, session-azure) -- name the factory class and configure it; there is no wiring to write. The cloud ones expect a PSR-18 client bound in the container. Cookie settings live on this same slot: cookie_name, session_cookie_lifetime, session_cookie_secure, session_cookie_httponly, session_cookie_samesite, session_migration_grace_seconds.'],
-                    ['description' => 'Read and write through the bag on the context. get() normalizes "missing" to your default, so there is no null-vs-false trap.', 'code' => <<<'PHP'
-                        $bag = $this->getContext()->getSessionBag();
+                    ['description' => 'Read and write through the bag -- constructor-inject SessionBagInterface (as of 4.0, Context no longer exposes getSessionBag()). get() normalizes "missing" to your default, so there is no null-vs-false trap.', 'code' => <<<'PHP'
+                        use Quiote\Session\SessionBagInterface;
+
+                        public function __construct(private readonly SessionBagInterface $bag) {}
+
+                        $bag = $this->bag;
 
                         $cart = $bag->get('cart', []);          // default returned when absent
                         $bag->set('cart', $cart);
@@ -895,7 +906,7 @@ final class RecipeBook
                 'title' => 'Test a full request end to end with the fluent HTTP client',
                 'steps' => [
                     ['description' => 'Pick your test entry point by how much of the request you need to exercise: a plain service/model -- Quiote\Testing\UnitTestCase, resolve it from the context and call it directly (the default, reach for it first). A full request -- routing, middleware, action, view, response -- Quiote\Testing\HttpTestCase, below. ActionTestCase (dispatches a single action, no routing) is explicitly a TRANSITIONAL harness in the docs; prefer HttpTestCase or UnitTestCase for new tests.'],
-                    ['description' => 'HttpTestCase drives the request through Context::handle() -- the SAME entry point production traffic uses, with the app\'s real middleware pipeline in place. Every request method returns a chainable TestResponse.', 'code' => <<<'PHP'
+                    ['description' => 'HttpTestCase drives the request through $context->getRequestHandler()->handle() -- the SAME entry point production traffic uses, with the app\'s real middleware pipeline in place (Context::handle() itself was removed in 4.0). Every request method returns a chainable TestResponse.', 'code' => <<<'PHP'
                         <?php
                         namespace Tests\Feature;
 
@@ -929,7 +940,15 @@ final class RecipeBook
                         // then, in any test:
                         $this->post('/orders', [])->assertApiError('sku_required');
                         PHP],
-                    ['description' => 'A test needing a session installs one via the public Context::setSessionBag() (no reflection needed); passing null drops it back to a NullSessionBag (writes discarded, exists() false). For process isolation (a test that mutates locale/environment/default context and could poison sibling tests), mark the class #[RunTestsInSeparateProcesses] plus #[IsolationEnvironment(...)] -- see quiote-docs://advanced/testing for the full isolation-attribute table and the lower-level "compose the middleware stack yourself" pattern for testing one middleware in isolation.'],
+                    ['description' => 'A test needing a session installs one by binding SessionBagInterface request-scoped into the container -- Context::setSessionBag() is gone as of 4.0.', 'code' => <<<'PHP'
+                        use Quiote\Container;
+                        use Quiote\Session\SessionBagInterface;
+
+                        $context->getContainer()->set(SessionBagInterface::class, $bag, Container::SCOPE_REQUEST);
+                        // unset() drops it back to a NullSessionBag (writes discarded, exists() false).
+                        $context->getContainer()->unset(SessionBagInterface::class);
+                        PHP],
+                    ['description' => 'For process isolation (a test that mutates locale/environment/default context and could poison sibling tests), mark the class #[RunTestsInSeparateProcesses] plus #[IsolationEnvironment(...)] -- see quiote-docs://advanced/testing for the full isolation-attribute table and the lower-level "compose the middleware stack yourself" pattern for testing one middleware in isolation.'],
                 ],
             ],
             'write-custom-validator' => [
@@ -1092,20 +1111,22 @@ final class RecipeBook
                         # or:
                         vendor/bin/quiote cache:warmup
                         BASH],
-                    ['description' => 'NOTHING HERE REQUIRES APPLICATION CHANGES beyond the cache clear above -- every Context accessor still works. Compiled config (factories, databases, output_types, translation, and now every OTHER kind too: settings, module, plugins, middleware, validators) became DATA rather than executable PHP -- only matters if you read a compiled file directly or wrote your own config handler.'],
+                    ['description' => 'Compiled config (factories, databases, output_types, translation, and now every OTHER kind too: settings, module, plugins, middleware, validators) became DATA rather than executable PHP -- only matters if you read a compiled file directly or wrote your own config handler.'],
                     ['description' => 'If you wrote a custom config handler: IXmlConfigHandler::execute() / IArrayConfigHandler::executeArray() / ILegacyConfigHandler::execute() now return the declaration (mixed), not a string of generated PHP. Quiote\Config\BaseConfigHandler::generate() is removed -- return the declaration directly. Quiote\Config\ConfigCache::writeCacheFile() takes ($config, $cache, $value, $generatedBy = null) -- no $append parameter. A handler registered for ConfigCache::load($path) must implement Quiote\Config\IDeclarationConfigHandler and move its old generated-statement logic into apply(mixed $declaration, string $sourceRef): void.'],
-                    ['description' => 'Context is growing seams, not losing accessors -- new injectable classes exist for what used to be reached through the context, purely additive.'],
-                    ['description' => 'Prefer constructor injection over reaching through the context in new code:', 'code' => <<<'PHP'
-                        // Instead of ...                  // Inject ...
+                    ['description' => 'THIS ONE DOES REQUIRE APPLICATION CHANGES: Context lost most of its accessors outright, it did not just grow additive seams alongside them. Context is down to 17 public methods; getDatabaseManager(), getTranslationManager(), getSessionBag()/setSessionBag(), getSessionManager()/setSessionManager(), getUser(), getRequest()/setRequest(), getRouting(), getController(), getModel(), getService(), createInstanceFor(), and handle() are ALL GONE -- not deprecated, not "prefer the new way", simply absent. Any code calling $context->getX() for one of these throws a fatal error immediately upon upgrade. Audit every $context-> call in the app before upgrading.', 'code' => <<<'PHP'
+                        // Removed accessor              // Inject/use instead
+                        // $context->getDatabaseManager()  Quiote\Database\DatabaseManager
+                        // $context->getSessionBag()       Quiote\Session\SessionBagInterface
                         // $context->getModel(...)         Quiote\Model\ModelLocator
-                        // Context::getInstance('web')      Quiote\ContextRegistry
+                        // Context::getInstance('web')      Quiote\ContextRegistry (getInstance() itself still works)
                         // $context->getRequest()/setRequest()  Quiote\Request\RequestState
                         // $context->getUser()              Quiote\User\CurrentUser
+                        // Context::handle()                $context->getRequestHandler()->handle($request)
                         PHP],
                     ['description' => 'TWO BREAKING SCOPE-DEFAULT FIXES, both closing real cross-request identity leaks. (1) An unregistered, autowired class with no #[Service] and no ServiceInterface used to default to SCOPE_SINGLETON -- the container\'s most dangerous default, since a singleton keeps whatever it was handed at construction for the worker\'s whole life. It now defaults to SCOPE_REQUEST. If something relied on that instance surviving across requests, register it explicitly: #[Service(scope: Container::SCOPE_SINGLETON)]. (2) A bare #[Service] (no scope: argument) used to default to singleton, disagreeing with ServiceInterface\'s transient default -- both now agree on SCOPE_TRANSIENT. Audit for a bare #[Service] attribute that relied on the old singleton default.'],
                     ['description' => 'A defect fix, not a rename: injecting WebRequest or User in a SINGLETON used to silently hand back a fresh, empty/unauthenticated instance (the container only bound each core service under its concrete class, so the app\'s WebRequest/User subclass left the base type unregistered). It now throws ContainerException AT WIRING TIME, naming RequestState/CurrentUser as the fix -- this is a real defect being surfaced, not new breakage; if it fires, replace the base-class injection with RequestState/CurrentUser per the table above.'],
                     ['description' => 'Validators can now declare constructor dependencies -- purely additive, see the "write-custom-validator" recipe. Two previously-private things are now public API: Context::getShutdownSequence() (append()/remove()/replaceRole()/all(), replacing reflection on the old array property) and Context::create() (the named constructor ContextRegistry builds through).'],
-                    ['description' => 'Checklist: clear the config cache or run cache:warmup; check for anything reading a compiled config file or the old *FactoryInfo properties on Context; if you wrote a custom config handler, update it per above; check for Context::$psrKernel/$correlationId access (removed -- use $context->getRequestHandler()->pipeline()/getCorrelationId()); check singletons type-hinting WebRequest/User/ISecurityUser (now throws -- inject RequestState/CurrentUser); check for anything relying on an unregistered class behaving as a singleton, or a bare #[Service] relying on the old singleton default; register a request-end clear (PluginManager::addRequestEndClear()) for any request-scoped state your own code holds. See quiote-docs://getting-started/upgrading-to-4.'],
+                    ['description' => 'Checklist: clear the config cache or run cache:warmup; audit every $context->getX() call against the removed-accessor table above and replace with the matching injectable; check for anything reading a compiled config file or the old *FactoryInfo properties on Context; if you wrote a custom config handler, update it per above; check for Context::$psrKernel/$correlationId access (removed -- use $context->getRequestHandler()->pipeline()/getCorrelationId()); check singletons type-hinting WebRequest/User/ISecurityUser (now throws -- inject RequestState/CurrentUser); check for anything relying on an unregistered class behaving as a singleton, or a bare #[Service] relying on the old singleton default; register a request-end clear (PluginManager::addRequestEndClear()) for any request-scoped state your own code holds. See quiote-docs://getting-started/upgrading-to-4.'],
                 ],
             ],
         ];

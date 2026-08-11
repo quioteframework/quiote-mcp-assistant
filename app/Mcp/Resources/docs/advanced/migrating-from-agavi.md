@@ -15,7 +15,7 @@ Use this table to find the Quiote equivalent of an Agavi concept. The sections b
 | Flat class names (`Blog_PostAction`) | PSR-4 namespaces (`App\Modules\Blog\Actions\PostAction`) | Namespace incrementally — the flat-name fallback keeps unported classes running. |
 | `Agavi` class prefix | `Quiote\` class prefix | Update `use` statements as you touch each file. |
 | `factories.xml` + context lookups | `factories` config (framework roles) + [DI container](/architecture/container/) (app code) | Declare dependencies as constructor parameters; let the container autowire. |
-| Singleton "models" | [Services](/basics/services-and-models/) (container-managed) | Move behaviour to services; keep data in `getModel()`. |
+| Singleton "models" | [Services](/basics/services-and-models/) (container-managed) | Move behaviour to services; keep data in models, resolved through `ModelLocator`. |
 | Execution filters | [Middleware pipeline](/architecture/middleware-pipeline/) | Rewrite each filter as a [custom middleware](/advanced/custom-middleware/). |
 | `routing.xml` | `Routing::build()` and `#[Route]` attributes | Define routes in code; the `routing.xml` handler is not wired. |
 | XML-only config | XML **or** PHP **or** YAML, per file | Leave XML in place; write new config in any format. |
@@ -43,7 +43,7 @@ You don't have to rename everything at once: when it can't find the namespaced c
 
 Agavi wired collaborators through `factories.xml` and context lookups. Quiote keeps a `factories` config for framework roles (`controller`, `response`, `routing`, `user`, `storage`, …) but new application code uses the [DI container](/architecture/container/): declare dependencies as constructor parameters and let the container autowire them. The old "reach through the context to find a model" pattern becomes constructor injection.
 
-This is also where the **model** concept splits. Agavi used "model" for two things — singleton service objects and transient data objects. Quiote un-conflates them: behaviour goes in [services](/basics/services-and-models/) (container-managed), data stays in models (`getModel()`). Your Agavi singleton "models" are, in Quiote terms, services.
+This is also where the **model** concept splits. Agavi used "model" for two things — singleton service objects and transient data objects. Quiote un-conflates them: behaviour goes in [services](/basics/services-and-models/) (container-managed), data stays in models, resolved through an injected `ModelLocator`. Your Agavi singleton "models" are, in Quiote terms, services.
 
 ### Filter chain becomes the middleware pipeline
 

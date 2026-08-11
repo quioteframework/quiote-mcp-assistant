@@ -11,7 +11,7 @@ This page traces that path end to end and names the real classes at each step. I
 ```mermaid
 flowchart TD
     A[HTTP request] --> B["Kernel::run()"]
-    B --> C["Context::handle(request)"]
+    B --> C["ContextRequestHandler::handle(request)"]
     C --> D[MiddlewarePipeline]
     D --> E[ErrorHandling, Session, ContentNegotiation, Routing, CSRF, Security, Validation, Dispatch, ...]
     E --> F["DispatchMiddleware calls ActionExecutor"]
@@ -30,19 +30,16 @@ The front controller calls `Kernel::create([...])->run()`. `run()` does four thi
 1. **Bootstrap** — sets core paths (`core.app_dir` and friends), decides whether the APCu config cache is usable, and calls `Quiote::bootstrap()` to load `settings`, create the requested context(s), and prime the controller.
 2. **Select a worker runtime** — a `WorkerRuntimeInterface` (`sapi`, `frankenphp`, `roadrunner`, `swoole`, or one a plugin registered), from the kernel option, `$QUIOTE_WORKER_RUNTIME`, `core.worker_runtime`, or auto-detection. The runtime owns the request loop and both of its ends. See [Deployment](/architecture/deployment/#choosing-a-runtime).
 3. **Build the request** — under a SAPI runtime, from the superglobals via Nyholm's `ServerRequestCreator::fromGlobals()`; off-SAPI, from the request object the server hands over. Either way reverse-proxy corrections (`X-Forwarded-*`) are applied and the result is wrapped in a `Quiote\Request\WebRequest` (which extends Nyholm's `ServerRequest`).
-4. **Handle and emit** — for each request the shared `WorkerLoop` calls `$context->handle($request)` and the runtime's own emitter sends the response. Any exception that escapes is rendered through `ErrorHandlingMiddleware::renderExceptionResponse()`.
+4. **Handle and emit** — for each request the shared `WorkerLoop` calls `$context->getRequestHandler()->handle($request)` and the runtime's own emitter sends the response. Any exception that escapes is rendered through `ErrorHandlingMiddleware::renderExceptionResponse()`.
 
 Under a persistent runtime, steps 1–2 happen once per worker; steps 3–4 repeat per request. State that must not leak between requests is reset via `WorkerManager::resetForNextRequest()`.
 
-## 2. Enter the pipeline — `Context::handle()`
+## 2. Enter the pipeline — `ContextRequestHandler`
 
-`Quiote\Context::handle()` is the PSR-15 entry point every runtime calls, and it delegates to `Quiote\Runtime\ContextRequestHandler` — a class that **declares** `RequestHandlerInterface` rather than merely matching its signature:
+`Quiote\Runtime\ContextRequestHandler` is the PSR-15 entry point every runtime calls — a class that **declares** `RequestHandlerInterface` rather than merely matching its signature. A context hands you its own:
 
 ```php
-public function handle(ServerRequestInterface $request): ResponseInterface
-{
-    return $this->getRequestHandler()->handle($request);
-}
+$response = $context->getRequestHandler()->handle($request);
 ```
 
 The handler owns the per-request work around the pipeline:
@@ -98,6 +95,8 @@ Session-backed state is persisted **before** the response is emitted, not on the
 - **The end-of-request clears**, which drop everything that must not survive into the next request the process serves.
 
 Identity is cleared first and unconditionally. `Context::reset()` runs the throwable-prone work — the controller reset, the user flush, the shutdown sequence that recycles database connections — inside a `try`, with the clearing of the session bag, the user and the request in the `finally`. A dead socket at a request boundary is an ordinary event, and before this the identity assignments sat *after* that work: any throwable aborted the reset before they ran, so the next request in that worker got a fresh session bag but the **previous request's authenticated user object**, roles intact. Each remaining component reset is separately guarded too, so one broken reset can't block the others.
+
+After identity come the rest: the ambient logging scope, the request-scoped container entries, the cache request state, routing, the translation manager — and the middleware. The pipeline itself is kept (it is built once per worker and reused), but every middleware in it that implements `Symfony\Contracts\Service\ResetInterface` has `reset()` called here, which is how a middleware holding per-request state lets go of it. See [One instance per worker, not per request](/advanced/custom-middleware/#one-instance-per-worker-not-per-request).
 
 Plugins and application code can contribute their own clears — see [Plugins: clearing your own state](/architecture/plugins/#clearing-your-own-state-at-the-end-of-a-request).
 

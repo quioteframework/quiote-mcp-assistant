@@ -51,6 +51,62 @@ final class HealthzMiddleware implements MiddlewareInterface
 
 Two things every middleware does: it can short-circuit by returning a response (as `/healthz` does), or delegate downstream with `$handler->handle($request)` and optionally post-process the returned response on the way back out.
 
+## One instance per worker, not per request
+
+The pipeline is built once per worker process and **the same middleware objects then serve every request that worker handles** — thousands of them, from as many different users. This is the one place where PSR-15 intuition (`new` middleware per request, as a fresh-per-request framework would do it) will get you into trouble, and it does so silently:
+
+```php
+final class TenantMiddleware implements MiddlewareInterface
+{
+    private ?string $tenantId = null;          // ← survives the request
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        $this->tenantId ??= $this->resolve($request);   // ← request 2 reuses request 1's tenant
+        return $handler->handle($request->withAttribute('tenant', $this->tenantId));
+    }
+}
+```
+
+Under `php-fpm` that code is correct, because the process ends with the request. Under FrankenPHP, RoadRunner or Swoole it hands the second caller the first caller's tenant, and a memo of anything user-specific — an identity, a permission set, a resolved account — becomes a cross-user data leak rather than a stale-cache bug.
+
+**The rule:** instance properties are for values that are genuinely process-wide — configuration, a shared connection, a compiled lookup table, collaborators injected at construction. Request-scoped values belong on the request itself (`$request->withAttribute()`, read back with `getAttribute()`) or are resolved fresh per call from the container:
+
+```php
+final class TenantMiddleware implements MiddlewareInterface
+{
+    public function __construct(private readonly TenantResolver $resolver) {}   // fine: process-wide
+
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        return $handler->handle($request->withAttribute('tenant', $this->resolver->resolve($request)));
+    }
+}
+```
+
+If a middleware genuinely must hold state across its own `process()` — a buffer it fills on the way in and drains on the way out — implement `Symfony\Contracts\Service\ResetInterface` and clear it there:
+
+```php
+use Symfony\Contracts\Service\ResetInterface;
+
+final class CollectingMiddleware implements MiddlewareInterface, ResetInterface
+{
+    /** @var list<string> */
+    private array $collected = [];
+
+    public function reset(): void
+    {
+        $this->collected = [];
+    }
+}
+```
+
+`MiddlewarePipeline::resetInstances()` calls `reset()` on every middleware in the built stack that implements it, and the context runs that at the end of each request, alongside dropping the session bag and the user. The stack itself is kept — this is the request boundary, not a rebuild — and a `reset()` that throws is logged without stopping the others.
+
+:::caution[This is a review rule, not a runtime check]
+Nothing detects a leaky property for you. When reviewing a middleware, read every `$this->` assignment in `process()` and ask whether the value came from the request. If it did, it needs to move to the attribute bag or be cleared in `reset()`.
+:::
+
 ## Declarative middleware.xml
 
 The no-code way. Drop a `middleware.xml` (or `.php`/`.yaml`/`.yml`) next to `settings.xml` in `Config/`, or inside any module's own `Config/` directory — resolved the same way as any other config type (`.php` > `.yaml`/`.yml` > `.xml`). This is a **drop-in**: a module registers its own middleware just by containing the file, no app wiring required.

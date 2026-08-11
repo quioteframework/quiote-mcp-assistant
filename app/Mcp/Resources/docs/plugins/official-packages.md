@@ -282,9 +282,29 @@ return [
 </ae:configurations>
 ```
 
+#### PHP
+
 ```php
 // Config/settings.php
-'mcp.enabled' => true,
+return [
+    'mcp.enabled' => true,
+];
+```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+mcp.enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="mcp.">
+  <setting name="enabled">true</setting>
+</settings>
 ```
 
 The [Quiote Assistant MCP](/getting-started/mcp-assistant/) is a full reference app built on this package.
@@ -330,9 +350,29 @@ return [
 </ae:configurations>
 ```
 
+#### PHP
+
 ```php
 // Config/settings.php
-'telemetry.enabled' => true,
+return [
+    'telemetry.enabled' => true,
+];
+```
+
+#### YAML
+
+```yaml
+# Config/settings.yaml
+telemetry.enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/settings.xml -->
+<settings prefix="telemetry.">
+  <setting name="enabled">true</setting>
+</settings>
 ```
 
 See [Telemetry](/architecture/telemetry/) for the full `telemetry.*` surface.
@@ -594,10 +634,32 @@ Adds the `redis` queue driver (`RedisQueueDriver`), registered as a `queue.defau
 composer require quioteframework/queue-redis predis/predis
 ```
 
+#### PHP
+
 ```php
 // Config/plugins.php
-['class' => \Quiote\Queue\QueuePlugin::class, 'enabled' => true],
-['class' => \Quiote\Queue\Redis\QueueRedisPlugin::class, 'enabled' => true],
+return [
+    ['class' => \Quiote\Queue\QueuePlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Queue\Redis\QueueRedisPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Queue\QueuePlugin
+  enabled: true
+- class: Quiote\Queue\Redis\QueueRedisPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml — inside <ae:configuration> -->
+<plugin class="Quiote\Queue\QueuePlugin" />
+<plugin class="Quiote\Queue\Redis\QueueRedisPlugin" />
 ```
 
 | Key | Default | Meaning |

@@ -38,8 +38,14 @@ Active record (Eloquent) and data mapper (Doctrine, Cycle) are the two classic O
 Each configured connection is a `Quiote\Database\Database` instance — a **lifecycle wrapper**, not the connection itself. You get the underlying object through it:
 
 ```php
-$db   = $context->getDatabaseManager()->getDatabase('main'); // the Database wrapper
-$conn = $db->getConnection();                                // the PDO / ORM object
+$db   = $this->databases->getDatabase('main'); // the Database wrapper
+$conn = $db->getConnection();                  // the PDO / ORM object
+```
+
+`$this->databases` is a `Quiote\Database\DatabaseManager`, injected — a class that talks to the database declares it in its constructor:
+
+```php
+public function __construct(private readonly DatabaseManager $databases) {}
 ```
 
 What `getConnection()` returns depends on the adapter:
@@ -61,18 +67,19 @@ Every adapter also declares `getPdo(): \PDO` on the `Database` base class itself
 
 The database layer is not a middleware — nothing in the [request pipeline](/architecture/middleware-pipeline/) opens a connection on its own. Instead, one manager object stands ready and hands out connections when your code asks.
 
-**How the framework finds and registers it.** `DatabaseManager` is a core role, wired by the `database_manager` entry in your `factories` config (`Config/factories.{php,yaml,xml}`), and the resulting instance is also bound in the [DI container](/architecture/container/) under the role `databaseManager`. `Context` exposes it two ways:
+**How the framework finds and registers it.** `DatabaseManager` is a core role, wired by the `database_manager` entry in your `factories` config (`Config/factories.{php,yaml,xml}`), and the resulting instance is bound in the [DI container](/architecture/container/) under the role `databaseManager` and under its class. Type-hint the class and the container hands it over:
 
 ```php
-$manager = $context->getDatabaseManager();          // the DatabaseManager (null if the layer is off)
-$conn    = $context->getDatabaseConnection('main'); // shortcut for ->getDatabase('main')->getConnection()
+public function __construct(private readonly DatabaseManager $databases) {}
 ```
+
+In a context whose `factories` config declares no `database_manager`, that binding is a factory that throws and names what would have declared it, rather than an empty manager with no connections. Where the database layer is genuinely optional, ask with `tryGet()` instead and handle the `null`.
 
 `DatabaseManager::getDatabase($name)` reads your [`databases` config](#configuring-connections), instantiates the named adapter the first time it's asked for (connections open **lazily**), and caches the wrapper.
 
 **The path a connection takes:**
 
-> your action or service calls `$context->getDatabaseConnection('main')` → `DatabaseManager::getDatabase('main')` resolves the adapter class from config → the adapter opens its connection on first use → the ORM/PDO object is returned. At the request boundary in a long-lived worker, `Context::reset()` calls `DatabaseManager::recycleConnections()`, which `ping()`s each live connection (reconnecting dead ones); per-request state is cleared separately by the container's request reset. Either way the connection itself is kept.
+> your action or service calls `$this->databases->getDatabase('main')->getConnection()` → `DatabaseManager::getDatabase('main')` resolves the adapter class from config → the adapter opens its connection on first use → the ORM/PDO object is returned. At the request boundary in a long-lived worker, `Context::reset()` calls `DatabaseManager::recycleConnections()`, which `ping()`s each live connection (reconnecting dead ones); per-request state is cleared separately by the container's request reset. Either way the connection itself is kept.
 
 See [Worker mode and connection lifecycle](#worker-mode-and-connection-lifecycle) for the full set of lifecycle hooks.
 
@@ -105,7 +112,7 @@ core.use_database: true
 </settings>
 ```
 
-With `core.use_database => false` (the scaffolded default), the manager is not required and no connection is ever opened — `getDatabaseConnection()` returns `null`. Set it to `true` before configuring connections below. See [Configuration → settings](/architecture/configuration/#settings) for the full settings file.
+With `core.use_database => false` (the scaffolded default), the manager is not required and no connection is ever opened — nothing binds a `DatabaseManager` to inject. Set it to `true` before configuring connections below. See [Configuration → settings](/architecture/configuration/#settings) for the full settings file.
 
 ## Configuring connections
 
@@ -325,7 +332,7 @@ main:
 
 ```php
 /** @var Quiote\Database\Adapter\Eloquent\EloquentDatabase $db */
-$db      = $context->getDatabaseManager()->getDatabase('main');
+$db      = $this->databases->getDatabase('main');
 $capsule = $db->getCapsule();              // Illuminate\Database\Capsule\Manager
 $conn    = $db->getEloquentConnection();   // Illuminate\Database\Connection
 $conn->table('users')->where('active', true)->get();
@@ -636,17 +643,17 @@ ORM adapters resolve their connection two ways:
 
 ```php
 // The wrapper (lifecycle):
-$db = $context->getDatabaseManager()->getDatabase('main');
+$db = $this->databases->getDatabase('main');
 
 // The underlying PDO / ORM object (generic):
-$conn = $context->getDatabaseConnection('main');
+$conn = $db->getConnection();
 
 // Typed, per adapter — cast the wrapper, then use its accessor:
 /** @var Quiote\Database\Adapter\Doctrine\DoctrineDatabase $db */
 $em = $db->getEntityManager();
 ```
 
-Omit the name to use the default connection. Put query logic in a [service](/architecture/container/) with the connection injected, and keep actions thin.
+Omit the name to use the default connection. `$this->databases` is an injected `Quiote\Database\DatabaseManager` — put query logic in a [service](/basics/services-and-models/) that declares it, and keep actions thin.
 
 ## Raw PDO access
 
@@ -655,7 +662,7 @@ Omit the name to use the default connection. Put query logic in a [service](/arc
 `getPdo(): \PDO` is a separate, uniform low-level path for the one thing that's useful across every adapter regardless of which ORM it wraps: a raw PDO handle for hand-written SQL — a custom query, a driver-specific optimization the ORM's query builder can't express, or code shared with something that already speaks PDO. Call it on the `Database` wrapper itself:
 
 ```php
-$pdo  = $context->getDatabaseManager()->getDatabase('main')->getPdo();
+$pdo  = $this->databases->getDatabase('main')->getPdo();
 $stmt = $pdo->prepare('SELECT * FROM orders WHERE status = ?');
 $stmt->execute(['shipped']);
 ```
