@@ -35,6 +35,16 @@ use QuioteMcpAssistant\Mcp\Resources\DocLibrary;
  * query's distinct terms, so multi-term queries prefer docs relevant to the
  * whole query over docs that happen to repeat one common term.
  *
+ * A third correction targets `api/**` -- the reflection-generated one-page-
+ * per-symbol reference synced in alongside the hand-written guides. Its
+ * boilerplate (method signatures, parameter tables, "Inherited methods")
+ * repeats ordinary words like "route" or "request" densely enough to
+ * outscore the guide page actually about that concept, even though
+ * `describe_symbol`/`list_api` already serve exact-symbol lookups better
+ * than full-text search ever could. A flat discount lets a guide doc win
+ * ties on conceptual queries while still surfacing an api/ page when it's
+ * the only real match.
+ *
  * Docs matching no term are dropped; the rest are returned highest-first with
  * a query-centered excerpt for citation.
  */
@@ -49,6 +59,8 @@ final class DocIndex
     private const CAP_DESCRIPTION = 3;
     private const CAP_HEADING = 5;
     private const CAP_BODY = 4;
+
+    private const API_REFERENCE_DISCOUNT = 0.4;
 
     /** Common words that carry little signal on their own; ignored unless a query is made up entirely of them. */
     private const STOPWORDS = [
@@ -70,7 +82,7 @@ final class DocIndex
 
         $limit = max(1, min(20, $limit));
 
-        /** @var array<string, array{title: string, description: string, headings: string, body: string}> $fields */
+        /** @var array<string, array{title: string, description: string, headings: string, body: string, isApiReference: bool}> $fields */
         $fields = [];
         foreach ($this->library->manifest() as $uri => $meta) {
             $body = $this->library->body($uri);
@@ -82,6 +94,7 @@ final class DocIndex
                 'description' => $meta['description'],
                 'headings' => implode("\n", $this->headings($body)),
                 'body' => $body,
+                'isApiReference' => str_starts_with($meta['path'], 'api/'),
             ];
         }
 
@@ -121,6 +134,10 @@ final class DocIndex
             $coverage = $matchedTerms / count($terms);
             $score *= 0.5 + 0.5 * $coverage;
 
+            if ($field['isApiReference']) {
+                $score *= self::API_REFERENCE_DISCOUNT;
+            }
+
             $results[$uri] = [
                 'uri' => $uri,
                 'title' => $field['title'],
@@ -140,7 +157,7 @@ final class DocIndex
      * in more of the corpus.
      *
      * @param list<string> $terms
-     * @param array<string, array{title: string, description: string, headings: string, body: string}> $fields
+     * @param array<string, array{title: string, description: string, headings: string, body: string, isApiReference: bool}> $fields
      * @return array<string, float>
      */
     private function inverseDocumentFrequencies(array $terms, array $fields): array
