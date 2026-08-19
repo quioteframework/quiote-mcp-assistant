@@ -241,6 +241,22 @@ Read-only:
 | `read_config(key?)` | One setting, restricted to an explicit allowlist (never secrets like `mcp.auth_token`). Omit `key` to see the allowlist. |
 | `validate_config(key?)` | Validates the target app's config files — syntax (per-format, with line numbers), semantic (the real config handler's own compilation), and array-shape schema checks — format-agnostically across PHP/YAML/XML. Omit `key` to validate every known config type (`settings`, `factories`, `databases`, `output_types`, `rbac_definitions`, `translation`, `plugins`, `middleware`). |
 
+Diagnosing a production failure (requires `quioteframework/replay` installed and a cassette store
+configured in the target app — see its own `advanced/record-replay` doc): `list_failed_requests`
+finds a candidate id, `describe_cassette`/`cassette_section` reads it, `replay_cassette` confirms
+the repro locally, `emit_replay_test` commits it as a regression test. Every one of them resolves an
+id the same way: the local cache, then the target app's configured store, then (given a
+`key`/`date`/`hour` hint, or none at all if the target app has a `log-analytics` index configured)
+the cassette-index chain — caching a store/index hit locally so a repeat lookup needs no network.
+
+| Tool | Description |
+| --- | --- |
+| `list_failed_requests(since?, limit?)` | Candidate cassette ids for "what broke": every recorded cassette whose response was a 5xx, or whose recorder trigger was `error`, newest first. |
+| `describe_cassette(id, key?, date?, hour?, include_bodies?)` | The redacted analysis payload for one cassette — request/resolved route/session/user/effects/response/exception, bodies and effect rows excerpted by default (pass `include_bodies` for the full content). |
+| `cassette_section(id, section, key?, date?, hour?, include_bodies?)` | One top-level section of a cassette (`meta`, `request`, `resolved`, `session`, `user`, `effects`, `response`, `exception`, `log`) without paying for the whole `describe_cassette` payload. |
+| `replay_cassette(id, key?, date?, hour?, force?)` | Re-runs a cassette against the target app's real pipeline and returns the response diff + drift report. Refuses to run unless the target app has `replay.allow_live=true`, and refuses a non-idempotent recorded method unless `force=true`. |
+| `emit_replay_test(id, key?, date?, hour?, expect_fixed?)` | Writes a committed PHPUnit regression test (plus a copy of the cassette) under the target app's `replay.tests_path`. `expect_fixed` emits an inverted `markTestIncomplete` skeleton instead of asserting the recorded (buggy) response, for committing a test before the fix lands. |
+
 Scaffolding + console (`dry_run` defaults to `true` on every write tool — it returns a diff and
 writes nothing until you pass `dry_run=false`; none of them ever overwrite an existing file):
 

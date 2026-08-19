@@ -8,8 +8,21 @@
         "quioteframework/quiote": "^4.0",
         "quioteframework/mcp": "^4.0",
         "quioteframework/csrf": "^4.0",
+        "quioteframework/replay": "*",
         "mcp/sdk": "^0.7.0"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/markus/Projects/quiote",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "/home/markus/Projects/quiote/packages/replay",
+            "options": { "symlink": true }
+        }
+    ],
     "autoload": {
         "psr-4": {
             "QuioteMcpAssistant\\": "app/"

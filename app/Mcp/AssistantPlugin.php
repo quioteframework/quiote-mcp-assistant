@@ -13,19 +13,24 @@ use QuioteMcpAssistant\Mcp\Conventions\ConventionCards;
 use QuioteMcpAssistant\Mcp\Prompts\ScaffoldPrompts;
 use QuioteMcpAssistant\Mcp\Recipes\RecipeBook;
 use QuioteMcpAssistant\Mcp\Resources\DocsResource;
+use QuioteMcpAssistant\Mcp\Tools\CassetteSectionTool;
 use QuioteMcpAssistant\Mcp\Tools\DescribeActionTool;
+use QuioteMcpAssistant\Mcp\Tools\DescribeCassetteTool;
 use QuioteMcpAssistant\Mcp\Tools\DescribeSymbolTool;
 use QuioteMcpAssistant\Mcp\Tools\DiagnosticsTool;
+use QuioteMcpAssistant\Mcp\Tools\EmitReplayTestTool;
 use QuioteMcpAssistant\Mcp\Tools\GetConventionTool;
 use QuioteMcpAssistant\Mcp\Tools\GetRecipeTool;
 use QuioteMcpAssistant\Mcp\Tools\ListApiTool;
 use QuioteMcpAssistant\Mcp\Tools\ListDbConnectionsTool;
+use QuioteMcpAssistant\Mcp\Tools\ListFailedRequestsTool;
 use QuioteMcpAssistant\Mcp\Tools\ListModulesTool;
 use QuioteMcpAssistant\Mcp\Tools\ListPluginsTool;
 use QuioteMcpAssistant\Mcp\Tools\ListRoutesTool;
 use QuioteMcpAssistant\Mcp\Tools\OverviewTool;
 use QuioteMcpAssistant\Mcp\Tools\ProjectInfoTool;
 use QuioteMcpAssistant\Mcp\Tools\ReadConfigTool;
+use QuioteMcpAssistant\Mcp\Tools\ReplayCassetteTool;
 use QuioteMcpAssistant\Mcp\Tools\RunConsoleTool;
 use QuioteMcpAssistant\Mcp\Tools\ScaffoldActionTool;
 use QuioteMcpAssistant\Mcp\Tools\ScaffoldDbConnectionTool;
@@ -337,9 +342,11 @@ final class AssistantPlugin implements PluginInterface
             method: 'list',
             name: 'list_db_connections',
             description: 'Configured database connections: adapter class and parameter names '
-                . 'only, never parameter values (DSNs/credentials are never disclosed). Call this '
-                . 'instead of reading Config/databases.xml directly, which would expose the '
-                . 'credentials this tool deliberately redacts.',
+                . 'only, never parameter values (DSNs/credentials are never disclosed), plus the '
+                . 'config format that actually won resolution. Resolves databases.{php,yaml,yml,xml} '
+                . 'the way the framework does (.php > .yaml > .xml), so it reports the connections '
+                . 'the app really uses. Call this instead of reading the databases config directly, '
+                . 'which would expose the credentials this tool deliberately redacts.',
             // An empty PHP array for "properties" serializes as a JSON array
             // ([]), which the SDK's opis/json-schema validator rejects
             // ("properties must be an object") -- force object serialization.
@@ -482,7 +489,10 @@ final class AssistantPlugin implements PluginInterface
             name: 'scaffold_db_connection',
             description: 'Create Config/databases.xml with a new connection if it doesn\'t exist '
                 . 'yet, otherwise return a ready-to-paste snippet (never edits an existing file). '
-                . 'dry_run defaults to true.',
+                . 'dry_run defaults to true. Emits XML only; databases.php and databases.yaml are '
+                . 'equally supported (and .php wins resolution over .xml), so for a PHP/YAML app '
+                . 'write the file yourself from the "database" convention card instead of pasting '
+                . 'this snippet.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -520,6 +530,134 @@ final class AssistantPlugin implements PluginInterface
                     ],
                 ],
                 'required' => ['command'],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->registerReplayTools();
+    }
+
+    /**
+     * The "Quiote request X failed in production, analyze it" workflow: `list_failed_requests`
+     * finds a candidate id, `describe_cassette`/`cassette_section` reads it, `replay_cassette`
+     * confirms the repro locally, `emit_replay_test` commits it as a regression test. All four
+     * need `quioteframework/replay` installed and a cassette store configured in the target app --
+     * absent that, {@see \QuioteMcpAssistant\Mcp\Introspection\Capabilities\CassetteResolution}'s
+     * own failure surfaces as the standard `{"error": "..."}` shape, same as any other
+     * misconfigured project-aware tool.
+     */
+    private function registerReplayTools(): void
+    {
+        $this->mcpTool(
+            handlerFqcn: ListFailedRequestsTool::class,
+            method: 'list',
+            name: 'list_failed_requests',
+            description: 'Candidate cassette ids for "what broke": every recorded cassette whose '
+                . 'response was a 5xx, or whose recorder trigger was "error", newest first. The '
+                . 'entry point for diagnosing a production failure -- describe_cassette on '
+                . 'whichever id looks relevant is the next step.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'since' => ['type' => 'string', 'description' => 'Only cassettes recorded at/after this ISO-8601 timestamp.'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of results to return.', 'minimum' => 1],
+                ],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: DescribeCassetteTool::class,
+            method: 'describe',
+            name: 'describe_cassette',
+            description: 'The redacted analysis payload for one recorded request: request/resolved '
+                . 'route/session/user/effects/response/exception, with bodies excerpted to length + '
+                . 'sha256 and effect rows excerpted to a count by default (pass include_bodies for '
+                . 'the full content). Resolves the id from the local cache, then the target app\'s '
+                . 'configured store, then (given a key/date/hour hint, or none at all if a '
+                . 'log-analytics index is configured) the cassette-index chain.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id, e.g. copied from a log line.'],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full request/response bodies and effect rows instead of excerpts (default false).'],
+                ],
+                'required' => ['id'],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: CassetteSectionTool::class,
+            method: 'section',
+            name: 'cassette_section',
+            description: 'One top-level section of a cassette (meta, request, resolved, session, '
+                . 'user, effects, response, exception, log) without paying for the whole '
+                . 'describe_cassette payload -- the same resolution and redaction rules apply.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id.'],
+                    'section' => [
+                        'type' => 'string',
+                        'description' => 'The section to return.',
+                        'enum' => ['meta', 'request', 'resolved', 'session', 'user', 'effects', 'response', 'exception', 'log'],
+                    ],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full body/row content instead of excerpts (default false).'],
+                ],
+                'required' => ['id', 'section'],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: ReplayCassetteTool::class,
+            method: 'replay',
+            name: 'replay_cassette',
+            description: 'Re-runs a recorded cassette against the target app\'s real pipeline and '
+                . 'reports the response diff + drift report -- confirming a production failure '
+                . 'reproduces locally, in isolation. Refuses to run unless the target app has '
+                . 'replay.allow_live=true, and refuses a non-idempotent recorded method (e.g. POST) '
+                . 'unless force=true.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id.'],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'force' => ['type' => 'boolean', 'description' => 'Allow replaying a non-idempotent (e.g. POST) request (default false).'],
+                ],
+                'required' => ['id'],
+                'additionalProperties' => false,
+            ],
+        );
+
+        $this->mcpTool(
+            handlerFqcn: EmitReplayTestTool::class,
+            method: 'emit',
+            name: 'emit_replay_test',
+            description: 'Writes a committed PHPUnit regression test (plus a copy of the cassette '
+                . 'it was built from) under the target app\'s replay.tests_path. Pass expect_fixed '
+                . 'to emit an inverted "markTestIncomplete" skeleton for the intended, fixed '
+                . 'behaviour instead of asserting the recorded (buggy) response -- for committing a '
+                . 'test before the fix lands.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id.'],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'expect_fixed' => ['type' => 'boolean', 'description' => 'Emit the inverted markTestIncomplete skeleton instead of asserting the recorded response (default false).'],
+                ],
+                'required' => ['id'],
                 'additionalProperties' => false,
             ],
         );

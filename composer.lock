@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "02120c0d492c284fc1ed48807e038168",
+    "content-hash": "6b89c0deb860146ceab5fe1df418fd63",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -56,16 +56,16 @@
         },
         {
             "name": "mcp/sdk",
-            "version": "v0.7.0",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modelcontextprotocol/php-sdk.git",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a"
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/a6f415578fa789783d010274d11c922e97659a8a",
-                "reference": "a6f415578fa789783d010274d11c922e97659a8a",
+                "url": "https://api.github.com/repos/modelcontextprotocol/php-sdk/zipball/785fc3b9b7006ecc8a73322c939d96a4a7154345",
+                "reference": "785fc3b9b7006ecc8a73322c939d96a4a7154345",
                 "shasum": ""
             },
             "require": {
@@ -134,9 +134,9 @@
             "description": "Model Context Protocol SDK for Client and Server applications in PHP",
             "support": {
                 "issues": "https://github.com/modelcontextprotocol/php-sdk/issues",
-                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.0"
+                "source": "https://github.com/modelcontextprotocol/php-sdk/tree/v0.7.1"
             },
-            "time": "2026-07-14T22:58:00+00:00"
+            "time": "2026-08-10T20:09:23+00:00"
         },
         {
             "name": "middlewares/negotiation",
@@ -1580,16 +1580,16 @@
         },
         {
             "name": "quioteframework/mcp",
-            "version": "v4.0.0-RC2",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/mcp.git",
-                "reference": "39ff8bb1b7ca601ae6ec0b1ea98eb38d2ef0f5dd"
+                "reference": "469b040e94c6cbc8df662a8c170b63563f385189"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/39ff8bb1b7ca601ae6ec0b1ea98eb38d2ef0f5dd",
-                "reference": "39ff8bb1b7ca601ae6ec0b1ea98eb38d2ef0f5dd",
+                "url": "https://api.github.com/repos/quioteframework/mcp/zipball/469b040e94c6cbc8df662a8c170b63563f385189",
+                "reference": "469b040e94c6cbc8df662a8c170b63563f385189",
                 "shasum": ""
             },
             "require": {
@@ -1632,23 +1632,17 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/mcp/tree/v4.0.0-RC2"
+                "source": "https://github.com/quioteframework/mcp/tree/v4.0.0"
             },
-            "time": "2026-08-05T18:33:50+00:00"
+            "time": "2026-08-09T09:22:17+00:00"
         },
         {
             "name": "quioteframework/quiote",
-            "version": "v4.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "8004fd6ba600c78047fba7077bc87b044b55976a"
-            },
+            "version": "dev-main",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/8004fd6ba600c78047fba7077bc87b044b55976a",
-                "reference": "8004fd6ba600c78047fba7077bc87b044b55976a",
-                "shasum": ""
+                "type": "path",
+                "url": "/home/markus/Projects/quiote",
+                "reference": "b98ded179135af95d7e2be3b82e97710579d2160"
             },
             "require": {
                 "ext-dom": "*",
@@ -1662,6 +1656,7 @@
                 "nyholm/psr7": "^1.8",
                 "nyholm/psr7-server": "^1.0",
                 "php": ">=8.5.0",
+                "psr/clock": "^1.0",
                 "psr/event-dispatcher": "^1.0",
                 "psr/http-client": "^1.0",
                 "psr/http-factory": "^1.1",
@@ -1695,6 +1690,7 @@
                 "quioteframework/db-eloquent": "^4.0",
                 "quioteframework/db-propulsion": "^4.0",
                 "quioteframework/docs": "^4.0",
+                "quioteframework/filesystem": "^4.0",
                 "quioteframework/filesystem-azure": "^4.0",
                 "quioteframework/filesystem-gcs": "^4.0",
                 "quioteframework/filesystem-s3": "^4.0",
@@ -1705,6 +1701,14 @@
                 "quioteframework/queue-redis": "^4.0",
                 "quioteframework/ratelimit": "^4.0",
                 "quioteframework/rector": "^4.0",
+                "quioteframework/replay": "^4.0",
+                "quioteframework/replay-azure": "^4.0",
+                "quioteframework/replay-cycle": "^4.0",
+                "quioteframework/replay-doctrine": "^4.0",
+                "quioteframework/replay-eloquent": "^4.0",
+                "quioteframework/replay-pdo": "^4.0",
+                "quioteframework/replay-propulsion": "^4.0",
+                "quioteframework/replay-storage": "^4.0",
                 "quioteframework/scheduler": "^4.0",
                 "quioteframework/security-headers": "^4.0",
                 "quioteframework/session-azure": "^4.0",
@@ -1712,6 +1716,7 @@
                 "quioteframework/session-pdo": "^4.0",
                 "quioteframework/session-redis": "^4.0",
                 "quioteframework/session-s3": "^4.0",
+                "quioteframework/storage": "^4.0",
                 "quioteframework/telemetry-dashboard": "^4.0",
                 "quioteframework/telemetry-otel": "^4.0",
                 "quioteframework/twig": "^4.0",
@@ -1744,6 +1749,7 @@
                 "quioteframework/db-doctrine": "Enables the 'doctrine' and 'doctrine_dbal' database drivers (Quiote\\Database\\Adapter\\Doctrine\\*)",
                 "quioteframework/db-eloquent": "Enables the 'eloquent' database driver (Quiote\\Database\\Adapter\\Eloquent\\EloquentDatabase)",
                 "quioteframework/db-propulsion": "Enables the 'propulsion' database driver (Quiote\\Database\\Adapter\\Propulsion)",
+                "quioteframework/filesystem": "Filesystem abstraction: FilesystemManager, disk drivers, FilesystemPlugin; pulled in automatically by the filesystem-* and session-* packages that extend its base classes",
                 "quioteframework/filesystem-azure": "Enables the 'azure' filesystem disk (Quiote\\Filesystem\\Azure\\AzureFilesystemPlugin), built on quioteframework/cloud-azure",
                 "quioteframework/filesystem-gcs": "Enables the 'gcs' filesystem disk (Quiote\\Filesystem\\Gcs\\GcsFilesystemPlugin), built on quioteframework/cloud-gcs",
                 "quioteframework/filesystem-s3": "Enables the 's3' filesystem disk (Quiote\\Filesystem\\S3\\S3FilesystemPlugin), built on quioteframework/cloud-s3",
@@ -1753,6 +1759,14 @@
                 "quioteframework/queue-db": "Enables the 'db' queue driver, backed by the app's own database (Quiote\\Queue\\Db\\DbQueueDriver)",
                 "quioteframework/queue-redis": "Enables the 'redis' queue driver (Quiote\\Queue\\Redis\\RedisQueueDriver), built on predis/predis",
                 "quioteframework/ratelimit": "Login throttle / general HTTP rate limiting (Quiote\\Security\\RateLimit\\LoginThrottle, Quiote\\Security\\RateLimit\\RateLimitMiddleware), built on symfony/rate-limiter",
+                "quioteframework/replay": "Record → replay → regression test: an effect ledger and per-subsystem recording/stub seams (Quiote\\Replay\\*)",
+                "quioteframework/replay-azure": "Enables the 'azure-blob' cassette store, keeping cassettes in Azure Blob Storage instead of a pod's ephemeral filesystem (Quiote\\Replay\\Store\\Azure\\*)",
+                "quioteframework/replay-cycle": "Records Cycle queries into the replay effect ledger, via Cycle's own PSR-3 logger seam (Quiote\\Replay\\Adapter\\Cycle\\*)",
+                "quioteframework/replay-doctrine": "Records Doctrine DBAL queries into the replay effect ledger, via a DBAL driver middleware (Quiote\\Replay\\Adapter\\Doctrine\\*)",
+                "quioteframework/replay-eloquent": "Records Eloquent queries into the replay effect ledger, via the QueryExecuted event (Quiote\\Replay\\Adapter\\Eloquent\\*)",
+                "quioteframework/replay-pdo": "Enables the 'pdo' cassette store, keeping cassettes in the app's own database instead of a pod's ephemeral filesystem (Quiote\\Replay\\Store\\Pdo\\*)",
+                "quioteframework/replay-propulsion": "Records Propulsion queries into the replay effect ledger, with bound-parameter/row redaction (Quiote\\Replay\\Adapter\\Propulsion\\*)",
+                "quioteframework/replay-storage": "A ListableCassetteStoreInterface over any Quiote\\Storage\\ListableObjectStoreClientInterface -- Azure Blob, S3 or GCS (Quiote\\Replay\\Store\\Storage\\*); pulled in automatically by replay-azure",
                 "quioteframework/scheduler": "Cron-expression task scheduling, `schedule:run` (Quiote\\Scheduler\\SchedulerPlugin), layered on the queue package",
                 "quioteframework/security-headers": "Security response headers middleware: CSP, X-Frame-Options, HSTS, etc. (Quiote\\Security\\Headers\\SecurityHeadersPlugin)",
                 "quioteframework/session-azure": "Azure Blob or Table Storage session backend (Quiote\\Storage\\Azure\\AzureBlobSessionFactory, AzureTableSessionFactory)",
@@ -1760,6 +1774,7 @@
                 "quioteframework/session-pdo": "PDO-backed session storage (Quiote\\Session\\Pdo\\PdoSessionFactory); core already ships an equivalent, so this is only needed by an application already requiring it",
                 "quioteframework/session-redis": "Redis session backend (Quiote\\Session\\Redis\\RedisSessionFactory), built on predis/predis",
                 "quioteframework/session-s3": "AWS S3 session backend (Quiote\\Storage\\S3\\S3SessionFactory)",
+                "quioteframework/storage": "Framework-agnostic object-store contracts (Quiote\\Storage\\ObjectStoreClientInterface and friends); pulled in automatically by cloud-azure, cloud-s3 and cloud-gcs",
                 "quioteframework/telemetry-dashboard": "Install to enable the `telemetry:dashboard` CLI command",
                 "quioteframework/telemetry-otel": "Install to enable the telemetry.* settings family / OTel SDK exporter (Quiote\\Telemetry\\TelemetryBootstrap)",
                 "quioteframework/twig": "Enables the Twig (.twig) template renderer (Quiote\\Renderer\\Twig\\TwigRenderer)",
@@ -1790,7 +1805,52 @@
                     ]
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Sandbox\\": [
+                        "tests/sandbox/app/"
+                    ],
+                    "Quiote\\Test\\Routing\\": [
+                        "tests/lib/routing/"
+                    ],
+                    "QuioteTestGeneratedTest1\\": [
+                        "tests/GeneratedRoutes/test1/"
+                    ],
+                    "QuioteTestGeneratedTest2\\": [
+                        "tests/GeneratedRoutes/test2/"
+                    ],
+                    "Quiote\\Rector\\Tests\\": [
+                        "packages/rector/tests/"
+                    ],
+                    "Quiote\\Test\\Database\\Entity\\": [
+                        "packages/db-doctrine/tests/Entity/",
+                        "packages/db-cycle/tests/Entity/"
+                    ]
+                },
+                "classmap": [
+                    "tests/lib/"
+                ]
+            },
+            "scripts": {
+                "test": [
+                    "php -d apc.enable_cli=0 vendor/bin/phpunit --no-coverage"
+                ],
+                "test:apcu": [
+                    "php -d apc.enable_cli=1 vendor/bin/phpunit --no-coverage --group apcu"
+                ],
+                "test:e2e": [
+                    "vendor/bin/phpunit --no-coverage tests/e2e --group e2e"
+                ],
+                "test:integration": [
+                    "vendor/bin/phpunit --no-coverage packages/db-eloquent/tests packages/db-doctrine/tests packages/db-cycle/tests packages/queue-redis/tests packages/session-redis/tests packages/ratelimit/tests tests/tests/unit/cache tests/integration/worker --group integration"
+                ],
+                "rector:census": [
+                    "vendor/bin/rector process Quiote packages tests samples --dry-run --no-progress-bar --clear-cache"
+                ],
+                "changelog:package": [
+                    "bin/package-changelog.sh"
+                ]
+            },
             "license": [
                 "LGPL-2.1-or-later"
             ],
@@ -1810,10 +1870,68 @@
                 "mvc"
             ],
             "support": {
-                "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/quiote/tree/v4.0.0"
+                "issues": "https://github.com/quioteframework/quiote/issues"
             },
-            "time": "2026-08-11T09:33:24+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
+        },
+        {
+            "name": "quioteframework/replay",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/markus/Projects/quiote/packages/replay",
+                "reference": "d3598c0c19d2beb9a133e00cce9eacf530b85c3e"
+            },
+            "require": {
+                "php": ">=8.5.0",
+                "quioteframework/quiote": "^4.0"
+            },
+            "suggest": {
+                "quioteframework/replay-cycle": "Records Cycle (cycle/database) queries into the effect ledger, via Cycle's own PSR-3 logger seam.",
+                "quioteframework/replay-doctrine": "Records Doctrine DBAL queries into the effect ledger, via a DBAL driver middleware.",
+                "quioteframework/replay-eloquent": "Records Eloquent (illuminate/database) queries into the effect ledger, via the QueryExecuted event.",
+                "quioteframework/replay-propulsion": "Records Propulsion queries into the effect ledger, via Propulsion's own query observer seam."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
+                "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
+            },
+            "autoload": {
+                "psr-4": {
+                    "Quiote\\Replay\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quiote Contributors",
+                    "homepage": "https://github.com/quioteframework/quiote/graphs/contributors"
+                }
+            ],
+            "description": "Record → replay → regression test: a cassette format/store, a request recorder middleware, cassette:list/cassette:show console commands, and an effect ledger with per-subsystem recording/stub seams (database, HTTP client, cache, queue, env) for Quiote.",
+            "homepage": "https://github.com/quioteframework/replay",
+            "keywords": [
+                "determinism",
+                "quiote",
+                "record",
+                "replay",
+                "testing"
+            ],
+            "support": {
+                "issues": "https://github.com/quioteframework/quiote/issues"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
         },
         {
             "name": "relay/relay",
@@ -3619,16 +3737,16 @@
         },
         {
             "name": "symfony/uid",
-            "version": "v8.1.0",
+            "version": "v8.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/uid.git",
-                "reference": "7393f157a55f7e70a4de0334435c55a5a8fe749a"
+                "reference": "50e98f8bc4c3fcdaf925545a65150fb42cf0caf2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/uid/zipball/7393f157a55f7e70a4de0334435c55a5a8fe749a",
-                "reference": "7393f157a55f7e70a4de0334435c55a5a8fe749a",
+                "url": "https://api.github.com/repos/symfony/uid/zipball/50e98f8bc4c3fcdaf925545a65150fb42cf0caf2",
+                "reference": "50e98f8bc4c3fcdaf925545a65150fb42cf0caf2",
                 "shasum": ""
             },
             "require": {
@@ -3673,7 +3791,7 @@
                 "uuid"
             ],
             "support": {
-                "source": "https://github.com/symfony/uid/tree/v8.1.0"
+                "source": "https://github.com/symfony/uid/tree/v8.1.4"
             },
             "funding": [
                 {
@@ -3693,7 +3811,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-29T05:06:50+00:00"
+            "time": "2026-08-02T11:29:46+00:00"
         },
         {
             "name": "symfony/var-exporter",
@@ -3980,20 +4098,20 @@
     "packages-dev": [
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.4",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a"
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/07d290f0c47959fd5eed98c95ee5602db07e0b6a",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.0"
             },
             "conflict": {
                 "doctrine/collections": "<1.6.8",
@@ -4028,15 +4146,15 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.4"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.14.0"
             },
             "funding": [
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
                 }
             ],
-            "time": "2025-08-01T08:46:24+00:00"
+            "time": "2026-08-11T10:17:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -4395,16 +4513,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "14.2.4",
+            "version": "14.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "048a5c12bdb4580f4767ce2761793a16b170fbe4"
+                "reference": "6ce313bb110384148d1dc7695a99175f59529069"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/048a5c12bdb4580f4767ce2761793a16b170fbe4",
-                "reference": "048a5c12bdb4580f4767ce2761793a16b170fbe4",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/6ce313bb110384148d1dc7695a99175f59529069",
+                "reference": "6ce313bb110384148d1dc7695a99175f59529069",
                 "shasum": ""
             },
             "require": {
@@ -4418,12 +4536,12 @@
                 "sebastian/complexity": "^6.0",
                 "sebastian/environment": "^9.3.2",
                 "sebastian/git-state": "^1.0",
-                "sebastian/lines-of-code": "^5.0.1",
+                "sebastian/lines-of-code": "^5.0.2",
                 "sebastian/version": "^7.0",
                 "theseer/tokenizer": "^2.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.2.2"
+                "phpunit/phpunit": "^13.3.1"
             },
             "suggest": {
                 "ext-pcov": "PHP extension that provides line coverage",
@@ -4432,7 +4550,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "14.2.x-dev"
+                    "dev-main": "14.3.x-dev"
                 }
             },
             "autoload": {
@@ -4461,7 +4579,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.2.4"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/14.3.1"
             },
             "funding": [
                 {
@@ -4481,27 +4599,27 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-30T17:01:07+00:00"
+            "time": "2026-08-16T05:23:47+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
-            "version": "7.0.0",
+            "version": "7.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-file-iterator.git",
-                "reference": "6e5aa1fb0a95b1703d83e721299ee18bb4e2de50"
+                "reference": "3ccaa29123548190af12fee7af078dcd7f3ddfab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/6e5aa1fb0a95b1703d83e721299ee18bb4e2de50",
-                "reference": "6e5aa1fb0a95b1703d83e721299ee18bb4e2de50",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-file-iterator/zipball/3ccaa29123548190af12fee7af078dcd7f3ddfab",
+                "reference": "3ccaa29123548190af12fee7af078dcd7f3ddfab",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.0"
+                "phpunit/phpunit": "^13.3.0"
             },
             "type": "library",
             "extra": {
@@ -4534,7 +4652,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-file-iterator/issues",
                 "security": "https://github.com/sebastianbergmann/php-file-iterator/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-file-iterator/tree/7.0.0"
+                "source": "https://github.com/sebastianbergmann/php-file-iterator/tree/7.0.1"
             },
             "funding": [
                 {
@@ -4554,7 +4672,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-06T04:33:26+00:00"
+            "time": "2026-08-10T06:43:12+00:00"
         },
         {
             "name": "phpunit/php-invoker",
@@ -4778,16 +4896,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "13.2.6",
+            "version": "13.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "5d2afe181339a56348ef9a80fa7eb806b7eae508"
+                "reference": "fc024931d6ad047404e9d86536735923fe63a06b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/5d2afe181339a56348ef9a80fa7eb806b7eae508",
-                "reference": "5d2afe181339a56348ef9a80fa7eb806b7eae508",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/fc024931d6ad047404e9d86536735923fe63a06b",
+                "reference": "fc024931d6ad047404e9d86536735923fe63a06b",
                 "shasum": ""
             },
             "require": {
@@ -4797,26 +4915,26 @@
                 "ext-libxml": "*",
                 "ext-mbstring": "*",
                 "ext-xmlwriter": "*",
-                "myclabs/deep-copy": "^1.13.4",
+                "myclabs/deep-copy": "^1.14.0",
                 "phar-io/manifest": "^2.0.4",
                 "phar-io/version": "^3.2.1",
                 "php": ">=8.4.1",
-                "phpunit/php-code-coverage": "^14.2.3",
-                "phpunit/php-file-iterator": "^7.0.0",
+                "phpunit/php-code-coverage": "^14.3",
+                "phpunit/php-file-iterator": "^7.0.1",
                 "phpunit/php-invoker": "^7.0.0",
                 "phpunit/php-text-template": "^6.0.0",
                 "phpunit/php-timer": "^9.0.0",
-                "sebastian/cli-parser": "^5.0.0",
-                "sebastian/comparator": "^8.3.0",
+                "sebastian/cli-parser": "^5.0.1",
+                "sebastian/comparator": "^8.4",
                 "sebastian/diff": "^9.0",
                 "sebastian/environment": "^9.3.2",
-                "sebastian/exporter": "^8.1.1",
+                "sebastian/exporter": "^8.2.1",
                 "sebastian/file-filter": "^1.0",
                 "sebastian/git-state": "^1.0",
                 "sebastian/global-state": "^9.0.1",
-                "sebastian/object-enumerator": "^8.0.0",
-                "sebastian/recursion-context": "^8.0.0",
-                "sebastian/type": "^7.0.1",
+                "sebastian/object-enumerator": "^8.1.0",
+                "sebastian/recursion-context": "^8.0.1",
+                "sebastian/type": "^7.0.2",
                 "sebastian/version": "^7.0.0",
                 "staabm/side-effects-detector": "^1.0.5"
             },
@@ -4826,7 +4944,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "13.2-dev"
+                    "dev-main": "13.3-dev"
                 }
             },
             "autoload": {
@@ -4858,7 +4976,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.2.6"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.3.1"
             },
             "funding": [
                 {
@@ -4866,20 +4984,20 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-07-28T14:00:09+00:00"
+            "time": "2026-08-13T13:14:23+00:00"
         },
         {
             "name": "quioteframework/phptal",
-            "version": "v4.0.0-RC2",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/phptal.git",
-                "reference": "fde17666f03d8a1b1a2729ae806e30fbc5100557"
+                "reference": "5e6bc382d93339284e101eabeba7a3969cce0aad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/phptal/zipball/fde17666f03d8a1b1a2729ae806e30fbc5100557",
-                "reference": "fde17666f03d8a1b1a2729ae806e30fbc5100557",
+                "url": "https://api.github.com/repos/quioteframework/phptal/zipball/5e6bc382d93339284e101eabeba7a3969cce0aad",
+                "reference": "5e6bc382d93339284e101eabeba7a3969cce0aad",
                 "shasum": ""
             },
             "require": {
@@ -4919,22 +5037,22 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/phptal/tree/v4.0.0-RC2"
+                "source": "https://github.com/quioteframework/phptal/tree/v4.0.0"
             },
-            "time": "2026-08-05T18:33:50+00:00"
+            "time": "2026-08-09T08:25:06+00:00"
         },
         {
             "name": "quioteframework/twig",
-            "version": "v4.0.0-RC2",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/twig.git",
-                "reference": "4c63107b872f1e32c4319a378dc54244f73f111d"
+                "reference": "0d2beeae73fc9c36cd4bf0923935c072ca98681d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/twig/zipball/4c63107b872f1e32c4319a378dc54244f73f111d",
-                "reference": "4c63107b872f1e32c4319a378dc54244f73f111d",
+                "url": "https://api.github.com/repos/quioteframework/twig/zipball/0d2beeae73fc9c36cd4bf0923935c072ca98681d",
+                "reference": "0d2beeae73fc9c36cd4bf0923935c072ca98681d",
                 "shasum": ""
             },
             "require": {
@@ -4974,22 +5092,22 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/twig/tree/v4.0.0-RC2"
+                "source": "https://github.com/quioteframework/twig/tree/v4.0.0"
             },
-            "time": "2026-08-05T18:33:50+00:00"
+            "time": "2026-08-09T08:25:06+00:00"
         },
         {
             "name": "quioteframework/xslt",
-            "version": "v4.0.0-RC2",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/xslt.git",
-                "reference": "3c5c53c0df1d09d5d92fd64ff798f68ab72d8ceb"
+                "reference": "3e1ba645ede545e5e62beb2b21c24a44ed692511"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/xslt/zipball/3c5c53c0df1d09d5d92fd64ff798f68ab72d8ceb",
-                "reference": "3c5c53c0df1d09d5d92fd64ff798f68ab72d8ceb",
+                "url": "https://api.github.com/repos/quioteframework/xslt/zipball/3e1ba645ede545e5e62beb2b21c24a44ed692511",
+                "reference": "3e1ba645ede545e5e62beb2b21c24a44ed692511",
                 "shasum": ""
             },
             "require": {
@@ -5031,9 +5149,9 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/xslt/tree/v4.0.0-RC2"
+                "source": "https://github.com/quioteframework/xslt/tree/v4.0.0"
             },
-            "time": "2026-08-05T18:33:50+00:00"
+            "time": "2026-08-09T08:25:06+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -5106,16 +5224,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "8.3.0",
+            "version": "8.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "c025fc7604afab3f195fab7cdaf72327331af241"
+                "reference": "3b070e608146cba00fd6fd1f0ffba89e5a8897fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/c025fc7604afab3f195fab7cdaf72327331af241",
-                "reference": "c025fc7604afab3f195fab7cdaf72327331af241",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/3b070e608146cba00fd6fd1f0ffba89e5a8897fb",
+                "reference": "3b070e608146cba00fd6fd1f0ffba89e5a8897fb",
                 "shasum": ""
             },
             "require": {
@@ -5123,10 +5241,10 @@
                 "ext-mbstring": "*",
                 "php": ">=8.4",
                 "sebastian/diff": "^9.0",
-                "sebastian/exporter": "^8.1.0"
+                "sebastian/exporter": "^8.2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.2"
+                "phpunit/phpunit": "^13.3"
             },
             "suggest": {
                 "ext-bcmath": "For comparing BcMath\\Number objects"
@@ -5134,7 +5252,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.3-dev"
+                    "dev-main": "8.4-dev"
                 }
             },
             "autoload": {
@@ -5174,7 +5292,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/8.3.0"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/8.4.0"
             },
             "funding": [
                 {
@@ -5194,7 +5312,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-05T03:06:45+00:00"
+            "time": "2026-08-07T07:23:13+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -5423,30 +5541,30 @@
         },
         {
             "name": "sebastian/exporter",
-            "version": "8.1.1",
+            "version": "8.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/exporter.git",
-                "reference": "cfaa77c750dcad6f44c9bac8f62ac486e1c82c26"
+                "reference": "24a3b69bba4a12ab615fca9d34680c5598d9ab7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/cfaa77c750dcad6f44c9bac8f62ac486e1c82c26",
-                "reference": "cfaa77c750dcad6f44c9bac8f62ac486e1c82c26",
+                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/24a3b69bba4a12ab615fca9d34680c5598d9ab7a",
+                "reference": "24a3b69bba4a12ab615fca9d34680c5598d9ab7a",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
                 "php": ">=8.4",
-                "sebastian/recursion-context": "^8.0"
+                "sebastian/recursion-context": "^8.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.2.4"
+                "phpunit/phpunit": "^13.3"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.1-dev"
+                    "dev-main": "8.2-dev"
                 }
             },
             "autoload": {
@@ -5489,7 +5607,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/exporter/issues",
                 "security": "https://github.com/sebastianbergmann/exporter/security/policy",
-                "source": "https://github.com/sebastianbergmann/exporter/tree/8.1.1"
+                "source": "https://github.com/sebastianbergmann/exporter/tree/8.2.1"
             },
             "funding": [
                 {
@@ -5509,7 +5627,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-13T11:35:11+00:00"
+            "time": "2026-08-07T07:22:06+00:00"
         },
         {
             "name": "sebastian/file-filter",
@@ -5795,30 +5913,29 @@
         },
         {
             "name": "sebastian/object-enumerator",
-            "version": "8.0.0",
+            "version": "8.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/object-enumerator.git",
-                "reference": "b39ab125fd9a7434b0ecbc4202eebce11a98cfc5"
+                "reference": "511064ecde82bd747e2ba2fab3dda8d977b59576"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/object-enumerator/zipball/b39ab125fd9a7434b0ecbc4202eebce11a98cfc5",
-                "reference": "b39ab125fd9a7434b0ecbc4202eebce11a98cfc5",
+                "url": "https://api.github.com/repos/sebastianbergmann/object-enumerator/zipball/511064ecde82bd747e2ba2fab3dda8d977b59576",
+                "reference": "511064ecde82bd747e2ba2fab3dda8d977b59576",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.4",
-                "sebastian/object-reflector": "^6.0",
-                "sebastian/recursion-context": "^8.0"
+                "sebastian/recursion-context": "^8.0.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.0"
+                "phpunit/phpunit": "^13.3.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.0-dev"
+                    "dev-main": "8.1-dev"
                 }
             },
             "autoload": {
@@ -5841,7 +5958,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/object-enumerator/issues",
                 "security": "https://github.com/sebastianbergmann/object-enumerator/security/policy",
-                "source": "https://github.com/sebastianbergmann/object-enumerator/tree/8.0.0"
+                "source": "https://github.com/sebastianbergmann/object-enumerator/tree/8.1.0"
             },
             "funding": [
                 {
@@ -5861,27 +5978,27 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-06T04:46:36+00:00"
+            "time": "2026-08-13T07:05:05+00:00"
         },
         {
             "name": "sebastian/object-reflector",
-            "version": "6.0.0",
+            "version": "6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/object-reflector.git",
-                "reference": "3ca042c2c60b0eab094f8a1b6a7093f4d4c72200"
+                "reference": "f71bbcdc4f95456b4622810bec64eb06372e25b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/object-reflector/zipball/3ca042c2c60b0eab094f8a1b6a7093f4d4c72200",
-                "reference": "3ca042c2c60b0eab094f8a1b6a7093f4d4c72200",
+                "url": "https://api.github.com/repos/sebastianbergmann/object-reflector/zipball/f71bbcdc4f95456b4622810bec64eb06372e25b2",
+                "reference": "f71bbcdc4f95456b4622810bec64eb06372e25b2",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.0"
+                "phpunit/phpunit": "^13.3.0"
             },
             "type": "library",
             "extra": {
@@ -5909,7 +6026,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/object-reflector/issues",
                 "security": "https://github.com/sebastianbergmann/object-reflector/security/policy",
-                "source": "https://github.com/sebastianbergmann/object-reflector/tree/6.0.0"
+                "source": "https://github.com/sebastianbergmann/object-reflector/tree/6.1.0"
             },
             "funding": [
                 {
@@ -5929,7 +6046,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-06T04:47:13+00:00"
+            "time": "2026-08-13T06:34:36+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -6009,23 +6126,23 @@
         },
         {
             "name": "sebastian/type",
-            "version": "7.0.1",
+            "version": "7.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "fee0309275847fefd7636167085e379c1dbf6990"
+                "reference": "bd1df467864cb95140414059a535b2d906173fcf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/fee0309275847fefd7636167085e379c1dbf6990",
-                "reference": "fee0309275847fefd7636167085e379c1dbf6990",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/bd1df467864cb95140414059a535b2d906173fcf",
+                "reference": "bd1df467864cb95140414059a535b2d906173fcf",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.1.10"
+                "phpunit/phpunit": "^13.3.0"
             },
             "type": "library",
             "extra": {
@@ -6054,7 +6171,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/type/issues",
                 "security": "https://github.com/sebastianbergmann/type/security/policy",
-                "source": "https://github.com/sebastianbergmann/type/tree/7.0.1"
+                "source": "https://github.com/sebastianbergmann/type/tree/7.0.2"
             },
             "funding": [
                 {
@@ -6074,7 +6191,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-20T06:49:11+00:00"
+            "time": "2026-08-10T08:00:57+00:00"
         },
         {
             "name": "sebastian/version",

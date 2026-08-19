@@ -3,6 +3,9 @@
 !/app/cache/.gitkeep
 /app/log/*
 !/app/log/.gitkeep
+/app/var/*
+!/app/var/.gitkeep
+/app/tests/
 /.build/
 /build/
 /internal/

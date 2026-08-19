@@ -28,4 +28,18 @@ return array (
   'mcp.auth_token' => getenv('QUIOTE_ASSISTANT_MCP_TOKEN') ?: null,
   'mcp.server_name' => 'quiote-assistant',
   'mcp.server_version' => '1.1.0',
+
+  // This app's own cassette store, dogfooded by the cassette-related
+  // introspection capabilities' own integration tests (replay.enabled stays
+  // at its false default -- there is no real user traffic to record here).
+  // Kept out of app/cache/ (the gitignored build-artifact directory) on
+  // purpose: a cassette is recorded application data, not a regenerable
+  // cache entry, even though this app's own cassettes are just test
+  // fixtures. replay.local_path is a genuinely separate directory (not the
+  // same as replay.store.path) so CassetteResolution's "local cache, then
+  // the configured store, then the index chain" order is exercised for
+  // real by the integration tests, the same way a target app with a remote
+  // store would experience it.
+  'replay.store.path' => dirname(__DIR__) . '/var/cassettes',
+  'replay.local_path' => dirname(__DIR__) . '/var/cassette-cache',
 );
