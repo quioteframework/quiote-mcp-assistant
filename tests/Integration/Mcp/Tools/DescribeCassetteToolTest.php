@@ -11,6 +11,7 @@ use Quiote\Replay\Cassette\Cassette;
 use Quiote\Replay\Cassette\CassetteCodec;
 use Quiote\Replay\Cassette\CassetteId;
 use Quiote\Replay\Store\FileCassetteStore;
+use QuioteMcpAssistant\Mcp\Introspection\CassetteIntrospector;
 use QuioteMcpAssistant\Mcp\Introspection\TargetAppIntrospector;
 use QuioteMcpAssistant\Mcp\Tools\DescribeCassetteTool;
 
@@ -58,7 +59,7 @@ final class DescribeCassetteToolTest extends TestCase
     {
         $this->seed('DCT-AAA');
 
-        $tool = new DescribeCassetteTool(new TargetAppIntrospector());
+        $tool = new DescribeCassetteTool(new CassetteIntrospector(new TargetAppIntrospector()));
         $result = $tool->describe('DCT-AAA');
 
         self::assertSame('DCT-AAA', $result['id']);
@@ -68,7 +69,7 @@ final class DescribeCassetteToolTest extends TestCase
     #[Test]
     public function unresolvableIdReturnsTheErrorShape(): void
     {
-        $tool = new DescribeCassetteTool(new TargetAppIntrospector());
+        $tool = new DescribeCassetteTool(new CassetteIntrospector(new TargetAppIntrospector()));
         $result = $tool->describe('does-not-exist-either');
 
         self::assertArrayHasKey('error', $result);

@@ -42,4 +42,13 @@ return array (
   // store would experience it.
   'replay.store.path' => dirname(__DIR__) . '/var/cassettes',
   'replay.local_path' => dirname(__DIR__) . '/var/cassette-cache',
+
+  // Reading a real deployment's cassettes directly, without a --target-app-dir
+  // checkout, is configured at launch rather than here: see
+  // `--cassette-store`/`--azure-*` in bin/quiote-assistant. Those options are
+  // translated into config *before* Quiote::bootstrap(), which is what keeps
+  // them out of the compiled settings cache -- a getenv() call in this file is
+  // evaluated once, when the cache is written, and a stale cache then silently
+  // wins over a changed environment. `core.app_dir` and
+  // `assistant.target_app_dir` are set the same way and for the same reason.
 );

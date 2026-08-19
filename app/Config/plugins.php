@@ -8,8 +8,18 @@
 // probe's cassette capabilities read from (see Config/settings.php's
 // replay.store.path); AssistantPlugin (this app) registers the knowledge
 // resources/tools/prompts and `mcp:docs:sync`.
+//
+// ReplayAzurePlugin must come BEFORE ReplayPlugin. PluginRegistrar::service()
+// is set-if-absent, so whichever plugin registers CassetteStoreInterface first
+// wins -- and ReplayPlugin's own factory only knows how to build the file
+// store, so loading it first would make `replay.store = azure-blob` fail with
+// a confusing "no constructor known" error. Loading the Azure plugin is
+// harmless when replay.store is left at `file`: it only registers an alias, a
+// config family and three index factories, none of which is built unless
+// something asks for them.
 return array(
   array('class' => \Quiote\Mcp\McpPlugin::class, 'enabled' => true),
+  array('class' => \Quiote\Replay\Store\Azure\ReplayAzurePlugin::class, 'enabled' => true),
   array('class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true),
   array('class' => \QuioteMcpAssistant\Mcp\AssistantPlugin::class, 'enabled' => true),
 );

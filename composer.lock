@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b89c0deb860146ceab5fe1df418fd63",
+    "content-hash": "8ad4aac35c7a966941d1e214226b6583",
     "packages": [
         {
             "name": "doctrine/deprecations",
@@ -1525,6 +1525,60 @@
             "time": "2021-10-29T13:26:27+00:00"
         },
         {
+            "name": "quioteframework/cloud-azure",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/markus/Projects/quiote/packages/cloud-azure",
+                "reference": "a2258cd7f6c4984989c04b2b645788baef3c02f3"
+            },
+            "require": {
+                "nyholm/psr7": "^1.8",
+                "php": ">=8.5.0",
+                "psr/http-client": "^1.0",
+                "psr/http-message": "^2.0",
+                "psr/log": "^3.0",
+                "quioteframework/storage": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
+                "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/cloud-azure/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
+            },
+            "autoload": {
+                "psr-4": {
+                    "Quiote\\Storage\\Azure\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quiote Contributors",
+                    "homepage": "https://github.com/quioteframework/quiote/graphs/contributors"
+                }
+            ],
+            "description": "Minimal Azure Blob and Table Storage clients, Shared Key or Azure AD (workload identity / az login) authenticated REST access with no azure-sdk dependency, plus a signed-request method for operations they do not model themselves. Framework-agnostic (built on quioteframework/storage, not the Quiote framework itself) and usable outside a Quiote application; also shared by Quiote's own Azure session and filesystem backends.",
+            "homepage": "https://github.com/quioteframework/cloud-azure",
+            "keywords": [
+                "azure",
+                "blob",
+                "client",
+                "quiote",
+                "table-storage"
+            ],
+            "support": {
+                "issues": "https://github.com/quioteframework/quiote/issues"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
+        },
+        {
             "name": "quioteframework/csrf",
             "version": "v4.0.0",
             "source": {
@@ -1642,7 +1696,7 @@
             "dist": {
                 "type": "path",
                 "url": "/home/markus/Projects/quiote",
-                "reference": "b98ded179135af95d7e2be3b82e97710579d2160"
+                "reference": "3083f57505aa7eaf51ba45d9ef172fdcd01f0183"
             },
             "require": {
                 "ext-dom": "*",
@@ -1924,6 +1978,160 @@
                 "record",
                 "replay",
                 "testing"
+            ],
+            "support": {
+                "issues": "https://github.com/quioteframework/quiote/issues"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
+        },
+        {
+            "name": "quioteframework/replay-azure",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/markus/Projects/quiote/packages/replay-azure",
+                "reference": "f1274a7929e457d19d413455c33638877c19cb6e"
+            },
+            "require": {
+                "php": ">=8.5.0",
+                "quioteframework/cloud-azure": "^4.0",
+                "quioteframework/quiote": "^4.0",
+                "quioteframework/replay": "^4.0",
+                "quioteframework/replay-storage": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
+                "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay-azure/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
+            },
+            "autoload": {
+                "psr-4": {
+                    "Quiote\\Replay\\Store\\Azure\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quiote Contributors",
+                    "homepage": "https://github.com/quioteframework/quiote/graphs/contributors"
+                }
+            ],
+            "description": "Azure Blob Storage cassette store for quioteframework/replay: the production target for an AKS + Azure Blob + Log Analytics deployment.",
+            "homepage": "https://github.com/quioteframework/replay-azure",
+            "keywords": [
+                "azure",
+                "blob",
+                "quiote",
+                "record",
+                "replay"
+            ],
+            "support": {
+                "issues": "https://github.com/quioteframework/quiote/issues"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
+        },
+        {
+            "name": "quioteframework/replay-storage",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/markus/Projects/quiote/packages/replay-storage",
+                "reference": "96758b7dc90cd41b0079189536f6611cd756cc30"
+            },
+            "require": {
+                "php": ">=8.5.0",
+                "quioteframework/quiote": "^4.0",
+                "quioteframework/replay": "^4.0",
+                "quioteframework/storage": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
+                "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay-storage/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
+            },
+            "autoload": {
+                "psr-4": {
+                    "Quiote\\Replay\\Store\\Storage\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quiote Contributors",
+                    "homepage": "https://github.com/quioteframework/quiote/graphs/contributors"
+                }
+            ],
+            "description": "Object-store-backed cassette store for quioteframework/replay, built on the framework-free quioteframework/storage contracts (any ListableObjectStoreClientInterface -- Azure Blob, S3, GCS).",
+            "homepage": "https://github.com/quioteframework/replay-storage",
+            "keywords": [
+                "object-store",
+                "quiote",
+                "record",
+                "replay",
+                "storage"
+            ],
+            "support": {
+                "issues": "https://github.com/quioteframework/quiote/issues"
+            },
+            "transport-options": {
+                "symlink": true,
+                "relative": false
+            }
+        },
+        {
+            "name": "quioteframework/storage",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "/home/markus/Projects/quiote/packages/storage",
+                "reference": "88d23109653f5d048338bbdae088f451f9c4d9bf"
+            },
+            "require": {
+                "php": ">=8.5.0",
+                "psr/http-message": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "4.0.x-dev"
+                },
+                "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/storage/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
+            },
+            "autoload": {
+                "psr-4": {
+                    "Quiote\\Storage\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quiote Contributors",
+                    "homepage": "https://github.com/quioteframework/quiote/graphs/contributors"
+                }
+            ],
+            "description": "Framework-agnostic object-store contracts for Quiote: ObjectStoreClientInterface, ListableObjectStoreClientInterface, ObjectMetadata, ObjectListing, ObjectSummary and ObjectStoreException. No dependency on quioteframework/quiote, so a REST client built against these types (cloud-azure, cloud-s3, cloud-gcs) is usable outside a Quiote application too.",
+            "homepage": "https://github.com/quioteframework/storage",
+            "keywords": [
+                "contracts",
+                "object-store",
+                "quiote",
+                "storage"
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues"

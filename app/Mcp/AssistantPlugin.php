@@ -7,7 +7,11 @@ use Quiote\Config\Config;
 use Quiote\Mcp\McpCatalog;
 use Quiote\Plugin\Attribute\Plugin;
 use Quiote\Plugin\PluginInterface;
+use Psr\Http\Client\ClientInterface;
+use Quiote\DI\Container;
+use Quiote\Http\Client\CurlTransport;
 use Quiote\Plugin\PluginRegistrar;
+use QuioteMcpAssistant\Mcp\Introspection\CassetteIntrospector;
 use QuioteMcpAssistant\Mcp\Console\DocsSyncCommand;
 use QuioteMcpAssistant\Mcp\Conventions\ConventionCards;
 use QuioteMcpAssistant\Mcp\Prompts\ScaffoldPrompts;
@@ -86,10 +90,29 @@ final class AssistantPlugin implements PluginInterface
         // The re-runnable docs bundler.
         $registrar->command(DocsSyncCommand::class);
 
+        $this->registerHttpClient($registrar);
         $this->registerDocResources();
         $this->registerTools();
         $this->registerPrompts();
         $this->registerProjectTools();
+    }
+
+    /**
+     * Binds a PSR-18 client, which every Azure-backed package requires the application to provide
+     * and none of them binds itself (`AzureSessionParameters::httpClient()` and
+     * `ReplayAzurePlugin::requireHttpClient()` both read it from the container and say so).
+     *
+     * Registered set-if-absent through `service()`, so an application embedding this assistant that
+     * already binds its own client keeps it. Only ever constructed if something resolves it, which
+     * for this app means `replay.store = azure-blob` -- so the default `file` store pays nothing.
+     */
+    private function registerHttpClient(PluginRegistrar $registrar): void
+    {
+        $registrar->service(
+            ClientInterface::class,
+            static fn(): ClientInterface => new CurlTransport(),
+            Container::SCOPE_SINGLETON,
+        );
     }
 
     /**
@@ -257,6 +280,10 @@ final class AssistantPlugin implements PluginInterface
      */
     private function registerProjectTools(): void
     {
+        // The read-only cassette tools need a cassette store, not a source tree, so they are
+        // advertised whenever either is available -- see registerCassetteReadTools().
+        $this->registerCassetteReadTools();
+
         if (trim(Config::getNullableString('assistant.target_app_dir') ?? '') === '') {
             return;
         }
@@ -538,83 +565,19 @@ final class AssistantPlugin implements PluginInterface
     }
 
     /**
-     * The "Quiote request X failed in production, analyze it" workflow: `list_failed_requests`
-     * finds a candidate id, `describe_cassette`/`cassette_section` reads it, `replay_cassette`
-     * confirms the repro locally, `emit_replay_test` commits it as a regression test. All four
-     * need `quioteframework/replay` installed and a cassette store configured in the target app --
-     * absent that, {@see \QuioteMcpAssistant\Mcp\Introspection\Capabilities\CassetteResolution}'s
-     * own failure surfaces as the standard `{"error": "..."}` shape, same as any other
-     * misconfigured project-aware tool.
+     * The two halves of the "Quiote request X failed in production, analyze it" workflow that
+     * genuinely need the application, not just its cassettes: `replay_cassette` dispatches the
+     * recorded request through the app's own pipeline, and `emit_replay_test` writes a test file
+     * into the app's own tree. Neither is expressible against a bare blob container, so both stay
+     * behind `--target-app-dir`.
+     *
+     * The reading half -- `list_failed_requests`, `describe_cassette`, `cassette_section` -- is in
+     * {@see registerCassetteReadTools()}, because a store is all any of them needs.
      */
     private function registerReplayTools(): void
     {
-        $this->mcpTool(
-            handlerFqcn: ListFailedRequestsTool::class,
-            method: 'list',
-            name: 'list_failed_requests',
-            description: 'Candidate cassette ids for "what broke": every recorded cassette whose '
-                . 'response was a 5xx, or whose recorder trigger was "error", newest first. The '
-                . 'entry point for diagnosing a production failure -- describe_cassette on '
-                . 'whichever id looks relevant is the next step.',
-            inputSchema: [
-                'type' => 'object',
-                'properties' => [
-                    'since' => ['type' => 'string', 'description' => 'Only cassettes recorded at/after this ISO-8601 timestamp.'],
-                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of results to return.', 'minimum' => 1],
-                ],
-                'additionalProperties' => false,
-            ],
-        );
 
-        $this->mcpTool(
-            handlerFqcn: DescribeCassetteTool::class,
-            method: 'describe',
-            name: 'describe_cassette',
-            description: 'The redacted analysis payload for one recorded request: request/resolved '
-                . 'route/session/user/effects/response/exception, with bodies excerpted to length + '
-                . 'sha256 and effect rows excerpted to a count by default (pass include_bodies for '
-                . 'the full content). Resolves the id from the local cache, then the target app\'s '
-                . 'configured store, then (given a key/date/hour hint, or none at all if a '
-                . 'log-analytics index is configured) the cassette-index chain.',
-            inputSchema: [
-                'type' => 'object',
-                'properties' => [
-                    'id' => ['type' => 'string', 'description' => 'The cassette id, e.g. copied from a log line.'],
-                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
-                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
-                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
-                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full request/response bodies and effect rows instead of excerpts (default false).'],
-                ],
-                'required' => ['id'],
-                'additionalProperties' => false,
-            ],
-        );
 
-        $this->mcpTool(
-            handlerFqcn: CassetteSectionTool::class,
-            method: 'section',
-            name: 'cassette_section',
-            description: 'One top-level section of a cassette (meta, request, resolved, session, '
-                . 'user, effects, response, exception, log) without paying for the whole '
-                . 'describe_cassette payload -- the same resolution and redaction rules apply.',
-            inputSchema: [
-                'type' => 'object',
-                'properties' => [
-                    'id' => ['type' => 'string', 'description' => 'The cassette id.'],
-                    'section' => [
-                        'type' => 'string',
-                        'description' => 'The section to return.',
-                        'enum' => ['meta', 'request', 'resolved', 'session', 'user', 'effects', 'response', 'exception', 'log'],
-                    ],
-                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
-                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
-                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
-                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full body/row content instead of excerpts (default false).'],
-                ],
-                'required' => ['id', 'section'],
-                'additionalProperties' => false,
-            ],
-        );
 
         $this->mcpTool(
             handlerFqcn: ReplayCassetteTool::class,
@@ -658,6 +621,96 @@ final class AssistantPlugin implements PluginInterface
                     'expect_fixed' => ['type' => 'boolean', 'description' => 'Emit the inverted markTestIncomplete skeleton instead of asserting the recorded response (default false).'],
                 ],
                 'required' => ['id'],
+                'additionalProperties' => false,
+            ],
+        );
+    }
+
+
+    /**
+     * The read-only half of the cassette workflow: find a candidate id, read it, read one section
+     * of it.
+     *
+     * Registered whenever *either* a target app or a direct cassette store is configured, unlike
+     * the rest of the project-aware tools. Those describe a source tree -- a route list or a
+     * scaffold only means something relative to somebody's code -- while these three need a
+     * cassette store and nothing else, and a store can perfectly well be a blob container the
+     * agent's own credentials read directly. Requiring a local checkout of the recording
+     * application to read a cassette out of Azure was a constraint of the plumbing, not of the
+     * task.
+     *
+     * {@see \QuioteMcpAssistant\Mcp\Introspection\CassetteIntrospector} picks the route per call
+     * and reports the same `{"error": "..."}` shape either way.
+     */
+    private function registerCassetteReadTools(): void
+    {
+        if (!CassetteIntrospector::hasTargetApp() && Config::getNullableString('assistant.direct_cassette_store') === null) {
+            // Neither route configured: advertise nothing rather than tools that could only fail.
+            return;
+        }
+
+        $this->mcpTool(
+            handlerFqcn: ListFailedRequestsTool::class,
+            method: 'list',
+            name: 'list_failed_requests',
+            description: 'Candidate cassette ids for "what broke": every recorded cassette whose '
+                . 'response was a 5xx, or whose recorder trigger was "error", newest first. The '
+                . 'entry point for diagnosing a production failure -- describe_cassette on '
+                . 'whichever id looks relevant is the next step.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'since' => ['type' => 'string', 'description' => 'Only cassettes recorded at/after this ISO-8601 timestamp.'],
+                    'limit' => ['type' => 'integer', 'description' => 'Maximum number of results to return.', 'minimum' => 1],
+                ],
+                'additionalProperties' => false,
+            ],
+        );
+        $this->mcpTool(
+            handlerFqcn: DescribeCassetteTool::class,
+            method: 'describe',
+            name: 'describe_cassette',
+            description: 'The redacted analysis payload for one recorded request: request/resolved '
+                . 'route/session/user/effects/response/exception, with bodies excerpted to length + '
+                . 'sha256 and effect rows excerpted to a count by default (pass include_bodies for '
+                . 'the full content). Resolves the id from the local cache, then the target app\'s '
+                . 'configured store, then (given a key/date/hour hint, or none at all if a '
+                . 'log-analytics index is configured) the cassette-index chain.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id, e.g. copied from a log line.'],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full request/response bodies and effect rows instead of excerpts (default false).'],
+                ],
+                'required' => ['id'],
+                'additionalProperties' => false,
+            ],
+        );
+        $this->mcpTool(
+            handlerFqcn: CassetteSectionTool::class,
+            method: 'section',
+            name: 'cassette_section',
+            description: 'One top-level section of a cassette (meta, request, resolved, session, '
+                . 'user, effects, response, exception, log) without paying for the whole '
+                . 'describe_cassette payload -- the same resolution and redaction rules apply.',
+            inputSchema: [
+                'type' => 'object',
+                'properties' => [
+                    'id' => ['type' => 'string', 'description' => 'The cassette id.'],
+                    'section' => [
+                        'type' => 'string',
+                        'description' => 'The section to return.',
+                        'enum' => ['meta', 'request', 'resolved', 'session', 'user', 'effects', 'response', 'exception', 'log'],
+                    ],
+                    'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
+                    'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
+                    'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
+                    'include_bodies' => ['type' => 'boolean', 'description' => 'Return full body/row content instead of excerpts (default false).'],
+                ],
+                'required' => ['id', 'section'],
                 'additionalProperties' => false,
             ],
         );

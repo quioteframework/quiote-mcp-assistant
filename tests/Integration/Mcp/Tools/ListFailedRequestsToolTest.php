@@ -11,6 +11,7 @@ use Quiote\Replay\Cassette\Cassette;
 use Quiote\Replay\Cassette\CassetteCodec;
 use Quiote\Replay\Cassette\CassetteId;
 use Quiote\Replay\Store\FileCassetteStore;
+use QuioteMcpAssistant\Mcp\Introspection\CassetteIntrospector;
 use QuioteMcpAssistant\Mcp\Introspection\TargetAppIntrospector;
 use QuioteMcpAssistant\Mcp\Tools\ListFailedRequestsTool;
 
@@ -56,7 +57,7 @@ final class ListFailedRequestsToolTest extends TestCase
     {
         $this->seed('LFRT-FAIL');
 
-        $tool = new ListFailedRequestsTool(new TargetAppIntrospector());
+        $tool = new ListFailedRequestsTool(new CassetteIntrospector(new TargetAppIntrospector()));
         $result = $tool->list();
 
         self::assertIsArray($result['requests']);

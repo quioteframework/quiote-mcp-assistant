@@ -29,6 +29,14 @@ php bin/quiote-assistant
 
 # ...or point it at a Quiote app to unlock the project-aware tools too:
 php bin/quiote-assistant --target-app-dir=/path/to/your/project
+
+# ...or point it straight at a cassette store, to read production cassettes with
+# no checkout of the recording app at all (see "Reading production cassettes"):
+php bin/quiote-assistant \
+  --cassette-store=azure-blob \
+  --azure-account=prodcassettes \
+  --azure-container=quiote-cassettes \
+  --azure-env=production
 ```
 
 The server speaks MCP over stdio by default — it's meant to be launched by a client as a
@@ -280,6 +288,97 @@ Parameterized templates that stitch together the right convention card + recipe:
 | `add-plugin` | Guidance for writing a plugin that contributes via `PluginRegistrar`. |
 | `add-db-connection` | Guidance for declaring a new database connection. |
 | `expose-mcp-tool` | Guidance for exposing an existing `#[Route]` action as an MCP tool. |
+
+## Reading production cassettes
+
+"Read Quiote cassette SUX2020 and analyze the issue" needs one thing: a cassette store the
+server can read. There are two ways to give it one, and they answer different questions.
+
+### Point it at the app that recorded them
+
+```bash
+php bin/quiote-assistant --target-app-dir=/path/to/production/checkout
+```
+
+The cassette tools run `probe.php` against that checkout, which bootstraps it for real — its
+config, its plugins, its store. This is the route to use when the point is to reason about the
+application, and it is the **only** route that can `replay_cassette` (which dispatches the
+recorded request through the app's own pipeline) or `emit_replay_test` (which writes a test file
+into the app's own tree).
+
+The checkout needs, in its own config:
+
+```php
+// Config/plugins.php — order no longer matters, but the package must be installed.
+array('class' => \Quiote\Replay\Store\Azure\ReplayAzurePlugin::class),
+array('class' => \Quiote\Replay\ReplayPlugin::class),
+
+// Config/settings.php
+'replay.store'                   => 'azure-blob',
+'replay.store.azure.account'     => 'prodcassettes',
+'replay.store.azure.container'   => 'quiote-cassettes',
+'replay.store.azure.auth'        => 'cli',   // reuse your own `az login` identity
+```
+
+plus `composer require quioteframework/replay-azure` and a PSR-18 `Psr\Http\Client\ClientInterface`
+bound in its container — no Azure-backed package binds one for you, deliberately.
+
+### Point it straight at the container
+
+```bash
+php bin/quiote-assistant \
+  --cassette-store=azure-blob \
+  --azure-account=prodcassettes \
+  --azure-container=quiote-cassettes \
+  --azure-env=production
+```
+
+No checkout, no target app. `list_failed_requests`, `describe_cassette` and `cassette_section`
+run in-process against that container — reading a cassette needs a store, not a source tree.
+`replay_cassette` and `emit_replay_test` stay unavailable, because neither is expressible
+without the application.
+
+Every option also reads an environment variable (`QUIOTE_ASSISTANT_AZURE_ACCOUNT` and friends),
+which is usually easier to manage from an MCP client config. They are applied before bootstrap
+and marked readonly, so they are never baked into the settings cache and never lose to
+`app/Config/settings.php`.
+
+| Option | Meaning |
+| --- | --- |
+| `--cassette-store` | `azure-blob`, `pdo`, or `file` |
+| `--cassette-path` | Directory, for `--cassette-store=file` |
+| `--azure-account` | Storage account name |
+| `--azure-container` | Blob container |
+| `--azure-prefix` | Key prefix (default `quiote-cassettes`) |
+| `--azure-auth` | `cli` (default), `workload_identity`, `chain`, or `shared_key` |
+| `--azure-env` | Environment segment of the key — the environment that **recorded** the cassettes |
+| `--azure-lookback-hours` | How far back a bare id is probed (default 48) |
+
+### Credentials
+
+`--azure-auth=cli` is the default and shells out to `az account get-access-token`, so the
+identity is whatever you already authenticated with `az login` and no account key is handed to
+the server. You need a role that can read the container — `Storage Blob Data Reader` is enough.
+
+`--azure-env` matters and is easy to miss: a cassette's key is
+`{prefix}/{env}/{yyyy}/{mm}/{dd}/{hh}/{id}.qcast`, and `{env}` is the environment of the
+deployment that *wrote* it. Reading production cassettes from a laptop means passing
+`--azure-env=production` — the server's own environment is not it, and cannot be borrowed
+(`core.environment` is locked readonly once bootstrapped).
+
+### Finding an id
+
+A bare id resolves only if the cassette is inside `--azure-lookback-hours` of now, because the
+store probes backward hour by hour from the deterministic key. For anything older, give the tools
+a hint — every cassette tool takes `date` (`YYYY-MM-DD`), `hour` (`00`–`23`) and `key`:
+
+- **`date`** narrows to one day's partition — one request per hour bucket.
+- **`key`** is the exact object key, which the recorder writes into its own pointer log line
+  (`cassette_key`), so pasting it from your log viewer is the fastest path and needs no scan.
+
+A Log Analytics workspace (`replay.index.log_analytics.workspace_id`) removes the need for a hint
+entirely by looking that pointer line up for you; without one, `describe_cassette` on an old id
+and no hint fails with a message saying exactly that.
 
 ## Running tests
 

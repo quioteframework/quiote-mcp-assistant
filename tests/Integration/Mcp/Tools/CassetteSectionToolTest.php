@@ -11,6 +11,7 @@ use Quiote\Replay\Cassette\Cassette;
 use Quiote\Replay\Cassette\CassetteCodec;
 use Quiote\Replay\Cassette\CassetteId;
 use Quiote\Replay\Store\FileCassetteStore;
+use QuioteMcpAssistant\Mcp\Introspection\CassetteIntrospector;
 use QuioteMcpAssistant\Mcp\Introspection\TargetAppIntrospector;
 use QuioteMcpAssistant\Mcp\Tools\CassetteSectionTool;
 
@@ -58,7 +59,7 @@ final class CassetteSectionToolTest extends TestCase
     {
         $this->seed('CST-AAA');
 
-        $tool = new CassetteSectionTool(new TargetAppIntrospector());
+        $tool = new CassetteSectionTool(new CassetteIntrospector(new TargetAppIntrospector()));
         $result = $tool->section('CST-AAA', 'resolved');
 
         self::assertArrayHasKey('resolved', $result);

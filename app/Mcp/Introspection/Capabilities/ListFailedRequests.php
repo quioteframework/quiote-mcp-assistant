@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Context;
+use Quiote\Replay\Cassette\RecordedAt;
 use Quiote\Replay\Console\CollectsCassetteRows;
 use Quiote\Replay\Store\CassetteStoreInterface;
 use Quiote\Replay\Store\ListableCassetteStoreInterface;
@@ -38,10 +39,30 @@ final class ListFailedRequests
         [$rows, $diagnostics] = self::collectCassetteRows($store);
 
         $rows = array_values(array_filter($rows, static fn(array $row): bool => self::isFailure($row)));
+
+        // Filtered and sorted by instant, not by string. `RecorderMiddleware` formats `recorded_at`
+        // in PHP's default timezone rather than forcing UTC, so two cassettes recorded either side
+        // of an offset difference compare wrong as strings even though both are valid ISO-8601 --
+        // and `RecordedAt` additionally refuses a relative expression, which `recorded_at` should
+        // never carry but is untrusted cassette content either way. `cassette:list` had exactly this
+        // bug; this capability reimplements the filter rather than sharing the command's, so it did
+        // not inherit the fix.
         if ($since !== null && $since !== '') {
-            $rows = array_values(array_filter($rows, static fn(array $row): bool => $row['recorded_at'] !== null && $row['recorded_at'] >= $since));
+            $sinceTimestamp = RecordedAt::timestamp($since);
+            if ($sinceTimestamp === null) {
+                throw new RuntimeException(sprintf('Could not parse "since" value "%s" as an ISO-8601 timestamp.', $since));
+            }
+            $rows = array_values(array_filter(
+                $rows,
+                static fn(array $row): bool => (RecordedAt::timestamp($row['recorded_at']) ?? null) !== null
+                    && RecordedAt::timestamp($row['recorded_at']) >= $sinceTimestamp,
+            ));
         }
-        usort($rows, static fn(array $a, array $b): int => ($b['recorded_at'] ?? '') <=> ($a['recorded_at'] ?? ''));
+        usort(
+            $rows,
+            static fn(array $a, array $b): int => (RecordedAt::timestamp($b['recorded_at']) ?? 0)
+                <=> (RecordedAt::timestamp($a['recorded_at']) ?? 0),
+        );
         if ($limit !== null && $limit > 0) {
             $rows = array_slice($rows, 0, $limit);
         }
