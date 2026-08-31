@@ -12,7 +12,7 @@ Resolves the configured driver (or an explicit alias) from [`FilesystemDriverReg
 
 |  |  |
 |---|---|
-| Source | `Filesystem/FilesystemManager.php` |
+| Source | `FilesystemManager.php` |
 
 ## Constructor
 

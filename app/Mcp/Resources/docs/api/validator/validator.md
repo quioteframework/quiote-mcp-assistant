@@ -49,6 +49,7 @@ Validator allows you to validate input Parameters for use in most validators: 'n
 | [`checkAllArgumentsSet(bool $throwError = true, ?array<int, string> $fullArgumentNames = null): bool`](#checkallargumentsset) | Returns whether all arguments are set in the validation input parameters. |
 | [`execute(WebRequest $parameters): int`](#execute) | Executes the validator. |
 | [`export(mixed $value, ValidationArgument|string|null $argument = null, ?int $result = null): void`](#export) | Exports a value back into the request. |
+| [`exportOwnArgumentByDefault(mixed $value): void`](#exportownargumentbydefault) | Exports a type-coerced value, defaulting the target to this validator's own argument name. |
 | [`getAcceptedParameters(): array<int, string>`](#getacceptedparameters) | Returns the set of parameter names this validator understands. |
 | [`getArgument(string $name = null): ?string`](#getargument) | Returns the name of the argument which should be validated. |
 | [`getArguments(): array<int|string, string>`](#getarguments) | Returns all arguments which should be validated. |
@@ -131,6 +132,18 @@ The result status code to use for the exported value.
 | `$value` | `mixed` | The value to be exported. |
 | `$argument` | [`ValidationArgument`](/api/validator/validation-argument/)`|``string``|``null` | An optional parameter name which should be used for exporting instead of the "export" attribute value, or an ValidationArgument object if the value should be exported to a different source. |
 | `$result` | `?``int` | The result status code to use for the exported value. Defaults to Validator::SUCCESS. |
+
+### exportOwnArgumentByDefault()
+
+`protected function exportOwnArgumentByDefault(mixed $value): void`
+
+Exports a type-coerced value, defaulting the target to this validator's own argument name.
+
+The coerced value to write back.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$value` | `mixed` | The coerced value to write back. |
 
 ### getAcceptedParameters()
 

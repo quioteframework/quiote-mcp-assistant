@@ -1,6 +1,6 @@
 # API reference
 
-> Every class, interface, trait and enum the framework ships — 744 types across 42 namespaces.
+> Every class, interface, trait and enum the framework ships — 881 types across 43 namespaces.
 
 This reference is generated from the source, so it describes the version you have installed rather than a release note. Each namespace below lists its own types; a type's page carries its methods, the types they take and return, and where each one is declared.
 
@@ -13,7 +13,7 @@ For how the pieces fit together, start from the guides instead: [the request lif
 | [`Quiote\Action`](/api/action/) | 3 types |
 | [`Quiote\Asset`](/api/asset/) | 1 type |
 | [`Quiote\Cache`](/api/cache/) | 5 types |
-| [`Quiote\Config`](/api/config/) | 67 types |
+| [`Quiote\Config`](/api/config/) | 68 types |
 | [`Quiote\Console`](/api/console/) | 18 types |
 | [`Quiote\Controller`](/api/controller/) | 4 types |
 | [`Quiote\DI`](/api/di/) | 6 types |
@@ -22,7 +22,7 @@ For how the pieces fit together, start from the guides instead: [the request lif
 | [`Quiote\Event`](/api/event/) | 12 types |
 | [`Quiote\Exception`](/api/exception/) | 27 types |
 | [`Quiote\Execution`](/api/execution/) | 33 types |
-| [`Quiote\Filesystem`](/api/filesystem/) | 16 types |
+| [`Quiote\Filesystem`](/api/filesystem/) | 17 types |
 | [`Quiote\Http`](/api/http/) | 21 types |
 | [`Quiote\I18n`](/api/i18n/) | 1 type |
 | [`Quiote\Introspection`](/api/introspection/) | 2 types |
@@ -35,16 +35,17 @@ For how the pieces fit together, start from the guides instead: [the request lif
 | [`Quiote\Queue`](/api/queue/) | 29 types |
 | [`Quiote\Rector`](/api/rector/) | 11 types |
 | [`Quiote\Renderer`](/api/renderer/) | 7 types |
+| [`Quiote\Replay`](/api/replay/) | 106 types |
 | [`Quiote\Request`](/api/request/) | 25 types |
 | [`Quiote\Response`](/api/response/) | 4 types |
 | [`Quiote\Routing`](/api/routing/) | 27 types |
 | [`Quiote\Runtime`](/api/runtime/) | 35 types |
 | [`Quiote\Scheduler`](/api/scheduler/) | 8 types |
-| [`Quiote\Security`](/api/security/) | 59 types |
+| [`Quiote\Security`](/api/security/) | 60 types |
 | [`Quiote\Service`](/api/service/) | 2 types |
 | [`Quiote\Session`](/api/session/) | 19 types |
-| [`Quiote\Storage`](/api/storage/) | 19 types |
-| [`Quiote\Support`](/api/support/) | 7 types |
+| [`Quiote\Storage`](/api/storage/) | 35 types |
+| [`Quiote\Support`](/api/support/) | 19 types |
 | [`Quiote\Telemetry`](/api/telemetry/) | 36 types |
 | [`Quiote\Testing`](/api/testing/) | 21 types |
 | [`Quiote\Translation`](/api/translation/) | 11 types |

@@ -28,7 +28,7 @@ Toolkit provides basic utility methods.
 | [`isNotArray(mixed $value): bool`](#isnotarray) | Checks if a value is not an array |
 | [`isPathAbsolute(string $path): bool`](#ispathabsolute) | Determine if a filesystem path is absolute. |
 | [`isPortNecessary(string $scheme, int $port): bool`](#isportnecessary) | Determines whether a port declaration is necessary in a URL authority. |
-| [`literalize(mixed $value): mixed`](#literalize) | Literalize a string value. |
+| [`literalize(mixed $value, bool $expandDirectives = true): mixed`](#literalize) | Literalize a string value. |
 | [`mkdir(string $path, int $mode = 509, bool $recursive = false, resource $context = null): bool`](#mkdir) | Creates a directory without sucking at permissions. |
 | [`normalizePath(string $path): string`](#normalizepath) | Normalizes a path to contain only '/' as path delimiter. |
 | [`overloadHelper(array<int, array{parameters: array<int, string>, name: string}> $definitions, array<int, mixed> $parameters): string`](#overloadhelper) | Returns the method from the given definition list matching the given parameters. |
@@ -199,15 +199,20 @@ Returns `bool` — True, if port must be included, otherwise false.
 
 ### literalize()
 
-`public static function literalize(mixed $value): mixed`
+`public static function literalize(mixed $value, bool $expandDirectives = true): mixed`
 
 Literalize a string value.
 
-The value to literalize.
+Whether a leftover string also has its `%directive%`
+                  references expanded. Pass false for text that did not come from a
+                  configuration file -- [`EnvPlaceholder`](/api/config/env-placeholder/) literalizes what
+                  the environment answered, and what a setting means should not depend on
+                  whether a deployment's variable happens to hold a directive reference.
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$value` | `mixed` | The value to literalize. |
+| `$expandDirectives` | `bool` | Whether a leftover string also has its `%directive%` references expanded. Pass false for text that did not come from a configuration file -- [`EnvPlaceholder`](/api/config/env-placeholder/) literalizes what the environment answered, and what a setting means should not depend on whether a deployment's variable happens to hold a directive reference. |
 
 Returns `mixed` — A literalized value.
 

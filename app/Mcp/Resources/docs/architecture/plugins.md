@@ -99,6 +99,18 @@ Clears are keyed by label, so registering the same label twice replaces rather t
 
 Under classic per-request PHP this is harmless but unnecessary; under a [persistent worker](/architecture/deployment/) it's the difference between per-request state and a leak. See [the request lifecycle](/architecture/request-lifecycle/#the-request-boundary).
 
+### Clearing your own static state
+
+Request-scoped state and *process*-scoped state are two different problems. A driver registry a plugin populates at boot must survive every request — but it must **not** survive `PluginManager::reset()`, which is what a test suite calls to get a clean process between cases. Register that clear from `register()`:
+
+```php
+$registrar->stateReset('my-driver-registry', static fn() => MyDriverRegistry::reset());
+```
+
+`PluginManager::addStateReset('label', $closure)` is the same seam from outside a plugin. Callbacks are keyed by label, so two plugins touching the same registry collapse into one call.
+
+This replaced (in 4.2) a hard-coded call in `PluginManager::reset()` that cleared the filesystem driver registry by name — core reaching into one optional subsystem it happened to know about. A plugin that keeps static state and registers no reset leaks it between tests in the same process.
+
 ### How a plugin fits in a request
 
 A plugin does **not** run on every request — it runs **once at boot**, and its job is to wire contributions into seams the framework already uses. After that, requests flow through those contributions as if the framework had shipped them itself:
@@ -145,6 +157,12 @@ return [
 ```
 
 `enabled` (PHP/YAML) / the `enabled="…"` attribute (XML) defaults to `true` when omitted, so a bare `['class' => ...]` entry is enough to turn a plugin on; set it to `false` to declare a class without activating it.
+
+`enabled` can also be an [`%env(NAME)%` placeholder](/architecture/configuration/#env-placeholders-deciding-a-value-at-load-time) instead of a literal bool, so a container image ships one compiled config and a deployment turns the plugin on or off by setting a variable and restarting — no recompile:
+
+```php
+['class' => \App\Plugin\DebugToolbarPlugin::class, 'enabled' => '%env(DEBUG_TOOLBAR, false)%'],
+```
 
 This is a **drop-in**, the same way [declarative `middleware.xml`](/advanced/custom-middleware/#declarative-middlewarexml) is: any module's own `Config/` directory can carry its own `Config/plugins.*` (discovered by `Quiote::bootstrap()` globbing `core.module_dir`, no app wiring required), so a module registers its own plugins just by containing the file. Per-plugin options still live in `settings.*` (contributed by the plugin via `configDefault()`) — `plugins.*` only controls which plugins run and in what order. App-declared plugins are compiled first, so if the same class is declared by both the app and a module, the app's declaration wins.
 

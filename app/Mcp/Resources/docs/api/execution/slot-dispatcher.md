@@ -22,7 +22,7 @@ Dynamic optional action extension points used via method_exists():
 
 ### __construct()
 
-`public function __construct(Controller $controller, ?ActionResolver $actionResolver = null, ?SlotExecutionGuard $executionGuard = null, ?ViewNameResolver $viewNameResolver = null, ?ForwardService $forwardService = null, ?ViewFactory $viewFactory = null): mixed`
+`public function __construct(Controller $controller, ?ActionResolver $actionResolver = null, ?SlotExecutionGuard $executionGuard = null, ?ViewNameResolver $viewNameResolver = null, ?ForwardService $forwardService = null, ?ViewFactory $viewFactory = null, ?ClockInterface $clock = null, ?EnvironmentReaderInterface $environment = null): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -32,6 +32,8 @@ Dynamic optional action extension points used via method_exists():
 | `$viewNameResolver` | `?`[`ViewNameResolver`](/api/execution/view-name-resolver/) |  |
 | `$forwardService` | `?`[`ForwardService`](/api/execution/forward-service/) |  |
 | `$viewFactory` | `?`[`ViewFactory`](/api/execution/view-factory/) |  |
+| `$clock` | `?`[`ClockInterface`](/api/support/clock/clock-interface/) |  |
+| `$environment` | `?`[`EnvironmentReaderInterface`](/api/support/environment/environment-reader-interface/) |  |
 
 Returns `mixed`
 

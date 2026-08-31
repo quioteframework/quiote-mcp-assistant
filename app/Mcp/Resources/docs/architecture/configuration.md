@@ -265,7 +265,88 @@ try {
 
 ## Environments and contexts
 
-`Kernel::create(['env' => 'production'])` sets the environment. Config files can carry environment- and context-specific overlays (`development.*`, `testing.*`, `production.*`), which are merged over the base values when that environment or context is active. This is how one config file serves dev, test, and prod without duplication.
+`Quiote::bootstrap('production')` sets the environment, which lands in `core.environment` as a **read-only** directive before any config file is compiled. Every compiled cache name embeds the environment, so each environment keeps its own compiled copy of every config and they never bleed into one another.
+
+How you make a config *vary* by environment depends on the format, and this is the one place the three formats are not equivalent.
+
+### XML: `environment` on `<ae:configuration>`
+
+An XML config may repeat its `<ae:configuration>` envelope, each carrying an `environment` (and/or `context`) attribute. Only the blocks matching the active environment are kept, and the survivors merge in document order over the unscoped block:
+
+```xml
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                   xmlns="http://quiote.dev/quiote/config/parts/databases/1.1">
+  <ae:configuration>
+    <databases default="main">
+      <database name="main" class="pdo">
+        <ae:parameter name="dsn">pgsql:host=localhost;dbname=app</ae:parameter>
+      </database>
+    </databases>
+  </ae:configuration>
+  <ae:configuration environment="test.*">
+    <databases default="main">
+      <database name="main" class="pdo">
+        <ae:parameter name="dsn">sqlite::memory:</ae:parameter>
+      </database>
+    </databases>
+  </ae:configuration>
+</ae:configurations>
+```
+
+The attribute is a **regular expression**, not a glob: `XmlConfigParser` anchors it as `#^(pattern)$#`, so `test.*` matches `test`, `testing` and `test.local` alike (the `.` is "any character", not a literal separator). Space-separated values are alternatives — `environment="development test"` matches either name exactly.
+
+### PHP and YAML: branch in the file
+
+Array-shaped formats have **no envelope equivalent**. `AbstractArrayFormatDriver` deliberately never applies the environment to the array it returns — a documented scope limit, on the grounds that a PHP file can already express the condition directly and more clearly than an attribute could. Two patterns cover it.
+
+Branch inside the file. `Config` is readable here because `core.environment` is set before configs compile:
+
+```php
+// Config/databases.php
+use Quiote\Config\Config;
+
+$isTest = str_starts_with((string) Config::getNullableString('core.environment'), 'test');
+
+return [
+    'default'   => 'main',
+    'databases' => [
+        'main' => [
+            'class'      => 'pdo',
+            'parameters' => [
+                'dsn' => $isTest ? 'sqlite::memory:' : 'pgsql:host=localhost;dbname=app',
+            ],
+        ],
+    ],
+];
+```
+
+Or name the environment in a path, since `%…%` directives expand inside array configs exactly as they do in XML — `%core.environment%` included:
+
+```php
+// Config/databases.php — one file per environment, selected by directive
+return [
+    'parent'    => '%core.config_dir%/databases.%core.environment%.php',
+    'default'   => 'main',
+];
+```
+
+`parent` and `imports` resolve *through* the format registry and carry the active environment with them, so the per-environment file may itself be PHP, YAML or XML.
+
+:::tip[Which to reach for]
+Branching keeps one file and reads well for a single differing value. A `parent` chain keeps environments in separate files, which is the better shape once production and development diverge in more than a line or two — and it is the only one of the two that lets a PHP config inherit from an XML one.
+:::
+
+## Env placeholders: deciding a value at load time
+
+A `%core.app_dir%`-style directive resolves while the config file is being *compiled* — `Toolkit::expandDirectives()` bakes the result into the cache, so it's the build machine's value that ends up on disk. A `%env(NAME)%` placeholder is different: it stays a placeholder through compilation and is resolved when the compiled artifact is *loaded*, by `Quiote\Config\EnvPlaceholder`. That's the whole point — a cache baked into a container image carries the placeholder rather than whatever environment happened to exist at build time, so a secret never lands in a file on disk, and changing the variable only needs a restart, not a recompile:
+
+```yaml
+filesystem.disks.azure.account_key: '%env(AZURE_ACCOUNT_KEY)%'
+```
+
+`%env(NAME, fallback)%` supplies a fallback used when the variable is unset. A placeholder standing alone as the whole value is literalized the same way a config file's own literals are, so `Config::getBool()`/`getInt()` still work on it — `%env(DEBUG, false)%` reads back as a real bool, not the string `"false"`.
+
+The `HTTP_` namespace is refused outright: under CGI/FastCGI, every request header arrives in the environment as `HTTP_<NAME>`, and resolving one would let a client steer configuration.
 
 ## Caching
 

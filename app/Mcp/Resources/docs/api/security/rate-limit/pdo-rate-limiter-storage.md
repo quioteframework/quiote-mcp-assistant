@@ -19,12 +19,13 @@ Lets rate-limiter / login-throttle state live in the application database (Postg
 
 ### __construct()
 
-`public function __construct(PDO $pdo, string $table = 'quiote_rate_limit'): mixed`
+`public function __construct(PDO $pdo, string $table = 'quiote_rate_limit', ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$pdo` | [`PDO`](https://www.php.net/manual/en/class.pdo.php) |  |
 | `$table` | `string` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

@@ -1,8 +1,10 @@
 # JsonValidator
 
-> JsonValidator verifies if a parameter contains a value that is valid JSON and optionally exports the decoded value.
+> JsonValidator verifies if a parameter contains a value that is valid JSON.
 
-JsonValidator verifies if a parameter contains a value that is valid JSON and optionally exports the decoded value.
+JsonValidator verifies if a parameter contains a value that is valid JSON.
+
+On success the decoded value is written back into the request under the 'export' parameter's name, or under the validator's own argument name when 'export' is not configured -- so a caller reading the argument back afterwards gets the decoded array/object/scalar, never the raw JSON string.
 
 ## Synopsis
 

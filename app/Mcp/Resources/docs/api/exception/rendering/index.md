@@ -8,7 +8,7 @@ Everything under `Quiote\Exception\Rendering`.
 
 | Class | Description |
 |---|---|
-| [`ExceptionRendererRegistry`](/api/exception/rendering/exception-renderer-registry/) | Process-global slot for the "developer" exception renderer (the one [`ErrorHandlingMiddleware`](/api/middleware/error-handling-middleware/) uses when `core.developer_exceptions` is true), mirroring the static, worker-lifetime pattern of [`DatabaseDriverRegistry`](/api/database/database-driver-registry/) / [`MiddlewareCatalog`](/api/middleware/middleware-catalog/). |
+| [`ExceptionRendererRegistry`](/api/exception/rendering/exception-renderer-registry/) | Process-global slot for the "developer" and "safe" exception renderers (the ones [`ErrorHandlingMiddleware`](/api/middleware/error-handling-middleware/) uses when `core.developer_exceptions` is true or false, respectively), mirroring the static, worker-lifetime pattern of [`DatabaseDriverRegistry`](/api/database/database-driver-registry/) / [`MiddlewareCatalog`](/api/middleware/middleware-catalog/). |
 | [`SafeRenderer`](/api/exception/rendering/safe-renderer/) | Default renderer: never leaks exception internals. |
 
 ## Interfaces

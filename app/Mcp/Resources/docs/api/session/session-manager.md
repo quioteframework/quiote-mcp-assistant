@@ -24,12 +24,14 @@ Usage: construct one instance per app (it's stateless aside from config), call s
 
 ### __construct()
 
-`public function __construct(SessionPersistenceInterface $persistence, array<string, mixed> $parameters = []): mixed`
+`public function __construct(SessionPersistenceInterface $persistence, array<string, mixed> $parameters = [], ClockInterface $clock = new SystemClock(…), RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$persistence` | [`SessionPersistenceInterface`](/api/session/session-persistence-interface/) |  |
 | `$parameters` | `array``<``string``, ``mixed``>` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

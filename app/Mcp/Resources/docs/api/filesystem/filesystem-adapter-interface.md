@@ -17,7 +17,7 @@ Enumeration is not here: a store built on single-object calls cannot offer it, s
 |  |  |
 |---|---|
 | Implemented by | [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/), [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) |
-| Source | `Filesystem/FilesystemAdapterInterface.php` |
+| Source | `FilesystemAdapterInterface.php` |
 
 ## Methods
 

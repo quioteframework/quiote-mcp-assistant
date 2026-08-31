@@ -8,7 +8,9 @@ A `'plugins' => [...]` entry written directly into `settings.*` happens to work 
 
 Multiple plugin config files can contribute (the app's own `%core.config_dir%/plugins.xml` plus any module's `%core.module_dir%/<name>/Config/plugins.xml`). Each compiled artifact returns just the classes it declares; [`PluginConfigHandler::apply()`](/api/config/plugin-config-handler/#apply) reads the `plugins` key's current value and appends only classes not already present, so declared order across files is preserved and the first occurrence of a class (across all contributing files, applied in bootstrap order) wins if the same class is listed more than once.
 
-Canonical schema: list<array{class: string, enabled: bool}>, in document order.
+An `enabled` written as a `%env(...)%` placeholder cannot be decided while the file is being compiled, so such an entry survives compilation as a `{class, enabled}` pair and [`EnvPlaceholder`](/api/config/env-placeholder/) turns the placeholder into the bool when the artifact is loaded. That is what lets a deployment turn a plugin on by setting a variable and restarting, with the same compiled cache.
+
+Canonical schema: list<array{class: string, enabled: bool|string}>, in document order, where a string `enabled` is an unresolved placeholder.
 
 ## Synopsis
 
@@ -33,11 +35,11 @@ Canonical schema: list<array{class: string, enabled: bool}>, in document order.
 |---|---|
 | [`apply(mixed $declaration, string $sourceRef): void`](#apply) | Append the declared plugin classes to the `plugins` config key. |
 | [`execute(XmlConfigDomDocument $document): mixed`](#execute) | Execute this configuration handler. |
-| [`executeArray(list<array{class: string, enabled?: bool}> $config, ?string $sourceRef = null): mixed`](#executearray) |  |
+| [`executeArray(list<array{class: string, enabled?: (bool | string)}> $config, ?string $sourceRef = null): list<string|array{class: string, enabled: string}>`](#executearray) | Compiles the canonical array down to what the artifact holds: a class name per enabled plugin, and a `{class, enabled}` pair for one whose `enabled` is a `%env(...)%` placeholder, which nothing can decide yet. |
 | [`merge(list<string> $declared, array<int|string, mixed> $existing): list<mixed>`](#merge) | Merge declared plugin classes into the classes already registered, appending only what is not there yet. |
 | [`schema(): Rule`](#schema) | "enabled" is not required: hand-authored PHP/YAML may omit it, defaulting to true, matching the XSD's own default. |
-| [`toCanonicalArray(XmlConfigDomDocument $document): list<array{class: string, enabled: bool}>`](#tocanonicalarray) |  |
-| [`toCanonicalArrayWithPositions(XmlConfigDomDocument $document, ElementPositionIndex $positions): array{data: list<array{class: string, enabled: bool}>, positions: array<string, array{file: string, line: int}>}`](#tocanonicalarraywithpositions) |  |
+| [`toCanonicalArray(XmlConfigDomDocument $document): list<array{class: string, enabled: (bool | string)}>`](#tocanonicalarray) |  |
+| [`toCanonicalArrayWithPositions(XmlConfigDomDocument $document, ElementPositionIndex $positions): array{data: list<array{class: string, enabled: (bool | string)}>, positions: array<string, array{file: string, line: int}>}`](#tocanonicalarraywithpositions) |  |
 
 ### apply()
 
@@ -45,12 +47,12 @@ Canonical schema: list<array{class: string, enabled: bool}>, in document order.
 
 Append the declared plugin classes to the `plugins` config key.
 
-The enabled classes, in declared order, that [`PluginConfigHandler::executeArray()`](/api/config/plugin-config-handler/#executearray)
-                   compiles.
+The classes and deferred entries, in declared order, that
+                   [`PluginConfigHandler::executeArray()`](/api/config/plugin-config-handler/#executearray) compiles.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `$declaration` | `mixed` | The enabled classes, in declared order, that [`PluginConfigHandler::executeArray()`](/api/config/plugin-config-handler/#executearray) compiles. |
+| `$declaration` | `mixed` | The classes and deferred entries, in declared order, that [`PluginConfigHandler::executeArray()`](/api/config/plugin-config-handler/#executearray) compiles. |
 | `$sourceRef` | `string` |  |
 
 ### execute()
@@ -73,7 +75,9 @@ Returns `mixed` — The declaration to be cached.
 
 ### executeArray()
 
-`public function executeArray(list<array{class: string, enabled?: bool}> $config, ?string $sourceRef = null): mixed`
+`public function executeArray(list<array{class: string, enabled?: (bool | string)}> $config, ?string $sourceRef = null): list<string|array{class: string, enabled: string}>`
+
+Compiles the canonical array down to what the artifact holds: a class name per enabled plugin, and a `{class, enabled}` pair for one whose `enabled` is a `%env(...)%` placeholder, which nothing can decide yet.
 
 Hand-authored
        PHP/YAML sources may omit `enabled` (defaults to true), matching
@@ -81,10 +85,10 @@ Hand-authored
 
 | Parameter | Type | Description |
 |---|---|---|
-| `$config` | `list``<``array{class: string, enabled?: bool}``>` | Hand-authored PHP/YAML sources may omit `enabled` (defaults to true), matching the XSD's own default. |
+| `$config` | `list``<``array{class: string, enabled?: (bool | string)}``>` | Hand-authored PHP/YAML sources may omit `enabled` (defaults to true), matching the XSD's own default. |
 | `$sourceRef` | `?``string` |  |
 
-Returns `mixed`
+Returns `list``<``string``|``array{class: string, enabled: string}``>`
 
 ### merge()
 
@@ -107,28 +111,30 @@ Returns `list``<``mixed``>` — The merged list.
 
 "enabled" is not required: hand-authored PHP/YAML may omit it, defaulting to true, matching the XSD's own default.
 
+It is a bool or the string form of a `%env(...)%` placeholder that is not resolved yet.
+
 Returns [`Rule`](/api/config/schema/rule/)
 
 ### toCanonicalArray()
 
-`public function toCanonicalArray(XmlConfigDomDocument $document): list<array{class: string, enabled: bool}>`
+`public function toCanonicalArray(XmlConfigDomDocument $document): list<array{class: string, enabled: (bool | string)}>`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$document` | [`XmlConfigDomDocument`](/api/config/util/dom/xml-config-dom-document/) |  |
 
-Returns `list``<``array{class: string, enabled: bool}``>`
+Returns `list``<``array{class: string, enabled: (bool | string)}``>`
 
 ### toCanonicalArrayWithPositions()
 
-`public function toCanonicalArrayWithPositions(XmlConfigDomDocument $document, ElementPositionIndex $positions): array{data: list<array{class: string, enabled: bool}>, positions: array<string, array{file: string, line: int}>}`
+`public function toCanonicalArrayWithPositions(XmlConfigDomDocument $document, ElementPositionIndex $positions): array{data: list<array{class: string, enabled: (bool | string)}>, positions: array<string, array{file: string, line: int}>}`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$document` | [`XmlConfigDomDocument`](/api/config/util/dom/xml-config-dom-document/) |  |
 | `$positions` | [`ElementPositionIndex`](/api/config/format/xml/element-position-index/) |  |
 
-Returns `array{data: list<array{class: string, enabled: bool}>, positions: array<string, array{file: string, line: int}>}`
+Returns `array{data: list<array{class: string, enabled: (bool | string)}>, positions: array<string, array{file: string, line: int}>}`
 
 ## Inherited methods
 

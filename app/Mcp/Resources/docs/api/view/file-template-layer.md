@@ -73,21 +73,29 @@ These come from an ancestor and are documented where they are declared.
 | `clearParameters()` | [`ParameterHolder`](/api/util/parameter-holder/) | Clear all parameters associated with this request. |
 | `execute()` | [`TemplateLayer`](/api/view/template-layer/) | A convenience function that renders all slots and then the main template. |
 | `getFlatParameterNames()` | [`ParameterHolder`](/api/util/parameter-holder/) | Retrieve an array of flattened parameter names. |
+| `getModule()` | [`TemplateLayer`](/api/view/template-layer/) | Get the name of the module this layer's template belongs to. |
+| `getName()` | [`TemplateLayer`](/api/view/template-layer/) | Get the name of this layer. |
 | `getParameter()` | [`ParameterHolder`](/api/util/parameter-holder/) | Retrieve a parameter. |
 | `getParameterNames()` | [`ParameterHolder`](/api/util/parameter-holder/) | Retrieve an array of parameter names. |
 | `getParameters()` | [`ParameterHolder`](/api/util/parameter-holder/) | Retrieve an array of parameters. |
 | `getRenderer()` | [`TemplateLayer`](/api/view/template-layer/) | Get the renderer instance used for this layer. |
 | `getSlot()` | [`TemplateLayer`](/api/view/template-layer/) | Get the execution container for a slot. |
 | `getSlots()` | [`TemplateLayer`](/api/view/template-layer/) | Get all slots. |
+| `getTemplate()` | [`TemplateLayer`](/api/view/template-layer/) | Get the name of the template to render. |
 | `hasParameter()` | [`ParameterHolder`](/api/util/parameter-holder/) | Indicates whether or not a parameter exists. |
 | `hasSlot()` | [`TemplateLayer`](/api/view/template-layer/) | Check whether or not a slot has been set. |
 | `hasSlots()` | [`TemplateLayer`](/api/view/template-layer/) | Check if any slots have been set. |
+| `hasTemplate()` | [`TemplateLayer`](/api/view/template-layer/) | Check whether a template has been set. |
 | `removeParameter()` | [`ParameterHolder`](/api/util/parameter-holder/) | Remove a parameter. |
 | `removeSlot()` | [`TemplateLayer`](/api/view/template-layer/) | Remove a slot. |
+| `removeTemplate()` | [`TemplateLayer`](/api/view/template-layer/) | Remove the configured template. |
 | `reset()` | [`TemplateLayer`](/api/view/template-layer/) | Drops the per-request rendering state so the layer can be reused. |
+| `setModule()` | [`TemplateLayer`](/api/view/template-layer/) | Set the name of the module this layer's template belongs to. |
+| `setName()` | [`TemplateLayer`](/api/view/template-layer/) | Set the name of this layer. |
 | `setParameter()` | [`ParameterHolder`](/api/util/parameter-holder/) | Set a parameter. |
 | `setParameterByRef()` | [`ParameterHolder`](/api/util/parameter-holder/) | Set a parameter by reference. |
 | `setParameters()` | [`ParameterHolder`](/api/util/parameter-holder/) | Set an array of parameters. |
 | `setParametersByRef()` | [`ParameterHolder`](/api/util/parameter-holder/) | Set an array of parameters by reference. |
 | `setRenderer()` | [`TemplateLayer`](/api/view/template-layer/) | Set a renderer instance to use for this layer. |
 | `setSlot()` | [`TemplateLayer`](/api/view/template-layer/) | Set a slot that is rendered along with and available inside this layer. |
+| `setTemplate()` | [`TemplateLayer`](/api/view/template-layer/) | Set the name of the template to render. |

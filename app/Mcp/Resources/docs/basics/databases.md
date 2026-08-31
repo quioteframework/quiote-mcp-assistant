@@ -170,7 +170,7 @@ databases:
 ```
 
 - Multiple `<database>` children (or array entries) define multiple named connections.
-- Per-environment overrides use `<ae:configuration environment="…">` blocks (see [Configuration](/architecture/configuration/)).
+- Per-environment overrides differ by format: XML repeats `<ae:configuration environment="…">` blocks, while a PHP or YAML config branches on `core.environment` inside the file (or names it in a `parent` path) — see [Environments and contexts](/architecture/configuration/#environments-and-contexts).
 - In XML, array parameters nest `<ae:parameter>` (named ones become assoc entries, unnamed ones become list entries).
 
 :::note[Cycle needs PHP config]
@@ -735,6 +735,20 @@ composer require quioteframework/db-propulsion  # Propulsion (quioteframework/pr
 ```
 
 You also need the PDO driver for your database compiled into PHP (`pdo_pgsql`, `pdo_mysql`, `pdo_sqlite`, …). The database *servers* aren't needed locally for tests (see below); only the client drivers.
+
+## Recording a request's queries
+
+An optional `replay-*` package per adapter records every query a request runs into that request's [cassette](/advanced/record-replay/), so a recorded production failure can be replayed — and, for Doctrine and Propulsion, replayed *in isolation*, served from the recorded rows rather than the real database:
+
+| Adapter | Package | Records rows | Can replay in isolation |
+|---|---|---|---|
+| Propulsion | [`replay-propulsion`](/plugins/official-packages/#quioteframeworkreplay-propulsion) | Yes | Yes |
+| Doctrine ORM / DBAL | [`replay-doctrine`](/plugins/official-packages/#quioteframeworkreplay-doctrine) | Yes | Yes |
+| Eloquent | [`replay-eloquent`](/plugins/official-packages/#quioteframeworkreplay-eloquent) | No | No |
+| Cycle | [`replay-cycle`](/plugins/official-packages/#quioteframeworkreplay-cycle) | No | No |
+| raw `pdo` | — | — | — |
+
+Each registers its recording subclass under the same driver alias the adapter's own plugin registers, so there is no `databases.*` change — list the replay plugin *after* the adapter's. Why two of the four can only watch is [Eloquent and Cycle can only watch](/advanced/record-replay/#eloquent-and-cycle-can-only-watch).
 
 ## Integration testing
 

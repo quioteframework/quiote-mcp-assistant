@@ -8,7 +8,17 @@ It is deliberately separate from the two other storage-shaped things in the fram
 
 ## Turning it on
 
-The subsystem lives in core but is a **plugin**, so an application has to list it before `FilesystemManager` exists. Like every plugin, it is opt-in:
+The subsystem ships as **[`quioteframework/filesystem`](/plugins/official-packages/#quioteframeworkfilesystem)** and is a **plugin**, so an application installs it and then lists it before `FilesystemManager` exists:
+
+```bash
+composer require quioteframework/filesystem
+```
+
+:::note[It used to be in core]
+Through 4.1 these classes shipped inside `quioteframework/quiote` itself. As of 4.2 they are their own package, with **every namespace unchanged** — so there is nothing to rewrite, but the framework no longer installs them for you. See [Upgrading to 4.2](/getting-started/upgrading-to-4-2/#filesystem-and-object-store-classes-moved-into-their-own-packages), which also covers the two ways a missing install fails.
+:::
+
+Like every plugin, it is opt-in:
 
 #### YAML
 
@@ -77,13 +87,13 @@ Errors are `Quiote\Filesystem\FilesystemStorageException`, with `FileNotFoundSto
 
 ### Listing is a separate contract
 
-Enumerating a directory is **not** on the base interface, because three of the four shipped drivers have no list operation behind them. It lives on `Quiote\Filesystem\ListableFilesystemInterface`, which extends the base contract with one method:
+Enumerating a directory is **not** on the base interface: listing is the one operation a store may genuinely not offer, and declaring it on the base contract would leave a consumer unable to tell from the type whether the call would work. It lives on `Quiote\Filesystem\ListableFilesystemInterface`, which extends the base contract with one method:
 
 | Method | Behaviour |
 |---|---|
 | `listContents(string $path = ''): array` | Relative paths, **non-recursive**. |
 
-`LocalFilesystemAdapter` implements it; the S3, GCS and Azure adapters don't. So `disk()` — which returns the base contract — has no `listContents()` on it, and you ask for the disk a different way:
+All four shipped drivers implement it — `LocalFilesystemAdapter` since 3.2, and the S3, GCS and Azure disks since 4.2, once the cloud clients gained a listing operation. But `disk()` returns the base contract, which has no `listContents()` on it, so you ask for the disk a different way:
 
 ```php
 $files = $fs->listContents('reports/');                          // the default disk
@@ -151,20 +161,35 @@ Three packages add a disk each. All three follow the same shape: install the pac
 
 `read`, `write`, `delete`, `exists`, `size` and `lastModified` all work against both `local` and cloud disks. `exists()` on a cloud disk issues a HEAD, not a GET, so it does not transfer the object body.
 
-:::caution[No cloud disk can list its contents]
-The underlying REST clients implement get, put, delete and head on a single object. There is **no list operation** behind them, so none of the three adapters implements [`ListableFilesystemInterface`](#listing-is-a-separate-contract). Asking for one as a listable disk fails at resolution, naming the alias and the driver class, rather than throwing from inside a `listContents()` call it declared but could not honour.
-
-If you need a listing in production, keep it yourself, in the database alongside whatever record owns the file. If you genuinely need to list from the bucket, see [listing from the bucket](#listing-from-the-bucket) below.
-:::
+`listContents()` works on all three as of 4.2 — see [listing a cloud disk](#listing-a-cloud-disk) for what "a directory" means over a flat key space.
 
 `size()` and `lastModified()` read `Content-Length` and `Last-Modified` off the HEAD response. Both headers are nullable in the metadata value object, because a provider is not contractually obliged to return them — when one is missing, the adapter throws rather than inventing a zero or an epoch timestamp. In practice all three providers send both for a normal object.
 
-### Listing from the bucket
+### Listing a cloud disk
 
-`S3Client::request()`, `GcsClient::request()` and `AzureBlobClient::request()` sign an arbitrary request and hand back the raw PSR-7 response, so you can implement `ListObjectsV2` or `List Blobs` — pagination included — without reimplementing SigV4, HMAC or Shared-Key signing yourself:
+The stores underneath are flat key spaces, but `listContents()` presents them the way a filesystem does: it lists with a `/` delimiter one level below the path you asked for, so a deeper key never surfaces as if it were a direct child, and a prefix that groups into a "directory" comes back as a bare relative path — exactly like a subdirectory from the local disk. The store's own pagination is folded away, so you get one full, sorted list rather than driving continuation tokens yourself.
 
 ```php
-$response = $s3Client->request('GET', '', ['list-type' => '2', 'prefix' => 'reports/']);
+$fs->listableDisk('s3')->listContents('reports/2026/');
+```
+
+Underneath, all three [`cloud-*` clients](/plugins/official-packages/#cloud-transport-packages) implement `Quiote\Storage\ListableObjectStoreClientInterface`, which normalizes what the three providers each shape differently on the wire — S3's opaque continuation token, GCS's and Azure's marker — into one `ObjectListing` carrying `objects`, `commonPrefixes` and a `nextContinuationToken` you hand back verbatim:
+
+```php
+$page = $s3Client->listObjects('reports/', '/', null, 1000);
+foreach ($page->objects as $object) {
+    // $object->key, ->size, ->lastModified, ->etag
+}
+```
+
+Prefer keeping your own index in the database alongside whatever record owns the file when you need to *query* files. A bucket listing is a listing: it has no ordering you chose and no filtering beyond a prefix.
+
+### Reaching past the contract
+
+`S3Client::request()`, `GcsClient::request()` and `AzureBlobClient::request()` sign an arbitrary request and hand back the raw PSR-7 response, so any provider feature the typed methods don't cover is reachable without reimplementing SigV4, HMAC or Shared-Key signing:
+
+```php
+$response = $s3Client->request('GET', '', ['list-type' => '2', 'prefix' => 'reports/', 'max-keys' => '5']);
 $xml = simplexml_load_string((string) $response->getBody());
 ```
 
@@ -177,15 +202,19 @@ All three clients answer `head()` with the same value object, `Quiote\Storage\Ob
 
 There is one such class rather than one per provider, and the three clients share `Quiote\Storage\ObjectStoreClientInterface`, so code that reads or writes objects can be written once against the contract instead of three times. Each provider's exception (`S3StorageException`, `GcsStorageException`, `AzureStorageException`) extends `Quiote\Storage\ObjectStoreException`, so `catch` can be as narrow or as broad as you need.
 
+Both contracts and both value objects live in **[`quioteframework/storage`](/plugins/official-packages/#quioteframeworkstorage)**, which depends on nothing at all — not even the framework — so a client, a store or an adapter can be written against them from outside a Quiote application.
+
 :::note[Upgrading]
-The per-provider metadata classes — `Quiote\Storage\S3\ObjectMetadata`, `Quiote\Storage\Gcs\ObjectMetadata` and `Quiote\Storage\Azure\BlobMetadata` — are gone. They were byte-identical apart from the namespace, so rewriting the `use` statement to `Quiote\Storage\ObjectMetadata` is the whole migration. The six provider adapters keep their names, namespaces and constructor signatures.
+The per-provider metadata classes — `Quiote\Storage\S3\ObjectMetadata`, `Quiote\Storage\Gcs\ObjectMetadata` and `Quiote\Storage\Azure\BlobMetadata` — were removed in 3.2. They were byte-identical apart from the namespace, so rewriting the `use` statement to `Quiote\Storage\ObjectMetadata` is the whole migration. The six provider adapters keep their names, namespaces and constructor signatures.
+
+In 4.2 the surviving classes moved from the framework into `quioteframework/storage`, again with no namespace change — see [Upgrading to 4.2](/getting-started/upgrading-to-4-2/).
 :::
 
 ### Bring your own PSR-18 client
 
 None of the three packages pulls a vendor cloud SDK. Each is a small signed REST client (from the matching [`cloud-*` package](/plugins/official-packages/#cloud-transport-packages)) driven by whatever PSR-18 implementation you already use, resolved from the container by the `Psr\Http\Client\ClientInterface` id.
 
-Bind one before enabling the disk. Without it the plugin throws at boot with a message naming exactly what is missing — the same contract the [`session-*` packages](/basics/sessions/#cloud-object-storage-backends) use, so an app using both binds one client for both.
+Bind one before enabling the disk. Without it the plugin throws at boot with a message naming exactly what is missing — the same contract the [`session-*` packages](/basics/sessions/#cloud-object-storage-backends) use, so an app using both binds one client for both. See [Bring your own PSR-18 client](/basics/psr-18-client/) for a plugin that does the binding.
 
 ### S3
 
@@ -225,13 +254,25 @@ This uses GCS's S3-compatible HMAC interoperability API, so the credentials are 
 ```yaml
 filesystem.default_disk: azure
 filesystem.disks.azure.account_name: '%env(AZURE_ACCOUNT_NAME)%'
+filesystem.disks.azure.auth: shared_key
 filesystem.disks.azure.account_key: '%env(AZURE_ACCOUNT_KEY)%'
 filesystem.disks.azure.container: my-app-files
 filesystem.disks.azure.key_prefix: ''
 filesystem.disks.azure.endpoint: ''   # for Azurite or a custom endpoint
 ```
 
-Shared-Key authentication against a fixed container. Azure has no bucket-equivalent bound to the client itself, which is why `container` is a disk setting rather than part of the client configuration.
+Azure has no bucket-equivalent bound to the client itself, which is why `container` is a disk setting rather than part of the client configuration.
+
+`auth` (added in 4.2) chooses how requests are authorized, and only `shared_key` ever reads a storage account key:
+
+| `auth` | Credential |
+|---|---|
+| `shared_key` (default) | The account key, signed with Azure's Shared Key scheme. |
+| `workload_identity` | An AAD token from the AKS workload-identity webhook's own environment variables — no key in config at all. |
+| `cli` | An AAD token from an existing `az login` session, for local development. |
+| `chain` | Workload identity, falling back to the CLI. |
+
+The same four values drive [`quioteframework/session-azure`](/basics/sessions/#cloud-object-storage-backends) and `replay-azure`, through one shared `AzureCredentialFactory`.
 
 :::caution[One instance per alias]
 There is no multi-instance disk config — you cannot configure two differently-parameterised S3 buckets under the `s3` alias. If you need a second bucket, register a second alias pointing at your own adapter class (see below).
@@ -248,6 +289,7 @@ There is no multi-instance disk config — you cannot configure two differently-
 | `filesystem.disks.gcs.bucket` / `.access_key` / `.secret_key` / `.key_prefix` | `''` | — |
 | `filesystem.disks.gcs.endpoint` | `https://storage.googleapis.com` | — |
 | `filesystem.disks.azure.account_name` / `.account_key` / `.container` / `.endpoint` / `.key_prefix` | `''` | — |
+| `filesystem.disks.azure.auth` | `shared_key` | `shared_key`, `workload_identity`, `cli` or `chain`. |
 
 ## Adding your own disk
 

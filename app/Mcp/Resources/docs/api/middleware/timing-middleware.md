@@ -17,11 +17,12 @@ Records timing spans for downstream middleware execution.
 
 ### __construct()
 
-`public function __construct(bool $emitHeader = false): mixed`
+`public function __construct(bool $emitHeader = false, ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$emitHeader` | `bool` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

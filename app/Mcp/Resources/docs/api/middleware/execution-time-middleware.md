@@ -17,11 +17,12 @@ Basic execution timing middleware replacing ExecutionTimeFilter.
 
 ### __construct()
 
-`public function __construct(bool $appendHtmlComment = true): mixed`
+`public function __construct(bool $appendHtmlComment = true, ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$appendHtmlComment` | `bool` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

@@ -24,12 +24,13 @@ A cache that cannot be read or written is a miss, never an error: the page is st
 
 ### __construct()
 
-`public function __construct(CategoryLogger $logger, string $slotKey): mixed`
+`public function __construct(CategoryLogger $logger, string $slotKey, RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$logger` | [`CategoryLogger`](/api/logging/category-logger/) |  |
 | `$slotKey` | `string` |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

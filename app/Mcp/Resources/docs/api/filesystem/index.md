@@ -1,6 +1,6 @@
 # Filesystem
 
-> The Quiote\\Filesystem namespace — 16 documented types.
+> The Quiote\\Filesystem namespace — 17 documented types.
 
 Everything under `Quiote\Filesystem`.
 
@@ -14,6 +14,7 @@ Everything under `Quiote\Filesystem`.
 | [`FilesystemManager`](/api/filesystem/filesystem-manager/) | App-facing entry point: `$container->get(FilesystemManager::class)->write('reports/x.csv', $csv)`. |
 | [`FilesystemPlugin`](/api/filesystem/filesystem-plugin/) | Registers the filesystem subsystem: `filesystem.*` setting defaults (`local` disk rooted at `storage/app`, out of the box) and the [`FilesystemManager`](/api/filesystem/filesystem-manager/) service app code depends on. |
 | [`FilesystemStorageException`](/api/filesystem/filesystem-storage-exception/) | Thrown when a [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) operation fails. |
+| [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/) | A [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) over any [`ListableObjectStoreClientInterface`](/api/storage/listable-object-store-client-interface/), everything but listing inherited unchanged from [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/). |
 | [`LocalFilesystemAdapter`](/api/filesystem/local-filesystem-adapter/) | Zero-dependency local-disk [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) — the default driver. |
 | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | A [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) over any [`ObjectStoreClientInterface`](/api/storage/object-store-client-interface/). |
 

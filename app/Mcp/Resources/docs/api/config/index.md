@@ -1,6 +1,6 @@
 # Config
 
-> The Quiote\\Config namespace — 67 documented types.
+> The Quiote\\Config namespace — 68 documented types.
 
 Everything under `Quiote\Config`.
 
@@ -22,6 +22,7 @@ Everything under `Quiote\Config`.
 | [`ConfigRepository`](/api/config/config-repository/) | An instance-backed store of configuration directives, with typed accessors that fail loudly when a directive does not hold the shape the caller asked for. |
 | [`ConfigValueHolder`](/api/config/config-value-holder/) | ConfigValueHolder is the storage class for the XmlConfigHandler |
 | [`DatabaseConfigHandler`](/api/config/database-config-handler/) | DatabaseConfigHandler allows you to setup database connections in a configuration file that will be created for you automatically upon first request. |
+| [`EnvPlaceholder`](/api/config/env-placeholder/) | The `%env(NAME)%` / `%env(NAME, fallback)%` placeholder: a configuration value that comes from the process environment. |
 | [`FactoryConfigHandler`](/api/config/factory-config-handler/) | FactoryConfigHandler allows you to specify which factory implementation the system will use. |
 | [`MiddlewareConfigHandler`](/api/config/middleware-config-handler/) | MiddlewareConfigHandler reads a `middleware.{xml,php,yaml,yml}` file -- a flat list of `<use>` entries that register app/plugin middleware and/or override the placement or enabled state of any middleware (framework or app) known to `#[Quiote\Middleware\Attribute\Middleware]` scanning. |
 | [`ModuleConfigHandler`](/api/config/module-config-handler/) | ModuleConfigHandler reads module configuration files to determine the status of a module. |

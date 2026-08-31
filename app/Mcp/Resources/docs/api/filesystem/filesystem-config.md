@@ -14,7 +14,7 @@ v1 supports one instance per driver alias — there is no multi-instance config 
 
 |  |  |
 |---|---|
-| Source | `Filesystem/FilesystemConfig.php` |
+| Source | `FilesystemConfig.php` |
 
 ## Properties
 

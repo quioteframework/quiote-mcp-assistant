@@ -18,12 +18,13 @@ Security middleware: evaluates action security requirements and forwards unauthe
 
 ### __construct()
 
-`public function __construct(Controller $controller, ?SecurityService $securityService = null): mixed`
+`public function __construct(Controller $controller, ?SecurityService $securityService = null, RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$controller` | [`Controller`](/api/controller/controller/) |  |
 | `$securityService` | `?`[`SecurityService`](/api/execution/security-service/) |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

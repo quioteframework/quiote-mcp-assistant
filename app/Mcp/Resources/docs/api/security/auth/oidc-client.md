@@ -19,9 +19,9 @@ PKCE (S256) is hardcoded, not an app-configurable option, since OAuth 2.1 mandat
 
 ### __construct()
 
-`public function __construct(string $clientId, string $clientSecret, string $redirectUri, string $authorizationEndpoint, string $tokenEndpoint, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null): mixed`
+`public function __construct(string $clientId, string $clientSecret, string $redirectUri, string $authorizationEndpoint, string $tokenEndpoint, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null, RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
-A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle client.
+The source of entropy for the OIDC nonce.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -32,6 +32,7 @@ A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle clie
 | `$tokenEndpoint` | `string` | The authorization server's `/token` endpoint. |
 | `$scopes` | `array``<``int``, ``string``>` | The scopes to request. |
 | `$httpClient` | `?``ClientInterface` | A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle client. |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) | The source of entropy for the OIDC nonce. |
 
 Returns `mixed`
 
@@ -41,7 +42,7 @@ Returns `mixed`
 |---|---|
 | [`buildAuthorizationRequest(): OidcAuthorizationRequest`](#buildauthorizationrequest) | Generates state/PKCE-verifier/nonce and builds the authorization redirect URL. |
 | [`exchangeCode(string $code, string $pkceVerifier): AccessTokenInterface`](#exchangecode) | Exchanges an authorization code for tokens, using the PKCE verifier persisted from the matching [`OidcClient::buildAuthorizationRequest()`](/api/security/auth/oidc-client/#buildauthorizationrequest) call. |
-| [`fromDiscovery(OidcDiscoveryDocument $document, string $clientId, string $clientSecret, string $redirectUri, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null): self`](#fromdiscovery) | Builds a client from a provider's discovery document (see [`OidcDiscoveryClient`](/api/security/auth/oidc-discovery-client/)) instead of hand-copied endpoint URLs. |
+| [`fromDiscovery(OidcDiscoveryDocument $document, string $clientId, string $clientSecret, string $redirectUri, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null, RandomnessInterface $randomness = new SystemRandomness(…)): self`](#fromdiscovery) | Builds a client from a provider's discovery document (see [`OidcDiscoveryClient`](/api/security/auth/oidc-discovery-client/)) instead of hand-copied endpoint URLs. |
 
 ### buildAuthorizationRequest()
 
@@ -74,11 +75,11 @@ Returns `AccessTokenInterface` — The token response, including the ID token (s
 
 ### fromDiscovery()
 
-`public static function fromDiscovery(OidcDiscoveryDocument $document, string $clientId, string $clientSecret, string $redirectUri, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null): self`
+`public static function fromDiscovery(OidcDiscoveryDocument $document, string $clientId, string $clientSecret, string $redirectUri, array<int, string> $scopes = ['openid'], ?ClientInterface $httpClient = null, RandomnessInterface $randomness = new SystemRandomness(…)): self`
 
 Builds a client from a provider's discovery document (see [`OidcDiscoveryClient`](/api/security/auth/oidc-discovery-client/)) instead of hand-copied endpoint URLs.
 
-A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle client.
+The source of entropy for the OIDC nonce.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -88,6 +89,7 @@ A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle clie
 | `$redirectUri` | `string` | This app's callback URL, registered with the authorization server. |
 | `$scopes` | `array``<``int``, ``string``>` | The scopes to request. |
 | `$httpClient` | `?``ClientInterface` | A Guzzle HTTP client override (e.g. for testing); defaults to a real Guzzle client. |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) | The source of entropy for the OIDC nonce. |
 
 Returns `self` — A client wired to the discovered authorization and token endpoints.
 

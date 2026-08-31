@@ -21,7 +21,7 @@ Everything under `Quiote\Validator`.
 | [`InarrayValidator`](/api/validator/inarray-validator/) | InArrayValidator verifies whether an input is one of a set of values Parameters: 'values' list of values that form the array 'sep' separator of values in the list 'case' verifies case sensitive if true 'strict' whether or not to do strict type comparisons with in_array() |
 | [`IsNotEmptyValidator`](/api/validator/is-not-empty-validator/) | IsNotEmptyValidator verifies a parameter is not empty The content of the input value is not verified in any manner, it is only checked if the input value exists and is not empty. |
 | [`IssetValidator`](/api/validator/isset-validator/) | IssetValidator verifies a parameter is set The content of the input value is not verified in any manner, it is only checked if the input value exists. |
-| [`JsonValidator`](/api/validator/json-validator/) | JsonValidator verifies if a parameter contains a value that is valid JSON and optionally exports the decoded value. |
+| [`JsonValidator`](/api/validator/json-validator/) | JsonValidator verifies if a parameter contains a value that is valid JSON. |
 | [`NotoperatorValidator`](/api/validator/notoperator-validator/) | NOTOperatorValidator succeeds if the sub-validator failed Parameters: 'skip_errors' do not submit errors of child validators to validator manager |
 | [`NumberValidator`](/api/validator/number-validator/) | NumberValidator verifies that a parameter is a number and allows you to apply size constraints. |
 | [`OperatorValidator`](/api/validator/operator-validator/) | OperatorValidator Operators group a couple if validators... |

@@ -55,6 +55,7 @@ Returns `mixed`
 | [`modelExists(string $moduleName, string $modelName): bool`](#modelexists) | Indicates whether or not a module has a specific model. |
 | [`moduleExists(string $moduleName): bool`](#moduleexists) | Indicates whether or not a module exists. |
 | [`reset(): void`](#reset) | Reset the controller state for FrankenPHP worker mode. |
+| [`resolveActionClass(string $moduleName, string $actionName): class-string`](#resolveactionclass) | Resolve an Action's class name without constructing it. |
 | [`shutdown(): void`](#shutdown) | Execute the shutdown procedure for this controller. |
 | [`startup(): void`](#startup) | Do any necessary startup work after initialization. |
 | [`viewExists(string $moduleName, string $viewName): bool`](#viewexists) | Indicates whether or not a module has a specific view. |
@@ -255,6 +256,25 @@ Returns `bool` — true, if the module exists, otherwise false.
 Reset the controller state for FrankenPHP worker mode.
 
 This clears request-specific state that could leak between requests. Called automatically by FrankenPHP between requests when using worker mode.
+
+### resolveActionClass()
+
+`public function resolveActionClass(string $moduleName, string $actionName): class-string`
+
+Resolve an Action's class name without constructing it.
+
+An action name.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$moduleName` | `string` | A module name. |
+| `$actionName` | `string` | An action name. |
+
+Returns `class-string` — A fully qualified Action class name that exists.
+
+| Throws | When |
+|---|---|
+| `ClassNotFoundException` | if neither naming convention resolves to a loadable class. |
 
 ### shutdown()
 

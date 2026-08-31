@@ -14,7 +14,7 @@ Only `local` ships in core. Cloud backends register their own alias from their o
 
 |  |  |
 |---|---|
-| Source | `Filesystem/FilesystemDriverRegistry.php` |
+| Source | `FilesystemDriverRegistry.php` |
 
 ## Methods
 

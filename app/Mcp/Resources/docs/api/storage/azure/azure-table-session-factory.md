@@ -6,6 +6,8 @@
 
 ```yaml session: class: Quiote\Storage\Azure\AzureTableSessionFactory params: account_name: '%env(AZURE_STORAGE_ACCOUNT)%' account_key: '%env(AZURE_STORAGE_KEY)%' table: sessions ```
 
+The `%env(NAME)%` credentials are read from the process environment when the compiled configuration is loaded, not when it is compiled, so no key is written into the config cache -- see [`EnvPlaceholder`](/api/config/env-placeholder/).
+
 Cheaper than [`AzureBlobSessionFactory`](/api/storage/azure/azure-blob-session-factory/) for small key/value-shaped payloads. Bring your own PSR-18 client, bound in the container.
 
 ## Synopsis

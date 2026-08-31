@@ -21,12 +21,14 @@ Ready jobs live in a Redis LIST (`{prefix}:ready`); `reserve()` atomically moves
 
 ### __construct()
 
-`public function __construct(ClientInterface $redis, string $prefix = 'quiote_queue'): mixed`
+`public function __construct(ClientInterface $redis, string $prefix = 'quiote_queue', ClockInterface $clock = new SystemClock(…), RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$redis` | `ClientInterface` |  |
 | `$prefix` | `string` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

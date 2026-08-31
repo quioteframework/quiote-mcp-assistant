@@ -1,33 +1,29 @@
 # GcsFilesystemAdapter
 
-> FilesystemAdapterInterface over GcsClient (HMAC interop-key REST client, no google/cloud-storage).
+> ListableFilesystemInterface over GcsClient (HMAC interop-key REST client, no google/cloud-storage).
 
-[`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) over [`GcsClient`](/api/storage/gcs/gcs-client/) (HMAC interop-key REST client, no google/cloud-storage).
+[`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) over [`GcsClient`](/api/storage/gcs/gcs-client/) (HMAC interop-key REST client, no google/cloud-storage).
 
-The path-to-key mapping and the error translation live in [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/), shared with the other object-store drivers; this class supplies the client and the provider name that appears in its messages.
-
-Not a [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/): the client has no list-bucket operation — see `Quiote\Filesystem\S3\S3FilesystemAdapter`'s docblock for the reasoning.
+The path-to-key mapping, the error translation and the listing live in [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/), shared with the other object-store drivers; this class supplies the client and the provider name that appears in its messages.
 
 ## Synopsis
 
-`final readonly class GcsFilesystemAdapter extends ObjectStoreFilesystemAdapter`
+`final readonly class GcsFilesystemAdapter extends ListableObjectStoreFilesystemAdapter`
 
 |  |  |
 |---|---|
-| Extends | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) |
+| Extends | [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/) |
 | Source | `GcsFilesystemAdapter.php` |
 
 ## Constructor
 
 ### __construct()
 
-`public function __construct(ObjectStoreClientInterface $client, string $objectPrefix = ''): mixed`
-
-Prepended to every path to form the object key.
+`public function __construct(GcsClient $client, string $objectPrefix = ''): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
-| `$client` | `ObjectStoreClientInterface` | The store, already bound to its bucket or container. |
+| `$client` | [`GcsClient`](/api/storage/gcs/gcs-client/) |  |
 | `$objectPrefix` | `string` |  |
 
 Returns `mixed`
@@ -41,6 +37,7 @@ These come from an ancestor and are documented where they are declared.
 | `delete()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Deletes the object under $path. |
 | `exists()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Reports whether the store holds an object under $path. |
 | `lastModified()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Returns the object's modification time, taken from its Last-Modified metadata. |
+| `listContents()` | [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/) |  |
 | `read()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Returns the body of the object stored under $path. |
 | `size()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Returns the object's size in bytes, taken from its Content-Length metadata. |
 | `write()` | [`ObjectStoreFilesystemAdapter`](/api/filesystem/object-store-filesystem-adapter/) | Stores $contents as the object under $path, replacing any existing object. |

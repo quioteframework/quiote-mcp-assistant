@@ -42,7 +42,9 @@ Returns `mixed`
 | [`middleware(string $fqcn, callable $factory, ?string $after = null, ?string $before = null, int $priority = 0): PluginRegistrar`](#middleware) | Insert a middleware at a position (routes to [`MiddlewareCatalog::register()`](/api/middleware/middleware-catalog/#register)). |
 | [`moduleDirectory(string $dir): PluginRegistrar`](#moduledirectory) | Contribute a module directory. |
 | [`pluginName(): string`](#pluginname) | Returns the name of the plugin whose contributions this registrar records. |
+| [`safeExceptionRenderer(callable(): \Quiote\Exception\Rendering\ExceptionRenderer $factory): PluginRegistrar`](#safeexceptionrenderer) | Register the "safe" exception renderer used by [`ErrorHandlingMiddleware`](/api/middleware/error-handling-middleware/) when `core.developer_exceptions` is false (the default, i.e. |
 | [`service(string $id, mixed $concrete, ?string $scope = null, string ...$aliases): PluginRegistrar`](#service) | A DI service default, applied to each context's container when built, and only if that id isn't already bound (app/core win; first plugin wins). |
+| [`stateReset(string $label, \Closure(): void $reset): PluginRegistrar`](#statereset) | Contribute a callback that clears a plugin-owned static registry, invoked by [`PluginManager::reset()`](/api/plugin/plugin-manager/#reset). |
 
 ### attributedMiddleware()
 
@@ -176,6 +178,18 @@ Returns the name of the plugin whose contributions this registrar records.
 
 Returns `string`
 
+### safeExceptionRenderer()
+
+`public function safeExceptionRenderer(callable(): \Quiote\Exception\Rendering\ExceptionRenderer $factory): PluginRegistrar`
+
+Register the "safe" exception renderer used by [`ErrorHandlingMiddleware`](/api/middleware/error-handling-middleware/) when `core.developer_exceptions` is false (the default, i.e.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$factory` | `callable(): \Quiote\Exception\Rendering\ExceptionRenderer` |  |
+
+Returns [`PluginRegistrar`](/api/plugin/plugin-registrar/)
+
 ### service()
 
 `public function service(string $id, mixed $concrete, ?string $scope = null, string ...$aliases): PluginRegistrar`
@@ -190,5 +204,18 @@ $concrete is anything [`Container::set()`](/api/di/container/#set) accepts (inst
 | `$concrete` | `mixed` |  |
 | `$scope` | `?``string` |  |
 | `$aliases` | `string` |  |
+
+Returns [`PluginRegistrar`](/api/plugin/plugin-registrar/)
+
+### stateReset()
+
+`public function stateReset(string $label, \Closure(): void $reset): PluginRegistrar`
+
+Contribute a callback that clears a plugin-owned static registry, invoked by [`PluginManager::reset()`](/api/plugin/plugin-manager/#reset).
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$label` | `string` |  |
+| `$reset` | `\Closure(): void` |  |
 
 Returns [`PluginRegistrar`](/api/plugin/plugin-registrar/)

@@ -18,7 +18,7 @@ Intended for the "count failed authentication attempts per key (IP, username, * 
 
 ### __construct()
 
-`public function __construct(StorageInterface $storage, int $maxAttempts = 10, string $interval = '15 minutes', string $id = 'quiote_login'): mixed`
+`public function __construct(StorageInterface $storage, int $maxAttempts = 10, string $interval = '15 minutes', string $id = 'quiote_login', ClockInterface $clock = new SystemClock(…)): mixed`
 
 Limiter id namespace (keep distinct per use-case).
 
@@ -28,6 +28,7 @@ Limiter id namespace (keep distinct per use-case).
 | `$maxAttempts` | `int` | Allowed attempts within the interval. |
 | `$interval` | `string` | Window size, e.g. "15 minutes" / "1 hour". |
 | `$id` | `string` | Limiter id namespace (keep distinct per use-case). |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

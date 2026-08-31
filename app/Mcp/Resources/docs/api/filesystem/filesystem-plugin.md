@@ -15,7 +15,7 @@ Like every plugin, this is opt-in via the `plugins` config key — even though i
 |  |  |
 |---|---|
 | Implements | [`PluginInterface`](/api/plugin/plugin-interface/) |
-| Source | `Filesystem/FilesystemPlugin.php` |
+| Source | `FilesystemPlugin.php` |
 
 ## Methods
 

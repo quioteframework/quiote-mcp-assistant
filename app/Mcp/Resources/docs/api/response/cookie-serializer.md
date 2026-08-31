@@ -19,7 +19,7 @@ Pure translation: given a cookie's declared attributes it produces the normalize
 
 ### __construct()
 
-`public function __construct(string $defaultPath = '/'): mixed`
+`public function __construct(string $defaultPath = '/', ClockInterface $clock = new SystemClock(…)): mixed`
 
 Path for a cookie that declares none. An empty string
             is treated as "/", so a cookie is never scoped to the empty path.
@@ -27,6 +27,7 @@ Path for a cookie that declares none. An empty string
 | Parameter | Type | Description |
 |---|---|---|
 | `$defaultPath` | `string` | Path for a cookie that declares none. An empty string is treated as "/", so a cookie is never scoped to the empty path. |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

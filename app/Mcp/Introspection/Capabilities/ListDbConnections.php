@@ -5,66 +5,71 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Config\Config;
 use Quiote\Config\DatabaseConfigHandler;
-use Quiote\Config\XmlConfigParser;
+use Quiote\Config\Format\FormatDriverRegistry;
 
 /**
- * `list_db_connections` -- parses the target app's `Config/databases.xml`
- * directly through the same `XmlConfigParser` + `databases.xsl` +
- * {@see DatabaseConfigHandler::toCanonicalArray()} pipeline the framework's
- * own `DatabaseManager` compiles at boot, but standalone (no `core.use_database`
- * requirement, no `DatabaseManager` instantiation) so this works even for an
- * app that hasn't enabled the database layer.
+ * `list_db_connections` -- resolves the target app's `databases` config
+ * through the framework's own {@see FormatDriverRegistry}, so a connection
+ * declared in `databases.php` or `databases.yaml` is reported exactly like one
+ * declared in `databases.xml`, with the same `.php` > `.yaml` > `.xml`
+ * precedence the framework applies. The registry hands every format to
+ * {@see DatabaseConfigHandler::toCanonicalArray()} (XML additionally passing
+ * through `databases.xsl`), which is what `DatabaseManager` compiles at boot --
+ * but standalone here (no `core.use_database` requirement, no `DatabaseManager`
+ * instantiation), so this works even for an app that hasn't enabled the
+ * database layer.
  *
  * Safety (read-only, never touches DB data): reports
  * each connection's adapter class and parameter *names* only, never the
- * parameter values -- `databases.xml` routinely holds DSNs/usernames/passwords
+ * parameter values -- a databases config routinely holds DSNs/usernames/passwords
  * inline, and this tool must never be a way to exfiltrate them.
  */
 final class ListDbConnections
 {
-    /** @return array<string, mixed> */
-    public static function run(): array
+    /**
+     * @param string|null $configDir The directory holding the `databases`
+     *        config; defaults to the bootstrapped app's `core.config_dir`.
+     * @return array<string, mixed>
+     */
+    public static function run(?string $configDir = null): array
     {
-        $configDir = Config::getString('core.config_dir');
-        $path = rtrim($configDir, '/') . '/databases.xml';
-        if (!is_file($path)) {
-            return ['_schema_version' => 1, 'found' => false, 'default' => null, 'databases' => []];
-        }
-
-        $document = XmlConfigParser::run(
-            $path,
-            Config::getString('core.environment'),
-            '',
-            [
-                XmlConfigParser::STAGE_SINGLE => [Config::getString('core.quiote_dir') . '/Config/xsl/databases.xsl'],
-                XmlConfigParser::STAGE_COMPILATION => [],
-            ],
-            [
-                XmlConfigParser::STAGE_SINGLE => [
-                    XmlConfigParser::STEP_TRANSFORMATIONS_BEFORE => [],
-                    XmlConfigParser::STEP_TRANSFORMATIONS_AFTER => [],
-                ],
-                XmlConfigParser::STAGE_COMPILATION => [
-                    XmlConfigParser::STEP_TRANSFORMATIONS_BEFORE => [],
-                    XmlConfigParser::STEP_TRANSFORMATIONS_AFTER => [],
-                ],
-            ],
+        $registry = FormatDriverRegistry::forHandler(
+            new DatabaseConfigHandler(),
+            [Config::getString('core.quiote_dir') . '/Config/xsl/databases.xsl'],
         );
 
-        $canonical = (new DatabaseConfigHandler())->toCanonicalArray($document);
+        $path = $registry->locate(rtrim($configDir ?? Config::getString('core.config_dir'), '/') . '/databases');
+        if ($path === null) {
+            return ['_schema_version' => 1, 'found' => false, 'format' => null, 'default' => null, 'databases' => []];
+        }
+
+        $canonical = $registry->load($path, Config::getNullableString('core.environment'), '');
+
+        $default = $canonical['default'] ?? null;
+        $declared = $canonical['databases'] ?? [];
 
         $databases = [];
-        foreach ($canonical['databases'] as $name => $db) {
-            $databases[$name] = [
-                'class' => $db['class'],
-                'parameter_keys' => array_keys($db['parameters']),
-            ];
+        if (is_array($declared)) {
+            foreach ($declared as $name => $db) {
+                if (!is_array($db)) {
+                    continue;
+                }
+                $class = $db['class'] ?? null;
+                $parameters = $db['parameters'] ?? [];
+                $databases[(string) $name] = [
+                    'class' => is_string($class) ? $class : null,
+                    'parameter_keys' => is_array($parameters) ? array_keys($parameters) : [],
+                ];
+            }
         }
 
         return [
             '_schema_version' => 1,
             'found' => true,
-            'default' => $canonical['default'] ?? null,
+            // Which format actually won resolution -- an app with both a
+            // databases.php and a databases.xml on disk only uses the former.
+            'format' => strtolower(pathinfo($path, PATHINFO_EXTENSION)),
+            'default' => is_string($default) ? $default : null,
             'databases' => $databases,
         ];
     }

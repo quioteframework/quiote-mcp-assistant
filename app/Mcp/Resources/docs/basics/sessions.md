@@ -71,7 +71,7 @@ Every backend ships a `session` slot factory. Name one, configure its parameters
 | Azure Table | `Quiote\Storage\Azure\AzureTableSessionFactory` | [`quioteframework/session-azure`](/plugins/official-packages/#quioteframeworksession-azure) |
 
 :::caution[The S3, GCS and Azure factories need a PSR-18 client in the container]
-Those three carry no vendor SDK — they are small signed REST clients over whatever PSR-18 implementation you already use, which they resolve from the [container](/architecture/container/) by the `Psr\Http\Client\ClientInterface` id. Bind one, exactly as the matching `filesystem-*` packages expect. Without it the factory throws at startup with a message naming the missing binding, and the context falls back to `NullSessionBag`.
+Those three carry no vendor SDK — they are small signed REST clients over whatever PSR-18 implementation you already use, which they resolve from the [container](/architecture/container/) by the `Psr\Http\Client\ClientInterface` id. Bind one, exactly as the matching `filesystem-*` packages expect — see [Bring your own PSR-18 client](/basics/psr-18-client/) for a plugin that does it. Without it the factory throws at startup with a message naming the missing binding, and the context falls back to `NullSessionBag`.
 :::
 
 A custom backend implements `Quiote\Session\SessionPersistenceInterface` (`load`/`save`/`delete`) plus a `Quiote\Session\SessionFactoryInterface` to build it, and can then be named in the slot like any other.
@@ -358,4 +358,4 @@ The rule for your code is simply: **reach the session through the bag.** The fra
 
 ## Testing
 
-Binding `SessionBagInterface` request-scoped into the container is the supported way to give a test a session (`Context::setSessionBag()` no longer exists as of 4.0). See [Testing](/advanced/testing/#sessions).
+`Context::setSessionBag()` is public API and is the supported way to give a test a session. See [Testing](/advanced/testing/#sessions).

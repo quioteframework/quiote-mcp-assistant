@@ -31,7 +31,7 @@ final class RecipeBook
             'new-project' => [
                 'title' => 'Scaffold a brand-new Quiote application',
                 'steps' => [
-                    ['description' => 'Install Quiote from Packagist into the (empty or nonexistent) directory you want the app in. This creates that directory\'s own composer.json + vendor/, which the scaffolded app\'s front controller locates at runtime. Tagged stable releases are published (3.x at time of writing), so no minimum-stability/prefer-stable configuration is needed -- a plain require resolves ^3.0 under composer\'s default "stable" setting. Only add `composer config minimum-stability dev` + `prefer-stable true` if you deliberately want to track the unreleased dev-main branch.', 'code' => <<<'BASH'
+                    ['description' => 'Install Quiote from Packagist into the (empty or nonexistent) directory you want the app in. This creates that directory\'s own composer.json + vendor/, which the scaffolded app\'s front controller locates at runtime. Tagged stable releases are published (4.2.0 is the current stable release; 4.3.0-RC1 is also published for anyone testing the replay override work), so no minimum-stability/prefer-stable configuration is needed -- a plain require resolves the latest stable 4.x under composer\'s default "stable" setting. Only add `composer config minimum-stability dev` + `prefer-stable true` if you deliberately want to track the unreleased dev-main branch.', 'code' => <<<'BASH'
                         mkdir my-app && cd my-app
                         composer init --no-interaction --name you/my-app
                         composer require quioteframework/quiote --no-interaction
@@ -95,11 +95,20 @@ final class RecipeBook
                         <?php
                         namespace App\Modules\Blog\Views;
 
+                        use Quiote\Exception\ViewException;
                         use Quiote\Request\WebRequest;
                         use Quiote\View\View;
 
                         class PostSuccessView extends View
                         {
+                            // View::execute() is abstract -- without it the class cannot be
+                            // instantiated. It only runs for an output type with no
+                            // execute<OutputType>() of its own, so make that case loud.
+                            public function execute(WebRequest $rd): never
+                            {
+                                throw new ViewException('PostSuccessView serves html and json only.');
+                            }
+
                             public function executeHtml(WebRequest $rd): void
                             {
                                 $this->loadLayout();
@@ -115,15 +124,15 @@ final class RecipeBook
                         }
                         PHP],
                     ['description' => 'HTML needs a template (Templates/PostSuccess.php); JSON/XML/etc. generally don\'t -- they build and return the body string directly. Only add a template file for formats that actually render one.'],
-                    ['description' => 'Every output type the view serves must be declared in Config/output_types.xml -- html ships by default in a fresh app, others (like json) usually need adding. A JSON-like type needs no <layouts> at all.', 'code' => <<<'XML'
+                    ['description' => 'Every output type the view serves must be declared in the output_types config (.php/.yaml/.yml/.xml, resolved .php > .yaml > .xml) -- html ships by default in a fresh app, others (like json) usually need adding. A JSON-like type needs no <layouts> at all. In XML, parameters take the ae: envelope prefix (<ae:parameter>) -- the output_types XSD pulls parameters from the envelope namespace, so an unprefixed <parameter> fails schema validation.', 'code' => <<<'XML'
                         <!-- Config/output_types.xml -- inside <output_types> -->
                         <output_type name="json">
                             <renderers default="php">
                                 <renderer name="php" class="Quiote\Renderer\PhpRenderer" />
                             </renderers>
-                            <parameter name="http_headers">
-                                <parameter name="Content-Type">application/json; charset=UTF-8</parameter>
-                            </parameter>
+                            <ae:parameter name="http_headers">
+                                <ae:parameter name="Content-Type">application/json; charset=UTF-8</ae:parameter>
+                            </ae:parameter>
                         </output_type>
                         XML],
                     ['description' => 'scaffold_action(module, action, formats: ["html", "json"]) generates all of the above in one call -- the view\'s execute<Format>() methods, the html template, and (if Config/output_types.xml doesn\'t already declare a requested format) a ready-to-paste snippet for it.'],
@@ -159,11 +168,15 @@ final class RecipeBook
                             }
                         }
                         PHP],
-                    ['description' => 'Declare validators for the POST verb only with registerWriteValidators() (it runs only for POST) -- GET requests to display the empty form need none.', 'code' => <<<'PHP'
+                    ['description' => 'Declare validators for the POST verb only with registerWriteValidators() (it runs only for POST) -- GET requests to display the empty form need none. The hook takes NO arguments: ValidationService calls it as $action->registerWriteValidators(), so build the ValidatorBuilder yourself with ValidatorBuilder::on($validationManager, $context). Only the Validate/<Action>.php file form receives a $v parameter (its returned closure does).', 'code' => <<<'PHP'
                         use Quiote\Validator\Compiler\Runtime\ValidatorBuilder;
 
-                        public function registerWriteValidators(ValidatorBuilder $v): void
+                        public function registerWriteValidators(): void
                         {
+                            $v = ValidatorBuilder::on(
+                                $this->getInitContext()->getValidationManager(),
+                                $this->getContext(),
+                            );
                             $v->string('email', required: true);
                             $v->email('email', required: true);
                             $v->string('message', required: true)->minLength(1)->maxLength(2000);
@@ -209,7 +222,42 @@ final class RecipeBook
                 'title' => 'Add a database connection',
                 'steps' => [
                     ['description' => 'Set core.use_database = true in Config/settings.php.'],
-                    ['description' => 'Declare the connection in Config/databases.xml, naming a driver (pdo, or an ORM adapter alias like eloquent/doctrine_orm/doctrine_dbal/cycle/propulsion if that plugin is enabled).'],
+                    ['description' => 'Declare the connection in Config/databases.{php,yaml,yml,xml} -- all three formats are supported for every config type, resolved .php > .yaml > .xml with the first match winning, so a databases.php beside a databases.xml takes priority. PHP is the recommended default (and mandatory for Cycle, whose parameters are PHP config objects XML/YAML cannot express). Name a driver: pdo, or an ORM adapter alias like eloquent/doctrine_orm/doctrine_dbal/cycle/propulsion if that plugin is enabled. %...% directives expand in array configs exactly as in XML.', 'code' => <<<'PHP'
+                        <?php
+                        // Config/databases.php -- the array mirrors the XML element tree
+                        return [
+                            'default'   => 'main',
+                            'databases' => [
+                                'main' => [
+                                    'class'      => 'pdo',
+                                    'parameters' => [
+                                        'dsn'      => 'pgsql:host=localhost;dbname=app',
+                                        'username' => 'app',
+                                        'password' => 'secret',
+                                    ],
+                                ],
+                            ],
+                        ];
+                        PHP],
+                    ['description' => 'To vary the connection per environment: XML files filter natively with repeated <ae:configuration environment="..."> blocks (the attribute is an anchored regex -- "test.*" matches test/testing/test.local, space-separated values are alternatives). PHP and YAML arrays have NO envelope equivalent -- AbstractArrayFormatDriver deliberately never applies the environment -- so branch inside the file instead. core.environment is readable there because Quiote::bootstrap() sets it read-only before any config compiles, and compiled cache names embed the environment, so each environment caches its own result. See quiote-docs://architecture/configuration.', 'code' => <<<'PHP'
+                        <?php
+                        // Config/databases.php
+                        $isTest = str_starts_with(
+                            (string) \Quiote\Config\Config::getNullableString('core.environment'),
+                            'test'
+                        );
+
+                        return [
+                            'default'   => 'main',
+                            'databases' => ['main' => [
+                                'class'      => 'pdo',
+                                'parameters' => [
+                                    // %core.environment% expands here too, for a file-per-environment layout
+                                    'dsn' => $isTest ? 'sqlite::memory:' : 'pgsql:host=localhost;dbname=app',
+                                ],
+                            ]],
+                        ];
+                        PHP],
                     ['description' => 'Get the lifecycle wrapper by injecting DatabaseManager (as of 4.0, Context no longer exposes getDatabaseManager() -- it must be constructor-injected), then the real connection/ORM object from it.', 'code' => <<<'PHP'
                         use Quiote\Database\DatabaseManager;
 
@@ -223,7 +271,7 @@ final class RecipeBook
             'throttle-login' => [
                 'title' => 'Rate-limit repeated login attempts',
                 'steps' => [
-                    ['description' => 'Install quioteframework/ratelimit -- a plain library, not a plugin (no "plugins" entry). It provides LoginThrottle (sliding-window counter per key, e.g. IP or username) and PdoRateLimiterStorage (state kept in your own database, no Redis needed).', 'code' => <<<'BASH'
+                    ['description' => 'Install quioteframework/ratelimit. The package DOES ship a plugin (Quiote\Security\RateLimit\RateLimitPlugin, which registers the general HTTP RateLimitMiddleware and the ratelimit.* defaults -- see the "harden-http-surface" recipe), but this login-throttle recipe does not need it: LoginThrottle works standalone, constructed directly, with no "plugins" entry. It provides LoginThrottle (sliding-window counter per key, e.g. IP or username) and PdoRateLimiterStorage (state kept in your own database, no Redis needed).', 'code' => <<<'BASH'
                         composer require quioteframework/ratelimit
                         BASH],
                     ['description' => 'Create the storage table once (PdoRateLimiterStorage::schema() returns Postgres/SQLite-compatible DDL) -- e.g. from a one-off console command or migration, using the same PDO connection the app already has via an injected DatabaseManager.', 'code' => <<<'PHP'
@@ -304,7 +352,7 @@ final class RecipeBook
                             ['class' => \Quiote\Mcp\McpPlugin::class],
                         ];
                         PHP],
-                    ['description' => 'Set the two mcp.* settings in Config/settings.php. expose_actions is what turns #[McpTool]-annotated actions into tools; without mcp.enabled the plugin registers nothing.', 'code' => <<<'PHP'
+                    ['description' => 'Set the two mcp.* settings in Config/settings.php. expose_actions is what turns #[McpTool]-annotated actions into tools. mcp.enabled is checked at USE time, not registration time -- McpPlugin::register() always publishes its config defaults, the mcp:serve/mcp:warmup commands, the authenticator service and (when mcp.transports includes http) the middleware; McpServeCommand and McpEndpointMiddleware are what refuse to run without mcp.enabled.', 'code' => <<<'PHP'
                         <?php
                         // Config/settings.php -- inside the returned array
                         return [
@@ -320,7 +368,7 @@ final class RecipeBook
             'register-mcp-tool' => [
                 'title' => 'Register a plain (non-action) MCP tool',
                 'steps' => [
-                    ['description' => 'Write a plain, autowireable class with a method taking typed parameters and returning a string or array -- no attribute needed (there is no attribute discovery for plain classes).', 'code' => <<<'PHP'
+                    ['description' => 'Write a plain, autowireable class with a method taking typed parameters and returning a string or array. No attribute is needed for the explicit McpCatalog registration below. (Attribute discovery for plain classes does exist as an alternative -- set mcp.discover_attributes = true and put #[McpTool]/#[McpResource]/#[McpPrompt] classes under a module\'s Mcp/ subdirectory; see the "mcp" convention card. The catalog is the right choice for anything assembled at boot or living outside a module.)', 'code' => <<<'PHP'
                         <?php
                         namespace App\Mcp\Tools;
 
@@ -539,7 +587,7 @@ final class RecipeBook
                         // Deliberate: always writes, creating the session if needed.
                         $bag->set('locale', $chosenLocale);
                         PHP],
-                    ['description' => 'The slot is OPTIONAL -- omit it entirely and the context answers a NullSessionBag (reads return the default, writes are discarded, exists() is false, getId() is \'\'). That is right for a console command, a queue worker or a stateless API. But beware: CsrfValidationMiddleware treats a request arriving without a session cookie as CSRF-exempt, so with no session slot that exemption fires on EVERY request, while CsrfInjectionMiddleware still adds a _csrf_token field to every form -- it looks protected and is not. Configure a session slot before relying on CSRF protection for any state-changing endpoint.'],
+                    ['description' => 'The slot is OPTIONAL -- omit it entirely and the context answers a NullSessionBag (reads return the default, writes are discarded, exists() is false, getId() is \'\'). That is right for a console command, a queue worker or a stateless API. Note the CSRF interaction: CsrfValidationMiddleware exempts a request arriving without a session cookie (there is no session for an attacker to ride), EXCEPT when it is a cross-origin browser request -- that carve-out is what keeps a sessionless login POST failing closed. With no session slot at all, nearly every request takes the exempt path and CSRF protects little, so the middleware logs a warning once per process saying exactly that rather than leaving it silent. Configure a session slot before relying on CSRF protection for any state-changing endpoint, or set core.csrf.enabled = false to make the intent explicit.'],
                 ],
             ],
             'upgrade-to-3' => [
@@ -664,14 +712,14 @@ final class RecipeBook
                         $fs->disk()->size('reports/2026-q3.csv');           // default disk
                         $fs->disk('s3')->write('exports/big.zip', $bytes);  // a named disk
                         PHP],
-                    ['description' => 'FilesystemAdapterInterface is: read (throws FileNotFoundStorageException if absent), write (creates or overwrites), delete (best-effort, a no-op if absent), exists, size, lastModified (both throw if absent), and listContents (relative paths, NON-RECURSIVE). Everything thrown extends Quiote\Filesystem\FilesystemStorageException, so catching the base type catches the whole subsystem.'],
-                    ['description' => 'Configure the core "local" disk. Every path resolves against a fixed root; .. segments and absolute paths are rejected (load-bearing here in a way it is not for sessions, since callers may pass user input straight in), and writes are atomic via temp-file-then-rename so a reader never sees a partial file. The root is created at 0755 if missing, and a non-writable root fails at construction rather than at first write.', 'code' => <<<'YAML'
+                    ['description' => 'FilesystemAdapterInterface is exactly six methods: read (throws FileNotFoundStorageException if absent), write (creates or overwrites), delete (best-effort, a no-op if absent), exists, size, lastModified (both throw if absent). listContents (relative paths, NON-RECURSIVE) is NOT on it -- it lives on the separate Quiote\Filesystem\ListableFilesystemInterface, implemented only by LocalFilesystemAdapter, and you reach it via FilesystemManager::listableDisk($alias). Adapter failures extend Quiote\Filesystem\FilesystemStorageException, but catching that base type does NOT cover the whole subsystem: FilesystemManager throws plain \RuntimeException for an unknown driver or a non-listable disk.'],
+                    ['description' => 'Configure the core "local" disk. Every path resolves against a fixed root; .. segments and absolute paths are rejected (this matters more here than for sessions, since callers may pass user input straight in), and writes are atomic via temp-file-then-rename so a reader never sees a partial file. The root is created at 0755 if missing, and a non-writable root fails at construction rather than at first write.', 'code' => <<<'YAML'
                         # Config/settings.yaml
                         filesystem.default_disk: local
                         filesystem.disks.local.root: storage/app
                         YAML],
                     ['description' => 'Cloud disks are one package + plugin each: s3 (filesystem-s3, Quiote\Filesystem\S3\S3FilesystemPlugin), gcs (filesystem-gcs, Gcs\GcsFilesystemPlugin), azure (filesystem-azure, Azure\AzureFilesystemPlugin). Set that disk\'s filesystem.disks.<alias>.* settings and bind a PSR-18 client. read/write/delete/exists/size/lastModified all work against both local and cloud; exists() on a cloud disk issues a HEAD rather than a GET, so it does not transfer the body.'],
-                    ['description' => 'CAUTION: listContents() throws UNCONDITIONALLY on all three cloud disks -- the underlying REST clients implement get/put/delete/head on a single object and have no list operation at all. That is a current limitation, not a transient failure, and no retry or different bucket fixes it. If you need a listing in production, keep it yourself in the database alongside whatever record owns the file. Also out of scope by design: visibility/ACLs, MIME detection, streaming reads/writes, copy/move, and checksums -- use the disk\'s own client for those. See quiote-docs://basics/filesystem.'],
+                    ['description' => 'ALL THREE CLOUD DISKS CAN LIST, as of 4.2. Each cloud client (S3/GCS/Azure) implements listObjects(), normalized into one paginated ObjectListing despite the three shaping continuation differently on the wire, and S3FilesystemAdapter/GcsFilesystemAdapter/AzureFilesystemAdapter all implement ListableFilesystemInterface. Go through FilesystemManager::listableDisk($alias)->listContents($path) -- disk() still returns the base contract with no listContents() on it regardless of driver, so listableDisk() is the only way to reach it (it also gives you the named \RuntimeException up front if a disk genuinely cannot list). Over the flat cloud key spaces, listContents() presents a "/"-delimited directory view one level below the given path, with the store\'s own pagination folded away into one sorted list. Also out of scope by design: visibility/ACLs, MIME detection, streaming reads/writes, copy/move, and checksums -- use the disk\'s own client for those. See quiote-docs://basics/filesystem.'],
                 ],
             ],
             'generate-openapi' => [
@@ -692,14 +740,16 @@ final class RecipeBook
             'authenticate-user' => [
                 'title' => 'Authenticate requests with a firewall (form login, HTTP Basic, JWT, OIDC)',
                 'steps' => [
-                    ['description' => 'The auth model is a FIREWALL: for a slice of your app\'s URL space (a path pattern), it says how a caller proves who they are and what happens if they can\'t. It is not a network firewall and blocks nothing itself. A Firewall is a plain, immutable 5-arg value object; a FirewallMap holds an ordered list and matches the FIRST pattern that fits the raw request path -- no "most specific wins" logic, so list narrower patterns (^/api/) before broader ones (^/) or the catch-all always wins and api never matches.', 'code' => <<<'BASH'
+                    ['description' => 'The auth model is a FIREWALL: for a slice of your app\'s URL space (a path pattern), it says how a caller proves who they are and what happens if they can\'t. It is not a network firewall and blocks nothing itself. A Firewall is a plain, immutable 6-arg value object (name, pattern, authenticators, entryPoint, stateless = false, sessionless = false); a FirewallMap holds an ordered list and matches the FIRST pattern that fits the raw request path -- no "most specific wins" logic, so list narrower patterns (^/api/) before broader ones (^/) or the catch-all always wins and api never matches.', 'code' => <<<'BASH'
                         composer require quioteframework/auth
                         BASH],
                     ['description' => 'Two independent flags per firewall, easy to conflate: `stateless` (identity axis) -- true means the identity is re-derived from the credential every request (HTTP Basic, bearer/JWT); false means it is read back from the session between requests (form login). `sessionless` (session axis) -- true means no session/cookie is started at all for this firewall\'s requests (pure M2M). Exactly one of StatelessAuthenticationMiddleware / SessionAuthenticationMiddleware acts on a given request, decided entirely by the matched firewall\'s `stateless` flag.', 'code' => <<<'PHP'
                         <?php
                         use Quiote\Security\Auth\{Firewall, FirewallMap};
                         use Quiote\Security\Auth\EntryPoint\{HttpChallengeEntryPoint, LoginRedirectEntryPoint};
-                        use App\Auth\{Authenticator\HttpBasicAuthenticator, Provider\InMemoryUserProvider, Hasher\DefaultPasswordHasher};
+                        use Quiote\Security\Auth\Authenticator\HttpBasicAuthenticator;
+                        use Quiote\Security\Auth\Provider\InMemoryUserProvider;
+                        use Quiote\Security\Auth\Hasher\DefaultPasswordHasher;
 
                         $hasher = new DefaultPasswordHasher(); // argon2id, falls back to bcrypt
                         $provider = new InMemoryUserProvider([
@@ -719,7 +769,7 @@ final class RecipeBook
                         PHP],
                     ['description' => 'Form login additionally wants CsrfManager and/or LoginThrottle -- both are soft dependencies of FormLoginAuthenticator, pass null to skip either. This is deliberately redundant with CsrfValidationMiddleware (which already checks every unsafe request) -- the authenticator\'s own check stays correct even if that middleware is disabled or reordered for some other route.', 'code' => <<<'PHP'
                         <?php
-                        use App\Auth\Authenticator\FormLoginAuthenticator;
+                        use Quiote\Security\Auth\Authenticator\FormLoginAuthenticator;
                         use Quiote\Security\Csrf\CsrfManager;
                         use Quiote\Security\RateLimit\{LoginThrottle, PdoRateLimiterStorage};
 
@@ -733,8 +783,9 @@ final class RecipeBook
                     ['description' => 'For a bearer/JWT resource server (an API that ACCEPTS tokens someone else minted -- a human\'s access token or a service\'s M2M token, both), add quioteframework/auth-jwt. JwtAuthPlugin only registers the ClientTypeResolverInterface default -- the validator and authenticator need app-specific secrets, so wire those yourself.', 'code' => <<<'PHP'
                         <?php
                         // composer require quioteframework/auth-jwt
-                        use App\Auth\Authenticator\BearerTokenAuthenticator;
-                        use App\Auth\JwtTokenValidator;
+                        // Note: no sub-namespace on these two -- both are Quiote\Security\Auth\*
+                        use Quiote\Security\Auth\BearerTokenAuthenticator;
+                        use Quiote\Security\Auth\JwtTokenValidator;
 
                         $validator = new JwtTokenValidator(/* HS256 secret, or RS256/ES256 via a JWKS-backed CachedKeySet */);
                         $bearerAuth = new BearerTokenAuthenticator($validator);
@@ -743,11 +794,16 @@ final class RecipeBook
                     ['description' => 'For Quiote as an OAuth/OIDC CLIENT (never an authorization server), add quioteframework/auth-oauth. Two distinct flows sharing one package: relying party (redirect a human to Entra ID/Google/Okta -- OidcClient + OidcAuthenticator, PKCE S256 hardcoded) vs. outbound M2M (ClientCredentialsClient, Quiote fetching its own token to call another API, no browser). No plugin ships with this package -- every piece needs app-specific secrets/endpoints. Don\'t reach for this when you actually need auth-jwt (resource server) -- see quiote-docs://advanced/authentication-authorization\'s decision guide.', 'code' => <<<'PHP'
                         <?php
                         // composer require quioteframework/auth-oauth
-                        $discovery = \App\Auth\OidcDiscoveryClient::discover('https://issuer.example.com');
-                        $oidc = \App\Auth\OidcClient::fromDiscovery($discovery, clientId: '...', clientSecret: '...', redirectUri: '...');
+                        use Quiote\Security\Auth\{OidcClient, OidcDiscoveryClient};
+
+                        // discover() is an INSTANCE method; the client needs a PSR-18 client and
+                        // PSR-17 request factory (plus an optional PSR-6 cache, ttl, requireHttps).
+                        $discovery = (new OidcDiscoveryClient($httpClient, $requestFactory))
+                            ->discover('https://issuer.example.com');
+                        $oidc = OidcClient::fromDiscovery($discovery, clientId: '...', clientSecret: '...', redirectUri: '...');
                         // $oidc->buildAuthorizationRequest() to start the redirect; OidcAuthenticator handles the callback leg.
                         PHP],
-                    ['description' => 'Securing an action itself is unchanged by any of this -- isSecure(): bool and getCredentials() (AND/OR shape via hasCredentials([\'edit\', [\'admin\', \'moderator\']])) on the action, still decided by SecurityMiddleware/SecurityService::decide(). A firewall only establishes WHO the caller is; it never makes the authorization decision. See quiote-docs://advanced/authentication-authorization.'],
+                    ['description' => 'Securing an action itself is unchanged by any of this -- the action declares isSecure(): bool and getCredentials(), and SecurityMiddleware/SecurityService::decide() still makes the call. The AND/OR credential shape ([\'edit\', [\'admin\', \'moderator\']]) is evaluated by hasCredentials() on the SECURITY USER (Quiote\User\SecurityUser / ISecurityUser), not on the action -- the action only supplies the required credentials. A firewall only establishes WHO the caller is; it never makes the authorization decision. See quiote-docs://advanced/authentication-authorization.'],
                 ],
             ],
             'secure-mcp-endpoint' => [
@@ -774,7 +830,7 @@ final class RecipeBook
                             'mcp.oauth.cache_ttl' => 3600,                // seconds a fetched JWKS is cached
                         ];
                         PHP],
-                    ['description' => 'Both middlewares -- McpAuthMiddleware (bearer/oauth2 modes) and McpEndpointMiddleware -- are anchored before: SecurityMiddleware, since MCP does its own auth rather than session-based security/CSRF. There is still no RBAC-gated tool listing and no rate limiting on the HTTP endpoint in any auth mode -- a caller\'s roles don\'t filter tools/list, and neither mode throttles calls; that is a documented current gap, not a misconfiguration to chase. See quiote-docs://advanced/mcp-server.'],
+                    ['description' => 'The two middlewares are anchored differently: McpEndpointMiddleware sits before: SecurityMiddleware (MCP does its own auth rather than session-based security/CSRF), and McpAuthMiddleware sits before: McpEndpointMiddleware so authentication runs ahead of the endpoint it guards. McpAuthMiddleware is BEARER-ONLY -- it is skipped when mcp.auth is "none" or "oauth2" (oauth2 is enforced inside the endpoint middleware instead). There is still no RBAC-gated tool listing and no rate limiting on the HTTP endpoint in any auth mode -- a caller\'s roles don\'t filter tools/list, and neither mode throttles calls; that is a documented current gap, not a misconfiguration to chase. See quiote-docs://advanced/mcp-server.'],
                 ],
             ],
             'harden-http-surface' => [
@@ -785,7 +841,7 @@ final class RecipeBook
                         composer require quioteframework/security-headers
                         composer require quioteframework/ratelimit
                         BASH],
-                    ['description' => 'CORS answers preflight OPTIONS and decorates cross-origin responses -- off until cors.enabled is true, and it runs after routing/before dispatch. allowed_origins: [\'*\'] combined with allow_credentials: true is REFUSED AT BOOT with a ConfigurationException -- the fetch spec forbids sending both, and reflecting the caller\'s origin instead would grant every origin on the internet credentialed access. Enumerate real origins, or turn credentials off.', 'code' => <<<'PHP'
+                    ['description' => 'CORS answers preflight OPTIONS and decorates cross-origin responses -- off until cors.enabled is true, and it runs after routing/before dispatch. allowed_origins: [\'*\'] combined with allow_credentials: true is refused PER REQUEST inside CorsMiddleware, not at boot -- a misconfigured app starts up fine and fails on the first credentialed cross-origin request, so do not expect a boot-time error to catch this for you. The fetch spec forbids sending both, and reflecting the caller\'s origin instead would grant every origin on the internet credentialed access. Enumerate real origins, or turn credentials off.', 'code' => <<<'PHP'
                         <?php
                         // Config/plugins.php
                         return [
@@ -796,7 +852,7 @@ final class RecipeBook
                             'cors.enabled' => true,
                             'cors.allowed_origins' => ['https://app.example.com'],
                             'cors.allow_credentials' => true,
-                            'cors.allowed_methods' => 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+                            'cors.allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // a list, not a comma-joined string
                             'cors.max_age' => 3600,
                         ];
                         PHP],
@@ -825,13 +881,13 @@ final class RecipeBook
                         ];
                         PHP],
                     ['description' => 'ratelimit.http.trust_forwarded_for defaults to false DELIBERATELY -- trusting a client-supplied X-Forwarded-For by default lets any caller spoof a fresh key and buy unlimited requests. Only enable it behind a proxy you control, and set ratelimit.http.trusted_proxy_hops to how many of your own proxies sit in front of the app -- the address is read from the RIGHT of the header, skipping that many entries, since a proxy APPENDS rather than replaces and the leftmost value is whatever the client wrote.'],
-                    ['description' => 'ratelimit.storage defaults to memory, which is PER-PROCESS -- fine for single-worker dev, useless as a shared limit across a worker pool. For a real deployment set ratelimit.storage: redis (see the "use-redis-backends" recipe) or bind PdoRateLimiterStorage yourself for shared state with no Redis dependency; the plugin binds its own storage set-if-absent, so an app binding wins. See quiote-docs://plugins/official-packages.'],
+                    ['description' => 'ratelimit.storage defaults to memory, which is PER-PROCESS -- fine for single-worker dev, useless as a shared limit across a worker pool. For a real deployment set ratelimit.storage: redis (see the "use-redis-backends" recipe) or ratelimit.storage: pdo for shared state with no Redis dependency -- pdo is a first-class value the plugin wires itself from ratelimit.pdo.connection / ratelimit.pdo.table, so there is no need to bind PdoRateLimiterStorage by hand. The plugin binds its own storage set-if-absent, so an app binding still wins if you want one. See quiote-docs://plugins/official-packages.'],
                 ],
             ],
             'use-redis-backends' => [
                 'title' => 'Back cache, sessions, the queue, or rate limiting with Redis',
                 'steps' => [
-                    ['description' => 'Four subsystems can be Redis-backed, and they don\'t share a package -- cache and rate limiting live in the kernel/ratelimit respectively, queue and session are their own packages -- but all four go through Symfony\'s RedisAdapter::createConnection() DSN factory, so ANY of ext-redis, ext-relay, or predis/predis works. predis/predis is the easiest path since it needs no PHP extension.', 'code' => <<<'BASH'
+                    ['description' => 'Four subsystems can be Redis-backed, and they don\'t share a package -- cache and rate limiting live in the kernel/ratelimit respectively, queue and session are their own packages -- and they do NOT share a client story. Cache and rate limiting go through Symfony\'s RedisAdapter::createConnection() DSN factory, so any of ext-redis, ext-relay or predis/predis works there. Queue (quioteframework/queue-redis) and session (quioteframework/session-redis) construct Predis\Client directly and require predis/predis ^3.0 -- an ext-redis-only host will fail those two (RedisSessionFactory throws telling you to install predis). Installing predis/predis satisfies all four and needs no PHP extension.', 'code' => <<<'BASH'
                         composer require predis/predis
                         BASH],
                     ['description' => 'Cache: one setting, no package to install (Redis support ships in the kernel).', 'code' => <<<'PHP'
@@ -941,7 +997,7 @@ final class RecipeBook
                         $this->post('/orders', [])->assertApiError('sku_required');
                         PHP],
                     ['description' => 'A test needing a session installs one by binding SessionBagInterface request-scoped into the container -- Context::setSessionBag() is gone as of 4.0.', 'code' => <<<'PHP'
-                        use Quiote\Container;
+                        use Quiote\DI\Container;
                         use Quiote\Session\SessionBagInterface;
 
                         $context->getContainer()->set(SessionBagInterface::class, $bag, Container::SCOPE_REQUEST);
@@ -1037,7 +1093,7 @@ final class RecipeBook
                         }
                         PHP],
                     ['description' => 'The four inputs to render(): $layer -- call $layer->getResourceStreamIdentifier() for the resolved, extension-checked template path; NEVER do your own template-file lookup, resolution (search paths, i18n fallback) is the layer\'s job. $attributes -- the view\'s data; respect $this->extractVars/$this->varName rather than hardcoding how data is exposed. $slots -- already-rendered embedded-action output, expose under $this->slotsVarName. $moreAssigns -- extra caller-injected values ($moreAssigns[\'inner\'] is the rendered inner layer an outer shell wraps).'],
-                    ['description' => 'initialize() (call parent:: or don\'t override it) reads <parameter> config into properties you don\'t reinvent: $this->varName (config key var_name, default "template"), $this->slotsVarName (slots_var_name, default "slots"), $this->extractVars (extract_vars, default false -- true exposes each attribute as its own top-level variable instead of one array under $varName), $this->defaultExtension (default_extension, including the dot), $this->assigns (maps a short template-variable name to a camel-cased Context getter, e.g. \'routing\' => \'ro\' exposes $ro = $context->getRouting()).'],
+                    ['description' => 'initialize() (call parent:: or don\'t override it) reads <parameter> config into properties you don\'t reinvent: $this->varName (config key var_name, default "template"), $this->slotsVarName (slots_var_name, default "slots"), $this->extractVars (extract_vars, default false -- true exposes each attribute as its own top-level variable instead of one array under $varName), $this->defaultExtension (default_extension, including the dot), $this->assigns (keyed by the CONTEXT ITEM, valued by the template-variable name -- \'routing\' => \'ro\' exposes $ro = $context->getRouting(); the config key is the item, not the variable).'],
                     ['description' => 'Wire it into an output type -- a plain config-driven registry, unrelated to the plugin system, no registrar call.', 'code' => <<<'PHP'
                         <?php
                         // Config/output_types.php -- inside the "html" output type's array
@@ -1126,7 +1182,94 @@ final class RecipeBook
                     ['description' => 'TWO BREAKING SCOPE-DEFAULT FIXES, both closing real cross-request identity leaks. (1) An unregistered, autowired class with no #[Service] and no ServiceInterface used to default to SCOPE_SINGLETON -- the container\'s most dangerous default, since a singleton keeps whatever it was handed at construction for the worker\'s whole life. It now defaults to SCOPE_REQUEST. If something relied on that instance surviving across requests, register it explicitly: #[Service(scope: Container::SCOPE_SINGLETON)]. (2) A bare #[Service] (no scope: argument) used to default to singleton, disagreeing with ServiceInterface\'s transient default -- both now agree on SCOPE_TRANSIENT. Audit for a bare #[Service] attribute that relied on the old singleton default.'],
                     ['description' => 'A defect fix, not a rename: injecting WebRequest or User in a SINGLETON used to silently hand back a fresh, empty/unauthenticated instance (the container only bound each core service under its concrete class, so the app\'s WebRequest/User subclass left the base type unregistered). It now throws ContainerException AT WIRING TIME, naming RequestState/CurrentUser as the fix -- this is a real defect being surfaced, not new breakage; if it fires, replace the base-class injection with RequestState/CurrentUser per the table above.'],
                     ['description' => 'Validators can now declare constructor dependencies -- purely additive, see the "write-custom-validator" recipe. Two previously-private things are now public API: Context::getShutdownSequence() (append()/remove()/replaceRole()/all(), replacing reflection on the old array property) and Context::create() (the named constructor ContextRegistry builds through).'],
+                    ['description' => 'FOUR MORE RENAMES/REMOVALS to grep for, each a fatal error if you still call it. (1) ValidationService::xmlOnlyValidate() is renamed validateDeclaredOnly() -- same signature, same behaviour. (2) Quiote\Execution\ViewResolver (deprecated stub) and Quiote\Execution\ActionExecutionSession are deleted; call Quiote\Execution\ViewNameResolver directly, same resolve() signature. (3) QuioteException\'s exception-page helpers getFixedTrace()/buildParamList()/highlightFile()/highlightString() are gone, and so are they on every exception extending it. (4) Four deprecated validation methods are deleted: ValidationError::setMessageIndex()/getMessageIndex() (use setName()/getName()) and ValidationIncident::hasFieldError()/getFieldErrors() (use getArguments()/getErrors()) -- note ValidationManager::getFieldErrors() is a DIFFERENT method that still exists, so check which class you are editing.'],
                     ['description' => 'Checklist: clear the config cache or run cache:warmup; audit every $context->getX() call against the removed-accessor table above and replace with the matching injectable; check for anything reading a compiled config file or the old *FactoryInfo properties on Context; if you wrote a custom config handler, update it per above; check for Context::$psrKernel/$correlationId access (removed -- use $context->getRequestHandler()->pipeline()/getCorrelationId()); check singletons type-hinting WebRequest/User/ISecurityUser (now throws -- inject RequestState/CurrentUser); check for anything relying on an unregistered class behaving as a singleton, or a bare #[Service] relying on the old singleton default; register a request-end clear (PluginManager::addRequestEndClear()) for any request-scoped state your own code holds. See quiote-docs://getting-started/upgrading-to-4.'],
+                ],
+            ],
+            'upgrade-to-4-1' => [
+                'title' => 'Upgrade an app from Quiote 4.0 to 4.1',
+                'steps' => [
+                    ['description' => 'SILENT BEHAVIOUR CHANGE 1 -- validators now write their coerced value back. StringValidator, JsonValidator, NumberValidator and BooleanValidator export their sanitized/decoded/cast value under their OWN argument name when no explicit "export" target is configured (Validator::exportOwnArgumentByDefault()). So $rd->getParameter(\'x\') after a StringValidator now returns the sanitized string, and after a JsonValidator the DECODED structure, where 4.0 handed back the raw input. Audit any code that deliberately re-read the raw value post-validation, and any JSON field you were decoding yourself a second time. Multi-argument, base-array and DateTime validators are unchanged (no single unambiguous target), and an explicit "export" still redirects wherever you point it.'],
+                    ['description' => 'SILENT BEHAVIOUR CHANGE 2 -- TemplateLayer lost its magic accessors. __call() is gone; getName()/setName(), getModule()/setModule(), getTemplate()/setTemplate(), hasTemplate() and removeTemplate() are now real typed methods returning ?string. The getters throw QuioteException when the underlying parameter is set but is not a string, where the magic version returned it uncast. Any other ad-hoc $layer->getFoo()/setFoo() that used to resolve through __call is now an undefined-method fatal -- use getParameter()/setParameter() for those. Mostly affects custom renderers and code assembling layers by hand.'],
+                    ['description' => 'ADDITIVE: PluginRegistrar::safeExceptionRenderer($factory) is the production counterpart to developerExceptionRenderer() -- the renderer used when core.debug is off. Nothing to change unless you want to own that page.'],
+                    ['description' => 'PACKAGES VERSION INDEPENDENTLY from 4.0.0 onward, so packages/* no longer track the framework version. A 4.1 app can legitimately hold e.g. quioteframework/db-propulsion 4.0.1 -- do not "fix" a package whose version does not match the framework, and read each package\'s own CHANGELOG rather than assuming the framework\'s applies.'],
+                    ['description' => 'Checklist: grep for getParameter() reads of a field guarded by a String/Json/Number/Boolean validator and confirm the coerced value is what you want; grep for TemplateLayer method calls outside the typed set above; clear the config cache if you hit anything odd (cache keys carry a framework fingerprint from 4.0, so this should auto-invalidate). See quiote-docs://getting-started/upgrading-to-4 for the 3.x->4.0 work that precedes this.'],
+                ],
+            ],
+            'record-and-replay-cassettes' => [
+                'title' => 'Record production failures and replay them locally (quioteframework/replay, 4.2+)',
+                'steps' => [
+                    ['description' => 'Install the package and enable its plugin -- installing/enabling alone changes nothing observable, since replay.enabled defaults to false and replay.record to never.', 'code' => <<<'PHP'
+                        // composer require quioteframework/replay
+                        // Config/plugins.php
+                        return [
+                            ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+                        ];
+                        PHP],
+                    ['description' => 'Turn recording on. replay.record: error (the default sampling policy) writes a cassette -- method, URI, headers, cookies, body, the route/action/validated parameters, every DB query with its bound parameters and rows, and the response or the exception that escaped -- only when the request errors. RecorderMiddleware self-registers at phase bootstrap; there is no middleware config to edit.', 'code' => <<<'PHP'
+                        // Config/settings.php
+                        return [
+                            'replay.enabled' => true,
+                            'replay.record'  => 'error',
+                        ];
+                        PHP],
+                    ['description' => 'Register a driver package\'s plugin AFTER its underlying database adapter\'s plugin (e.g. ReplayPropulsionPlugin after the propulsion db plugin) -- it overrides the adapter\'s driver alias to a recording subclass, and plugin service registration is register-if-absent / last-writer-wins, so ordering decides which one sticks. Only Doctrine and Propulsion effects are wired into LIVE requests today; Eloquent and Cycle recorders exist but are watch-only.'],
+                    ['description' => 'Sensitive headers/params are redacted before a cassette is ever written -- Set-Cookie is stripped from responses unconditionally. An action that should record nothing beyond a metadata skeleton (no headers/cookies/body/session/response/exception) gets #[NoRecord], read off the resolved action\'s class by reflection.', 'code' => <<<'PHP'
+                        use Quiote\Replay\Attribute\NoRecord;
+
+                        #[NoRecord]
+                        final class SubmitPaymentAction extends Action { /* ... */ }
+                        PHP],
+                    ['description' => 'This assistant reads production cassettes directly -- no target-app checkout needed for the read-only tools. list_failed_requests finds candidates by recency; describe_cassette pulls one cassette\'s full payload (redacted); cassette_section pulls one section (request/response/db/exception/...) when the full payload is too large. Configure a direct store at launch if you want to point this MCP server at a deployment\'s cassette container: --cassette-store=azure-blob --azure-account=... --azure-container=... --azure-env=production (or the QUIOTE_ASSISTANT_* env-var equivalents), with --azure-auth defaulting to cli (whatever `az login` already established).'],
+                    ['description' => 'replay_cassette and emit_replay_test need an actual application checkout (--target-app-dir) -- one dispatches the recorded request through the app\'s own pipeline, the other writes a test file into its tree; neither is expressible against a bare blob container. Both wrap the `replay` console command underneath.', 'code' => <<<'BASH'
+                        php bin/quiote replay <id> [--live] [--force] [--context=<name>] [--as-test] [--expect-fixed] [--json]
+                        BASH],
+                    ['description' => 'ISOLATION IS THE DEFAULT and needs no flag: clock is frozen at recorded_at, environment/cache/outbound-HTTP/queue reads are answered from the cassette\'s own recorded effects (a miss throws/errors rather than fabricating a value), and Doctrine/Propulsion queries are served recorded rows. Randomness is deliberately NOT substituted -- nothing recorded it, so nothing would be fed back but an invented value. A request whose only effects are Doctrine/Propulsion queries replays cleanly; one that reads the cache replays against a cold cache (each unrecorded read reported as an error diagnostic); one with outbound HTTP or an Environment read cannot be isolated at all -- use --live; Eloquent/Cycle/raw-pdo queries are never isolated from the real database.'],
+                    ['description' => '--live actually re-performs the request\'s side effects against real collaborators -- it refuses unless replay.allow_live is true (default false everywhere), and refuses anything but a SAFE method (GET/HEAD/OPTIONS/TRACE) without --force. Safe, not idempotent: a recorded DELETE /accounts/42 really deletes account 42 if you force it -- there is no confirmation prompt.'],
+                    ['description' => 'Drift comes back as one list of diagnostics, never smoothed over: REPLAY_STATUS_MISMATCH/REPLAY_BODY_MISMATCH (error), REPLAY_HEADER_* (warning; Date/Set-Cookie/correlation-id headers are skipped entirely), and -- only meaningful under isolation, since a live replay\'s effects never touch the ledger -- REPLAY_EFFECT_MISS (error, code asked for something the cassette has no counterpart for), REPLAY_EFFECT_UNPLAYED (warning, a recorded effect nothing asked for) and REPLAY_EFFECT_FUZZY (warning, answered from a different-fingerprint effect).'],
+                    ['description' => '--as-test commits the reproduction as a regression test: writes cassettes/{slug}.qcast plus a thin ReplayTestCase under replay.tests_path (default tests/Replay/). It extends the same HttpTestCase your other feature tests use, so every assertion you already know works on the returned TestResponse. AN EMITTED TEST ALWAYS REPLAYS IN ISOLATION regardless of --live at emission time -- that is what makes it safe to run unattended in CI, since it never re-performs the original write. A recorded DB write or enqueued job is scaffolded as a comment naming the SQL/job, not as a commented-out assertion call.', 'code' => <<<'PHP'
+                        /** Generated from cassette "CRX2050", recorded 2026-08-19T14:02:11+03:00. */
+                        final class ReplayCRX2050Test extends Quiote\Replay\Testing\ReplayTestCase
+                        {
+                            public function testOrdersUpdateReproducesRecordedResponse(): void
+                            {
+                                $this->replay(__DIR__ . '/cassettes/CRX2050.qcast')
+                                    ->assertStatus(500)
+                                    ->assertSee('Undefined array key "shipping"');
+                            }
+                        }
+                        PHP],
+                    ['description' => 'As of 4.3.0-RC1, replaying a cassette (CLI or emitted test) can override the request URI/query/body and impersonate a live session -- useful for re-running a captured failure against a variant of the original request rather than only exactly as recorded -- and it captures the exception and log entries the recorded request actually produced. This is an RC feature not yet in the curated docs; see the "upgrade-to-4-3" recipe.'],
+                    ['description' => 'Choose a store to match where you deploy: file (default, local disk, fine for dev), PDO (replay.store: pdo, one row per cassette, prunable with `cassette:prune`), or object-store-backed via replay-storage + a provider package (replay-azure, etc. -- --azure-env names the ENVIRONMENT THAT RECORDED the cassette, not this process\'s own core.environment, which matters when reading from a laptop). See quiote-docs://advanced/record-replay for the full settings reference and the console commands (cassette:list/show/fetch/prune).'],
+                ],
+            ],
+            'upgrade-to-4-2' => [
+                'title' => 'Upgrade an app from Quiote 4.1 to 4.2',
+                'steps' => [
+                    ['description' => 'ACTION REQUIRED if you use the filesystem or object-store classes: fourteen classes moved OUT of the framework into two new packages, quioteframework/filesystem and quioteframework/storage. Every namespace is unchanged (Quiote\\Filesystem\\*, Quiote\\Storage\\*, plus Quiote\\Session\\ObjectStoreSessionPersistence which lives in the filesystem package), so there is no code to edit -- just install what used to come bundled.', 'code' => <<<'BASH'
+                        composer require quioteframework/filesystem
+                        # requires quioteframework/storage transitively; if all you touch is
+                        # Quiote\Storage\* (writing your own object-store client), that alone is enough:
+                        # composer require quioteframework/storage
+                        BASH],
+                    ['description' => 'You already have these transitively if composer.json requires quioteframework/cloud-azure, cloud-s3 or cloud-gcs (-> storage), session-azure/session-s3/session-gcs (-> filesystem), or replay-storage (-> storage). NOT enough on its own: filesystem-azure/-s3/-gcs only SUGGEST quioteframework/filesystem (their clients work without it; only FilesystemManager\'s disk drivers need it).'],
+                    ['description' => 'HOW IT FAILS IF YOU MISS IT, and neither symptom says "package missing": a plugins entry naming Quiote\\Filesystem\\FilesystemPlugin::class is logged (`configured plugin "..." is not a Quiote\\Plugin\\PluginInterface`, at error) and SKIPPED, not fatal -- the app boots with no FilesystemManager in the container and the first $container->get(FilesystemManager::class) fails there instead. Direct use anywhere else is a plain autoload failure: Class "Quiote\\Filesystem\\FilesystemManager" not found. Grep logs for that PluginManager line before calling an upgrade clean.'],
+                    ['description' => 'PLUGIN AUTHORS ONLY: PluginManager::reset() no longer clears FilesystemDriverRegistry by name -- that was core reaching into one optional subsystem it happened to know about. A plugin owning a static registry now contributes its own cleanup.', 'code' => <<<'PHP'
+                        // from a plugin's register():
+                        $registrar->stateReset('my-driver-registry', static fn() => MyDriverRegistry::reset());
+                        PHP],
+                    ['description' => 'WORTH KNOWING, NOTHING TO DO: quioteframework/replay plus seven companion packages ship new, tagged 4.0.0, no @RC/minimum-stability needed -- see the record-and-replay-cassettes recipe. All three cloud filesystem disks (s3/gcs/azure) can list now via FilesystemManager::listableDisk($alias)->listContents(), where they previously refused at resolution -- see the "read-write-filesystem" recipe. New Quiote\\Support\\Clock/Random/Environment seams wrap now()/random_bytes()/random_int()/getenv() throughout the framework, letting a test freeze time or seed randomness process-wide. A config value can reference the process environment with %env(NAME)% or %env(NAME, fallback)%, resolved at LOAD time (not compile time), so a cache baked into a container image carries the placeholder rather than the build machine\'s value -- a plugin\'s "enabled" accepts the same placeholder.'],
+                    ['description' => 'IF YOU TRACKED cloud-azure ON dev-main (not a tagged release): AzureBlobClient\'s third constructor argument changed from a plain string $accountKey to an AzureCredential. Wrap what you were passing in new SharedKeyCredential($accountKey) for byte-identical Shared Key signing. Apps building the client through AzureCredentialFactory (which session-azure/filesystem-azure both do) need no change -- just set that disk\'s "auth" to shared_key/workload_identity/cli/chain. The Azure AD credential path (workload_identity/cli/chain) has not yet run against real Azure.'],
+                    ['description' => 'Checklist: composer require quioteframework/filesystem (or just storage) if you touch either subsystem; grep logs for the FilesystemPlugin skip warning on a running app; audit any plugin with a static registry for a stateReset() contribution; nothing else changes -- no namespace edits, no config changes, and an existing plugins entry stays exactly as written. See quiote-docs://getting-started/upgrading-to-4-2.'],
+                ],
+            ],
+            'upgrade-to-4-3' => [
+                'title' => 'Upgrade an app from Quiote 4.2 to 4.3 (currently 4.3.0-RC1)',
+                'steps' => [
+                    ['description' => 'PURELY ADDITIVE, replay-only, no application code to change. 4.3.0-RC1 is not yet folded into the curated upgrade guide on the docs site (still an RC as of this writing) -- this recipe is sourced from quioteframework/quiote\'s and quioteframework/replay\'s own CHANGELOG.md.'],
+                    ['description' => 'Replaying a cassette can now OVERRIDE the request URI and impersonate a live session, and override the query string and body params too -- useful for re-running a captured production failure against a different route, as a different authenticated user, or with different input, rather than only exactly as it was recorded. See the "record-and-replay-cassettes" recipe and quiote-docs://advanced/record-replay for the base workflow; check quioteframework/replay\'s own CHANGELOG or --help on the replay console command for the exact override flags, since they landed after this app\'s docs mirror was last synced.'],
+                    ['description' => 'FIXED: replaying a cassette now captures the exception and log entries the recorded request actually produced, not just its response -- so a replayed failure surfaces the same exception/log evidence the original production request did.'],
+                    ['description' => 'Checklist: nothing to change in application code; if you use --as-test/emit_replay_test on cassettes recorded before this fix, re-emitting against a fresh cassette will include exception/log assertions the old emission did not have.'],
                 ],
             ],
         ];

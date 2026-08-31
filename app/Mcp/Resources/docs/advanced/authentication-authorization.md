@@ -287,8 +287,7 @@ This matters most for the mixed case — an SPA that authenticates with a bearer
 
 ```php
 // In the action behind e.g. /auth/session, having already authenticated the JWT.
-// Inject Quiote\User\CurrentUser -- Context no longer exposes getUser() as of 4.0.
-$user = $this->currentUser->get();
+$user = $this->getContext()->getUser();
 $user->markTokenDerived(false);   // this identity is now the session's
 $user->setAuthenticated(true);    // regenerates the id, writes the auth flag
 $user->grantRole('member');       // persisted on shutdown

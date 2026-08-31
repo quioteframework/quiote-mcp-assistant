@@ -1,6 +1,6 @@
 # Support
 
-> The Quiote\\Support namespace — 7 documented types.
+> The Quiote\\Support namespace — 19 documented types.
 
 Everything under `Quiote\Support`.
 
@@ -14,4 +14,7 @@ Everything under `Quiote\Support`.
 
 | Namespace | Contents |
 |---|---|
+| [`Clock`](/api/support/clock/) | 5 types |
 | [`Compiler`](/api/support/compiler/) | 6 types |
+| [`Environment`](/api/support/environment/) | 3 types |
+| [`Random`](/api/support/random/) | 4 types |

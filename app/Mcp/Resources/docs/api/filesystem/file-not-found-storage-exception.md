@@ -11,7 +11,7 @@ Thrown by [`FilesystemAdapterInterface::read()`](/api/filesystem/filesystem-adap
 |  |  |
 |---|---|
 | Extends | [`FilesystemStorageException`](/api/filesystem/filesystem-storage-exception/) |
-| Source | `Filesystem/FileNotFoundStorageException.php` |
+| Source | `FileNotFoundStorageException.php` |
 
 ## Inherited methods
 

@@ -8,5 +8,5 @@ Everything under `Quiote\Filesystem\Gcs`.
 
 | Class | Description |
 |---|---|
-| [`GcsFilesystemAdapter`](/api/filesystem/gcs/gcs-filesystem-adapter/) | [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) over [`GcsClient`](/api/storage/gcs/gcs-client/) (HMAC interop-key REST client, no google/cloud-storage). |
+| [`GcsFilesystemAdapter`](/api/filesystem/gcs/gcs-filesystem-adapter/) | [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) over [`GcsClient`](/api/storage/gcs/gcs-client/) (HMAC interop-key REST client, no google/cloud-storage). |
 | [`GcsFilesystemPlugin`](/api/filesystem/gcs/gcs-filesystem-plugin/) | Registers the `gcs` filesystem driver alias and publishes `filesystem.disks.gcs.*` config defaults. |

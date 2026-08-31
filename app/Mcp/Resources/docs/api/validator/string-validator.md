@@ -4,7 +4,7 @@
 
 StringValidator allows you to apply string-related constraints to a parameter.
 
-Parameters: 'min'  string should be at least this long 'max'  string should be at most this long 'trim' trim whitespace before length checks 'utf8' whether or not to treat input as UTF-8 (defaults to true)
+Parameters: 'min'  string should be at least this long 'max'  string should be at most this long 'trim' trim whitespace before length checks 'utf8' whether or not to treat input as UTF-8 (defaults to true) On success the (string-cast, optionally trimmed) value is written back into the request under the 'export' parameter's name, or under the validator's own argument name when 'export' is not configured -- so a caller reading the argument back afterwards always gets a native string, never the raw submitted scalar.
 
 ## Synopsis
 

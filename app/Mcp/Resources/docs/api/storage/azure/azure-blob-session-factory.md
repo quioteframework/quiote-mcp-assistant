@@ -6,6 +6,10 @@
 
 ```yaml session: class: Quiote\Storage\Azure\AzureBlobSessionFactory params: account_name: '%env(AZURE_STORAGE_ACCOUNT)%' account_key: '%env(AZURE_STORAGE_KEY)%' container: quiote-sessions ```
 
+The `%env(NAME)%` credentials are read from the process environment when the compiled configuration is loaded, not when it is compiled, so no key is written into the config cache -- see [`EnvPlaceholder`](/api/config/env-placeholder/).
+
+`auth` selects how requests are authorized: `shared_key` (default, needs `account_key`), `workload_identity` (AKS, reads the webhook's own environment variables), `cli` (a developer's `az login` session) or `chain` (workload identity, falling back to the CLI). Only `shared_key` ever reads a storage account key.
+
 For small key/value-shaped session payloads [`AzureTableSessionFactory`](/api/storage/azure/azure-table-session-factory/) is cheaper. Bring your own PSR-18 client, bound in the container.
 
 ## Synopsis

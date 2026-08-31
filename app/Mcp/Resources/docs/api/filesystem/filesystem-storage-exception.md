@@ -11,7 +11,7 @@ Thrown when a [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-
 |  |  |
 |---|---|
 | Extends | [`StorageException`](/api/exception/storage-exception/) |
-| Source | `Filesystem/FilesystemStorageException.php` |
+| Source | `FilesystemStorageException.php` |
 
 ## Inherited methods
 

@@ -24,7 +24,7 @@ The `getModuleName()`, `getOutputType()`, `getParameter()` and `getParameters()`
 
 ### __construct()
 
-`public function __construct(Context $context, string $viewModule, string $viewName, string $outputType, ?string $actionModule, ?string $actionName, array<string, mixed> $actionAttributes, WebResponse $response, ?ResponseInterface $psrResponse = null, ?object $validationManager = null): mixed`
+`public function __construct(Context $context, string $viewModule, string $viewName, string $outputType, ?string $actionModule, ?string $actionName, array<string, mixed> $actionAttributes, WebResponse $response, ?ResponseInterface $psrResponse = null, ?ValidationManager $validationManager = null): mixed`
 
 Constructor.
 
@@ -41,7 +41,7 @@ An array of parameters to be set right away.
 | `$actionAttributes` | `array``<``string``, ``mixed``>` |  |
 | `$response` | [`WebResponse`](/api/response/web-response/) |  |
 | `$psrResponse` | `?`[`ResponseInterface`](https://www.php-fig.org/psr/psr-7/) |  |
-| `$validationManager` | `?``object` |  |
+| `$validationManager` | `?`[`ValidationManager`](/api/validator/validation-manager/) |  |
 
 Returns `mixed`
 
@@ -60,7 +60,7 @@ Returns `mixed`
 | [`getParameters(): array<string, mixed>`](#getparameters) | Expose an empty parameter array for completeness. |
 | [`getPsrResponse(): ResponseInterface`](#getpsrresponse) | Returns the PSR-7 response backing this context, never null. |
 | [`getResponse(): WebResponse`](#getresponse) | Returns the response the view writes its rendered output into. |
-| [`getValidationManager(): ?object`](#getvalidationmanager) | Return the validation manager, preferring the one injected at construction time (which carries the live error state from the current request). |
+| [`getValidationManager(): ?ValidationManager`](#getvalidationmanager) | Return the validation manager, preferring the one injected at construction time (which carries the live error state from the current request). |
 | [`getViewModuleName(): string`](#getviewmodulename) | Returns the canonical name of the module hosting the view. |
 | [`getViewName(): string`](#getviewname) | Returns the canonical name of the view being rendered. |
 
@@ -165,13 +165,13 @@ Returns [`WebResponse`](/api/response/web-response/)
 
 ### getValidationManager()
 
-`public function getValidationManager(): ?object`
+`public function getValidationManager(): ?ValidationManager`
 
 Return the validation manager, preferring the one injected at construction time (which carries the live error state from the current request).
 
 Falls back to creating a fresh instance only when none was supplied — callers that need error messages (e.g. JSON error views) must pass the validation manager explicitly via the constructor.
 
-Returns `?``object`
+Returns `?`[`ValidationManager`](/api/validator/validation-manager/)
 
 ### getViewModuleName()
 

@@ -8,5 +8,5 @@ Everything under `Quiote\Filesystem\Azure`.
 
 | Class | Description |
 |---|---|
-| [`AzureFilesystemAdapter`](/api/filesystem/azure/azure-filesystem-adapter/) | [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) over [`AzureBlobClient`](/api/storage/azure/azure-blob-client/) (Shared-Key REST client), against a fixed container. |
+| [`AzureFilesystemAdapter`](/api/filesystem/azure/azure-filesystem-adapter/) | [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) over [`AzureBlobClient`](/api/storage/azure/azure-blob-client/), against a fixed container. |
 | [`AzureFilesystemPlugin`](/api/filesystem/azure/azure-filesystem-plugin/) | Registers the `azure` filesystem driver alias and publishes `filesystem.disks.azure.*` config defaults. |

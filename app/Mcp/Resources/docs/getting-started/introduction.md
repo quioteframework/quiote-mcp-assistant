@@ -5,7 +5,7 @@
 Quiote is a PHP 8.5+ MVC framework descended from [Agavi](https://www.agavi.org/) — itself a fork of Mojavi, one of the earliest PHP MVC frameworks. It targets **large, long-lived applications** where developers need fine-grained control over behaviour.
 
 :::note[Version]
-The latest stable release is **v4.0.0**. See the [changelog](/getting-started/changelog/), and [Upgrading to 4.0](/getting-started/upgrading-to-4/) if you are on 3.x.
+The latest stable release is **v4.2.0**. See the [changelog](/getting-started/changelog/), and [Upgrading to 4.0](/getting-started/upgrading-to-4/) if you are on 3.x.
 :::
 
 ## Where the name comes from

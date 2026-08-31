@@ -209,11 +209,34 @@ $this->assertSame('', $bag->getId());
 
 That is the shape a console command, a queue worker or a stateless API runs in, so it is worth asserting against directly if your code has a sessionless path.
 
-Binding `SessionManager::class` singleton the same way is the companion seam: it installs a manager without a configured `session` factory slot, which is what lets a test exercise anything that asks the manager for its cookie name — CSRF validation, most obviously (`Context::setSessionManager()` no longer exists as of 4.0).
+`Context::setSessionManager()` is the companion seam: it installs a manager without a configured `session` factory slot, which is what lets a test exercise anything that asks the manager for its cookie name — CSRF validation, most obviously.
+
+## Time, randomness and the environment
+
+Three ambient reads are behind seams, so a test controls them without touching the code under test. Every `now()`, `random_bytes()`/`random_int()` and `getenv()` call inside the framework goes through one of them.
+
+| Facade | Interface | Test implementations |
+|---|---|---|
+| `Quiote\Support\Clock\Clock` | `ClockInterface` (extends PSR-20) | `FrozenClock`, `OffsetClock` |
+| `Quiote\Support\Random\Randomness` | `RandomnessInterface` | `SeededRandomness` |
+| `Quiote\Support\Environment\Environment` | `EnvironmentReaderInterface` | write your own, or a closure-backed stub |
+
+Each facade's `use*()` method installs an implementation process-wide **and returns the one it replaced**, so restoring is a `finally` away:
 
 ```php
-$context->getContainer()->set(SessionManager::class, $manager, Container::SCOPE_SINGLETON);
+$previous = Clock::useClock(FrozenClock::fromDateTime(new \DateTimeImmutable('2026-03-01 12:00:00')));
+try {
+    // ... assert behaviour at that instant
+} finally {
+    Clock::useClock($previous);
+}
 ```
+
+`FrozenClock` also has `advance($seconds)` and `set()`, so a test can step time forward across an expiry boundary rather than sleeping. `ClockInterface` splits the two kinds of reading on purpose: `now()`/`unixTimestamp()`/`microtime()` are wall clock, for anything that stores or compares an epoch-relative expiry, while `monotonic()` never steps backwards on an NTP correction — which is what measuring a duration actually needs.
+
+Prefer constructor-injecting `ClockInterface`, `RandomnessInterface` or `EnvironmentReaderInterface` where you can: the container binds all three, and an injected collaborator needs no global install and no restore. The facades exist for the fully-static call sites that have no container to resolve through — and `Context` seeds the container's own bindings *from* the facades, so installing an implementation before bootstrap reaches both.
+
+All three arrived in 4.2, and they are what makes [replay](/advanced/record-replay/)'s isolated mode possible: it freezes the clock at a cassette's recorded instant and answers environment reads from the cassette.
 
 ## Other seams worth knowing
 

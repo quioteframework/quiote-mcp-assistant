@@ -201,6 +201,21 @@ $bar   = $rd->getParameter('bar', null);    // returns null — default suppress
 
 Reading a parameter that no validator approved throws `UnvalidatedParameterAccessException` — unless you pass a default, in which case the default is returned. This makes "I forgot to validate this field" a loud error at development time, not a silent security hole.
 
+### What a validator hands back
+
+For a **single-argument** validator whose job is type coercion, what you read back is the value the validator produced, not the raw submission:
+
+| Validator | `getParameter()` returns |
+|---|---|
+| `StringValidator` | The string-cast, optionally trimmed value — a native string, even when an `int` was submitted. |
+| `JsonValidator` | The decoded value. |
+| `NumberValidator` | The cast `int`/`float`. |
+| `BooleanValidator` | A native `bool`, from any of `1`/`0`, `yes`/`no`, `on`/`off`, `true`/`false`. |
+
+Setting `export` redirects that value to another parameter name instead. Before 4.1 `StringValidator` and `JsonValidator` only wrote back *with* an `export` target, so without one the action silently read the raw input — and an `int` could survive a string validator and fail against a strictly-typed setter further down.
+
+Multi-argument validators and the array/base validators are unaffected: they have no single obvious target, so they stay opt-in through `export`. `DateTimeValidator` is deliberately opt-in too — its argument is often several discrete fields, or driven by `cast_to`/`arguments_format`, so there is no unambiguous default target.
+
 ## The strict lockdown
 
 For a non-simple action with **no validator configuration at all**, `ValidationMiddleware` clears every request parameter before the action runs — query parameters, the parsed body, and any promoted route parameters — via `WebRequest::clearParameters()`. The action sees no parameter input rather than unvalidated input: to let it read a parameter, declare a validator for that parameter's name (see [Advanced validation](/advanced/advanced-validation/)). This clearing applies to the parameter store only; headers, cookies, and uploaded files are not wiped by the lockdown, so treat those as unvalidated input and read them defensively.

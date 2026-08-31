@@ -22,12 +22,13 @@ Reverse-proxy correction is deliberately *not* done here: every runtime funnels 
 
 ### __construct()
 
-`public function __construct(SwooleConverterOptions $options = new SwooleConverterOptions(…), Psr17Factory $psr17 = new Psr17Factory(…)): mixed`
+`public function __construct(SwooleConverterOptions $options = new SwooleConverterOptions(…), Psr17Factory $psr17 = new Psr17Factory(…), ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$options` | [`SwooleConverterOptions`](/api/runtime/swoole/swoole-converter-options/) |  |
 | `$psr17` | `Psr17Factory` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

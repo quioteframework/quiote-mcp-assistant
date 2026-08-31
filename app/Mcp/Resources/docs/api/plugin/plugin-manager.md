@@ -24,6 +24,7 @@ Lifecycle: - [`PluginManager::add()`](/api/plugin/plugin-manager/#add) — progr
 | [`addHttpClientConfig(string $name, callable $configurator): void`](#addhttpclientconfig) | Records a configurator for a named HTTP client, keyed by $name. |
 | [`addModuleDirectory(string $dir): void`](#addmoduledirectory) | Records a directory a plugin contributes as a module search root. |
 | [`addRequestEndClear(string $label, \Closure(): void $clear): void`](#addrequestendclear) | Contribute a clear that runs when a request on any context ends. |
+| [`addStateReset(string $label, \Closure(): void $reset): void`](#addstatereset) | Contribute a callback that clears a plugin-owned static registry, run as part of [`PluginManager::reset()`](/api/plugin/plugin-manager/#reset). |
 | [`bootFromConfig(): void`](#bootfromconfig) | Boot phase: pull plugins from the `plugins` config key, then invoke register() on every plugin once, in order. |
 | [`configureContainer(Container $container): void`](#configurecontainer) | Apply deferred DI-service contributions to a container, register-if-absent so app/core bindings (and the first contributing plugin) win. |
 | [`configureHttpClients(HttpClientFactory $factory): void`](#configurehttpclients) | Apply named-HTTP-client contributions to a factory (does not overwrite an already-configured name). |
@@ -104,6 +105,17 @@ Contribute a clear that runs when a request on any context ends.
 |---|---|---|
 | `$label` | `string` |  |
 | `$clear` | `\Closure(): void` |  |
+
+### addStateReset()
+
+`public static function addStateReset(string $label, \Closure(): void $reset): void`
+
+Contribute a callback that clears a plugin-owned static registry, run as part of [`PluginManager::reset()`](/api/plugin/plugin-manager/#reset).
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$label` | `string` |  |
+| `$reset` | `\Closure(): void` |  |
 
 ### bootFromConfig()
 

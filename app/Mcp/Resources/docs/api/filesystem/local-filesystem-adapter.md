@@ -15,7 +15,7 @@ Writes go to a temp file in the same directory and are renamed into place (same 
 |  |  |
 |---|---|
 | Implements | [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) |
-| Source | `Filesystem/LocalFilesystemAdapter.php` |
+| Source | `LocalFilesystemAdapter.php` |
 
 ## Constructor
 

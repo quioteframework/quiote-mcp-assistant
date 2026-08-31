@@ -112,10 +112,19 @@ final class ScaffoldPrompts
             Add a database connection named "{$name}" using the "{$driver}" adapter.
 
             1. Set `core.use_database = true` in `Config/settings.php`.
-            2. Declare the connection in `Config/databases.xml`, naming the "{$driver}" driver
-               alias and its DSN/credentials. For an ORM adapter (eloquent, doctrine_orm,
-               doctrine_dbal, cycle, propulsion), ensure that ORM's plugin is enabled.
-            3. Use it: `\$db = \$context->getDatabaseManager()->getDatabase('{$name}');` then
+            2. Declare the connection in `Config/databases.{php,yaml,yml,xml}` — any of the three
+               formats works, resolved `.php` > `.yaml` > `.xml`, first match winning; PHP is the
+               recommended default. Name the "{$driver}" driver alias and its DSN/credentials. For
+               an ORM adapter (eloquent, doctrine_orm, doctrine_dbal, cycle, propulsion), ensure
+               that ORM's plugin is enabled — Cycle additionally *requires* `databases.php`, since
+               its parameters are PHP config objects. To vary the connection per environment: XML
+               filters natively with repeated `<ae:configuration environment="…">` blocks (the
+               attribute is an anchored regex, so `test.*` matches `test`/`testing`/`test.local`),
+               while PHP/YAML have no envelope equivalent — branch on
+               `Config::getNullableString('core.environment')` inside the file instead.
+            3. Use it: inject `Quiote\Database\DatabaseManager` (as of 4.0 `Context` no longer
+               exposes `getDatabaseManager()`), then
+               `\$db = \$this->databases->getDatabase('{$name}');` and
                `\$conn = \$db->getConnection();` (returns PDO or the ORM object). The `Database`
                wrapper handles lifecycle across worker requests.
 

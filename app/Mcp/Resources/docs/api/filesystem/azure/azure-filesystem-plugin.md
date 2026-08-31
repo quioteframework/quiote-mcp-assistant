@@ -27,7 +27,9 @@ Requires a PSR-18 `ClientInterface` to already be bound in the container (bring 
 
 Publishes the `filesystem.disks.azure.*` defaults, registers the `azure` driver alias and binds [`AzureFilesystemAdapter`](/api/filesystem/azure/azure-filesystem-adapter/) as a singleton.
 
-The adapter's factory reads account name and key, container, optional endpoint and key prefix from config at resolution time and pulls the PSR-18 client out of the container then, so registering this plugin without an HTTP client bound only fails once the disk is used.
+The adapter's factory reads account name, auth strategy, container, optional endpoint and key prefix from config at resolution time and pulls the PSR-18 client out of the container then, so registering this plugin without an HTTP client bound only fails once the disk is used.
+
+`filesystem.disks.azure.auth` selects how requests are authorized: `shared_key` (default, needs `account_key`), `workload_identity` (AKS, reads the webhook's own environment variables), `cli` (a developer's `az login` session) or `chain` (workload identity, falling back to the CLI). Only `shared_key` ever reads a storage account key.
 
 | Parameter | Type | Description |
 |---|---|---|

@@ -21,11 +21,12 @@ The framework's own cache is [`CacheManager`](/api/cache/cache-manager/), which 
 
 ### __construct()
 
-`public function __construct(string $directory): mixed`
+`public function __construct(string $directory, ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$directory` | `string` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

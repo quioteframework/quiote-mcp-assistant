@@ -18,12 +18,13 @@ Resolves the configured driver (or an explicit alias) from [`QueueDriverRegistry
 
 ### __construct()
 
-`public function __construct(Container $container, QueueConfig $config): mixed`
+`public function __construct(Container $container, QueueConfig $config, ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$container` | [`Container`](/api/di/container/) |  |
 | `$config` | [`QueueConfig`](/api/queue/queue-config/) |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

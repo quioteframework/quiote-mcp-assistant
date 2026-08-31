@@ -1,12 +1,14 @@
 # AzureBlobClient
 
-> Minimal Azure Blob Storage REST client using Shared Key authentication — deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST + signing algorithm has proven more maintainable in production).
+> Minimal Azure Blob Storage REST client, deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST API has proven more maintainable in production).
 
-Minimal Azure Blob Storage REST client using Shared Key authentication — deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST + signing algorithm has proven more maintainable in production).
+Minimal Azure Blob Storage REST client, deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST API has proven more maintainable in production).
 
-Only the operations the session and filesystem backends need: ensure-container, get, put, delete and get-properties. No chunked upload, snapshots, or listing.
+Only the operations the session and filesystem backends need: ensure-container, get, put, delete, get-properties and list. No chunked upload or snapshots.
 
-Those absent operations are still reachable: [`AzureBlobClient::request()`](/api/storage/azure/azure-blob-client/#request) performs the Shared Key signing and hands back the raw PSR-7 response, so a caller can implement List Blobs (or anything else) without reimplementing the signature.
+Those absent operations are still reachable: [`AzureBlobClient::request()`](/api/storage/azure/azure-blob-client/#request) authorizes the request the same way every other method does and hands back the raw PSR-7 response, so a caller can implement the operation it needs without reimplementing the authorization.
+
+Authorization itself, Shared Key or an Azure AD bearer token from workload identity or the Azure CLI, is delegated to an [`AzureCredential`](/api/storage/azure/azure-credential/), not built in here.
 
 ## Synopsis
 
@@ -20,13 +22,13 @@ Those absent operations are still reachable: [`AzureBlobClient::request()`](/api
 
 ### __construct()
 
-`public function __construct(ClientInterface $httpClient, string $accountName, string $accountKey, ?string $endpoint = null, Psr17Factory $psr17 = new Psr17Factory(…)): mixed`
+`public function __construct(ClientInterface $httpClient, string $accountName, AzureCredential $credential, ?string $endpoint = null, Psr17Factory $psr17 = new Psr17Factory(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$httpClient` | [`ClientInterface`](https://www.php-fig.org/psr/psr-18/) |  |
 | `$accountName` | `string` |  |
-| `$accountKey` | `string` |  |
+| `$credential` | [`AzureCredential`](/api/storage/azure/azure-credential/) |  |
 | `$endpoint` | `?``string` |  |
 | `$psr17` | `Psr17Factory` |  |
 
@@ -40,6 +42,7 @@ Returns `mixed`
 | [`ensureContainerExists(string $container): void`](#ensurecontainerexists) | Creates the container, treating "already exists" as success. |
 | [`get(string $container, string $blob): ?string`](#get) | Returns the blob's contents, or null if Azure answers 404. |
 | [`head(string $container, string $blob): ?ObjectMetadata`](#head) | Blob properties without transferring the body (Get Blob Properties), or null if the blob does not exist. |
+| [`listObjects(string $container, string $prefix = '', string $delimiter = '', ?string $continuationToken = null, int $maxKeys = 1000): ObjectListing`](#listobjects) | Lists blobs in $container whose name starts with $prefix, one page at a time (List Blobs). |
 | [`put(string $container, string $blob, string $data): void`](#put) | Creates or replaces a block blob in one request. |
 | [`request(string $method, string $path, array<string, string> $query = [], array<string, string> $headers = [], ?string $body = null): ResponseInterface`](#request) | Send an arbitrary signed request and return the raw response, for operations this class does not model itself. |
 
@@ -107,6 +110,28 @@ Blob properties without transferring the body (Get Blob Properties), or null if 
 | `$blob` | `string` |  |
 
 Returns `?`[`ObjectMetadata`](/api/storage/object-metadata/)
+
+### listObjects()
+
+`public function listObjects(string $container, string $prefix = '', string $delimiter = '', ?string $continuationToken = null, int $maxKeys = 1000): ObjectListing`
+
+Lists blobs in $container whose name starts with $prefix, one page at a time (List Blobs).
+
+$continuationToken must be null on the first call and, for a truncated result, the previous call's [`ObjectListing::$nextContinuationToken`](/api/storage/object-listing/#nextcontinuationtoken) verbatim on the next; it carries Azure's own `NextMarker` and is opaque to a caller.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$container` | `string` |  |
+| `$prefix` | `string` |  |
+| `$delimiter` | `string` |  |
+| `$continuationToken` | `?``string` |  |
+| `$maxKeys` | `int` |  |
+
+Returns [`ObjectListing`](/api/storage/object-listing/)
+
+| Throws | When |
+|---|---|
+| `AzureStorageException` | On any 4xx/5xx status, a transport failure that survived the retries, or a response body that was not the XML this expects. |
 
 ### put()
 

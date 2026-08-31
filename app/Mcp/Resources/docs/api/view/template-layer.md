@@ -43,37 +43,29 @@ Returns `mixed`
 
 | Method | Description |
 |---|---|
-| [`__call(string $name, array<int, mixed> $args): mixed`](#call) | Convenience overload for accessing parameters using a method. |
 | [`__clone(): mixed`](#clone) | Object cloning callback. |
 | [`__sleep(): mixed`](#sleep) | Pre-serialization callback. |
 | [`__wakeup(): mixed`](#wakeup) | Post-unserialization callback. |
 | [`execute(Renderer $renderer = null, array<string, mixed> &$attributes = [], array<int|string, mixed> &$moreAssigns = []): string`](#execute) | A convenience function that renders all slots and then the main template. |
+| [`getModule(): ?string`](#getmodule) | Get the name of the module this layer's template belongs to. |
+| [`getName(): ?string`](#getname) | Get the name of this layer. |
 | [`getRenderer(): ?Renderer`](#getrenderer) | Get the renderer instance used for this layer. |
 | [`getResourceStreamIdentifier(): ?string`](#getresourcestreamidentifier) | Get the full, resolved stream location name to the template resource. |
 | [`getSlot(string $name): SlotRenderable|null`](#getslot) | Get the execution container for a slot. |
 | [`getSlots(): array<string, SlotRenderable>`](#getslots) | Get all slots. |
+| [`getTemplate(): ?string`](#gettemplate) | Get the name of the template to render. |
 | [`hasSlot(string $name): bool`](#hasslot) | Check whether or not a slot has been set. |
 | [`hasSlots(): bool`](#hasslots) | Check if any slots have been set. |
+| [`hasTemplate(): bool`](#hastemplate) | Check whether a template has been set. |
 | [`initialize(Context $context, array<string, mixed> $parameters = []): void`](#initialize) | Initialize the layer. |
 | [`removeSlot(string $name): void`](#removeslot) | Remove a slot. |
+| [`removeTemplate(): void`](#removetemplate) | Remove the configured template. |
 | [`reset(): void`](#reset) | Drops the per-request rendering state so the layer can be reused. |
+| [`setModule(?string $module): void`](#setmodule) | Set the name of the module this layer's template belongs to. |
+| [`setName(?string $name): void`](#setname) | Set the name of this layer. |
 | [`setRenderer(Renderer $renderer): void`](#setrenderer) | Set a renderer instance to use for this layer. |
 | [`setSlot(string $name, SlotRenderable|string $c): void`](#setslot) | Set a slot that is rendered along with and available inside this layer. |
-
-### __call()
-
-`public function __call(string $name, array<int, mixed> $args): mixed`
-
-Convenience overload for accessing parameters using a method.
-
-The method arguments.
-
-| Parameter | Type | Description |
-|---|---|---|
-| `$name` | `string` | The method name. |
-| `$args` | `array``<``int``, ``mixed``>` | The method arguments. |
-
-Returns `mixed`
+| [`setTemplate(?string $template): void`](#settemplate) | Set the name of the template to render. |
 
 ### __clone()
 
@@ -121,6 +113,30 @@ Associative array of additional assigns.
 
 Returns `string` — The rendered result.
 
+### getModule()
+
+`public function getModule(): ?string`
+
+Get the name of the module this layer's template belongs to.
+
+Returns `?``string` — The module name, or null if not set.
+
+| Throws | When |
+|---|---|
+| `QuioteException` | If the "module" parameter is set but is not a string. |
+
+### getName()
+
+`public function getName(): ?string`
+
+Get the name of this layer.
+
+Returns `?``string` — The layer name, or null if not set.
+
+| Throws | When |
+|---|---|
+| `QuioteException` | If the "name" parameter is set but is not a string. |
+
 ### getRenderer()
 
 `public function getRenderer(): ?Renderer`
@@ -163,6 +179,18 @@ Get all slots.
 
 Returns `array``<``string``, `[`SlotRenderable`](/api/execution/slot-renderable/)`>` — An associative array of slot renderables, keyed by slot name.
 
+### getTemplate()
+
+`public function getTemplate(): ?string`
+
+Get the name of the template to render.
+
+Returns `?``string` — The template name, or null if not set.
+
+| Throws | When |
+|---|---|
+| `QuioteException` | If the "template" parameter is set but is not a string. |
+
 ### hasSlot()
 
 `public function hasSlot(string $name): bool`
@@ -184,6 +212,14 @@ Returns `bool` — True if the slot exists, false otherwise.
 Check if any slots have been set.
 
 Returns `bool` — true if any slots are defined, false otherwise.
+
+### hasTemplate()
+
+`public function hasTemplate(): bool`
+
+Check whether a template has been set.
+
+Returns `bool` — True if a template is set, false otherwise.
 
 ### initialize()
 
@@ -210,6 +246,12 @@ The name of the slot.
 |---|---|---|
 | `$name` | `string` | The name of the slot. |
 
+### removeTemplate()
+
+`public function removeTemplate(): void`
+
+Remove the configured template.
+
 ### reset()
 
 `public function reset(): void`
@@ -217,6 +259,30 @@ The name of the slot.
 Drops the per-request rendering state so the layer can be reused.
 
 Releases the context and its name, the renderer and any registered slots, then delegates to the parent for the parameter state and finally unsets the layer name, template attributes and extra assigns.
+
+### setModule()
+
+`public function setModule(?string $module): void`
+
+Set the name of the module this layer's template belongs to.
+
+The module name.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$module` | `?``string` | The module name. |
+
+### setName()
+
+`public function setName(?string $name): void`
+
+Set the name of this layer.
+
+The layer name.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$name` | `?``string` | The layer name. |
 
 ### setRenderer()
 
@@ -242,6 +308,18 @@ Deprecated legacy container parameter now supports SlotRenderable only.
 |---|---|---|
 | `$name` | `string` | The name of the slot. |
 | `$c` | [`SlotRenderable`](/api/execution/slot-renderable/)`|``string` | Deprecated legacy container parameter now supports SlotRenderable only. |
+
+### setTemplate()
+
+`public function setTemplate(?string $template): void`
+
+Set the name of the template to render.
+
+The template name.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$template` | `?``string` | The template name. |
 
 ## Inherited methods
 

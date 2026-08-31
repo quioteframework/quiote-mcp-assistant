@@ -69,6 +69,13 @@ return array (
     'title' => 'Background jobs & queues',
     'description' => 'Pushing and processing background jobs — Job/RetryableJob, the sync and DB-backed drivers, retry/backoff, dead-letter handling, and the queue:work/queue:failed:* commands.',
   ),
+  'quiote-docs://advanced/record-replay' => 
+  array (
+    'file' => 'advanced/record-replay.md',
+    'path' => 'advanced/record-replay',
+    'title' => 'Record, replay & regression tests',
+    'description' => 'Recording a real request as a cassette with quioteframework/replay, replaying it in isolation to see what changed, and emitting it as a committed PHPUnit regression test.',
+  ),
   'quiote-docs://advanced/scheduling' => 
   array (
     'file' => 'advanced/scheduling.md',
@@ -279,6 +286,13 @@ return array (
     'title' => 'DatabaseConfigHandler',
     'description' => 'DatabaseConfigHandler allows you to setup database connections in a configuration file that will be created for you automatically upon first request.',
   ),
+  'quiote-docs://api/config/env-placeholder' => 
+  array (
+    'file' => 'api/config/env-placeholder.md',
+    'path' => 'api/config/env-placeholder',
+    'title' => 'EnvPlaceholder',
+    'description' => 'The `%env(NAME)%` / `%env(NAME, fallback)%` placeholder: a configuration value that comes from the process environment.',
+  ),
   'quiote-docs://api/config/factory-config-handler' => 
   array (
     'file' => 'api/config/factory-config-handler.md',
@@ -480,7 +494,7 @@ return array (
     'file' => 'api/config/index.md',
     'path' => 'api/config/index',
     'title' => 'Config',
-    'description' => 'The Quiote\\\\Config namespace — 67 documented types.',
+    'description' => 'The Quiote\\\\Config namespace — 68 documented types.',
   ),
   'quiote-docs://api/config/middleware-config-handler' => 
   array (
@@ -1586,7 +1600,7 @@ return array (
     'file' => 'api/exception/rendering/exception-renderer-registry.md',
     'path' => 'api/exception/rendering/exception-renderer-registry',
     'title' => 'ExceptionRendererRegistry',
-    'description' => 'Process-global slot for the \\"developer\\" exception renderer (the one ErrorHandlingMiddleware uses when `core.developer_exceptions` is true), mirroring the static, worker-lifetime pattern of DatabaseDriverRegistry / MiddlewareCatalog.',
+    'description' => 'Process-global slot for the \\"developer\\" and \\"safe\\" exception renderers (the ones ErrorHandlingMiddleware uses when `core.developer_exceptions` is true or false, respectively), mirroring the static, worker-lifetime pattern of DatabaseDriverRegistry / MiddlewareCatalog.',
   ),
   'quiote-docs://api/exception/rendering/index' => 
   array (
@@ -1929,7 +1943,7 @@ return array (
     'file' => 'api/filesystem/azure/azure-filesystem-adapter.md',
     'path' => 'api/filesystem/azure/azure-filesystem-adapter',
     'title' => 'AzureFilesystemAdapter',
-    'description' => 'FilesystemAdapterInterface over AzureBlobClient (Shared-Key REST client), against a fixed container.',
+    'description' => 'ListableFilesystemInterface over AzureBlobClient, against a fixed container.',
   ),
   'quiote-docs://api/filesystem/azure/azure-filesystem-plugin' => 
   array (
@@ -1999,7 +2013,7 @@ return array (
     'file' => 'api/filesystem/gcs/gcs-filesystem-adapter.md',
     'path' => 'api/filesystem/gcs/gcs-filesystem-adapter',
     'title' => 'GcsFilesystemAdapter',
-    'description' => 'FilesystemAdapterInterface over GcsClient (HMAC interop-key REST client, no google/cloud-storage).',
+    'description' => 'ListableFilesystemInterface over GcsClient (HMAC interop-key REST client, no google/cloud-storage).',
   ),
   'quiote-docs://api/filesystem/gcs/gcs-filesystem-plugin' => 
   array (
@@ -2020,7 +2034,7 @@ return array (
     'file' => 'api/filesystem/index.md',
     'path' => 'api/filesystem/index',
     'title' => 'Filesystem',
-    'description' => 'The Quiote\\\\Filesystem namespace — 16 documented types.',
+    'description' => 'The Quiote\\\\Filesystem namespace — 17 documented types.',
   ),
   'quiote-docs://api/filesystem/listable-filesystem-interface' => 
   array (
@@ -2028,6 +2042,13 @@ return array (
     'path' => 'api/filesystem/listable-filesystem-interface',
     'title' => 'ListableFilesystemInterface',
     'description' => 'A filesystem that can enumerate what it holds.',
+  ),
+  'quiote-docs://api/filesystem/listable-object-store-filesystem-adapter' => 
+  array (
+    'file' => 'api/filesystem/listable-object-store-filesystem-adapter.md',
+    'path' => 'api/filesystem/listable-object-store-filesystem-adapter',
+    'title' => 'ListableObjectStoreFilesystemAdapter',
+    'description' => 'A ListableFilesystemInterface over any ListableObjectStoreClientInterface, everything but listing inherited unchanged from ObjectStoreFilesystemAdapter.',
   ),
   'quiote-docs://api/filesystem/local-filesystem-adapter' => 
   array (
@@ -2055,7 +2076,7 @@ return array (
     'file' => 'api/filesystem/s3/s3-filesystem-adapter.md',
     'path' => 'api/filesystem/s3/s3-filesystem-adapter',
     'title' => 'S3FilesystemAdapter',
-    'description' => 'FilesystemAdapterInterface over S3Client (SigV4 REST client, no aws-sdk-php).',
+    'description' => 'ListableFilesystemInterface over S3Client (SigV4 REST client, no aws-sdk-php).',
   ),
   'quiote-docs://api/filesystem/s3/s3-filesystem-plugin' => 
   array (
@@ -2258,7 +2279,7 @@ return array (
     'file' => 'api/index.md',
     'path' => 'api/index',
     'title' => 'API reference',
-    'description' => 'Every class, interface, trait and enum the framework ships — 744 types across 42 namespaces.',
+    'description' => 'Every class, interface, trait and enum the framework ships — 881 types across 43 namespaces.',
   ),
   'quiote-docs://api/introspection/app-introspection-artifact-writer' => 
   array (
@@ -3337,6 +3358,916 @@ return array (
     'path' => 'api/renderer/xslt/xslt-renderer',
     'title' => 'XsltRenderer',
     'description' => 'Renders `.xsl` stylesheets against an \\"inner\\" XML document (from `$moreAssigns[\'inner\']`) via ext-xsl.',
+  ),
+  'quiote-docs://api/replay/adapter/cycle/cycle-effect-source' => 
+  array (
+    'file' => 'api/replay/adapter/cycle/cycle-effect-source.md',
+    'path' => 'api/replay/adapter/cycle/cycle-effect-source',
+    'title' => 'CycleEffectSource',
+    'description' => 'The EffectSource implementation `Quiote\\\\Replay\\\\Recording\\\\RecorderMiddleware` activates/deactivates around one request.',
+  ),
+  'quiote-docs://api/replay/adapter/cycle/cycle-recording-logger' => 
+  array (
+    'file' => 'api/replay/adapter/cycle/cycle-recording-logger.md',
+    'path' => 'api/replay/adapter/cycle/cycle-recording-logger',
+    'title' => 'CycleRecordingLogger',
+    'description' => 'Records one EffectKind::Db entry per successful query on a Cycle (`cycle/database`) connection, and forwards every message to whatever logger the application already had, via Cycle\'s own PSR-3 logger seam -- `Cycle\\\\Database\\\\Driver\\\\Driver::statement()` logs every query through whatever `Psr\\\\Log\\\\LoggerInterface` was installed on it, at `info` on success and `error`+`alert` on failure (read directly from `vendor/cycle/database/src/Driver/Driver.php`, not assumed).',
+  ),
+  'quiote-docs://api/replay/adapter/cycle/index' => 
+  array (
+    'file' => 'api/replay/adapter/cycle/index.md',
+    'path' => 'api/replay/adapter/cycle/index',
+    'title' => 'Cycle',
+    'description' => 'The Quiote\\\\Replay\\\\Adapter\\\\Cycle namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/replay/adapter/cycle/replay-cycle-database' => 
+  array (
+    'file' => 'api/replay/adapter/cycle/replay-cycle-database.md',
+    'path' => 'api/replay/adapter/cycle/replay-cycle-database',
+    'title' => 'ReplayCycleDatabase',
+    'description' => 'CycleDatabase, with CycleRecordingLogger installed on the `Cycle\\\\Database\\\\DatabaseManager` it builds.',
+  ),
+  'quiote-docs://api/replay/adapter/cycle/replay-cycle-plugin' => 
+  array (
+    'file' => 'api/replay/adapter/cycle/replay-cycle-plugin.md',
+    'path' => 'api/replay/adapter/cycle/replay-cycle-plugin',
+    'title' => 'ReplayCyclePlugin',
+    'description' => 'Wires Cycle\'s own PSR-3 logger seam into `quioteframework/replay`\'s generic effect-recording seam, through the same plugin mechanism every other Quiote package uses.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-effect-source' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-effect-source.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-effect-source',
+    'title' => 'DoctrineEffectSource',
+    'description' => 'The EffectSource implementation `Quiote\\\\Replay\\\\Recording\\\\RecorderMiddleware` activates/deactivates around one request.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-recording-connection' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-recording-connection.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-recording-connection',
+    'title' => 'DoctrineRecordingConnection',
+    'description' => 'Records `query()`/`exec()` called directly on the connection (bypassing a prepared Statement), and hands back a DoctrineRecordingStatement from `prepare()` so a prepared statement\'s own `execute()` is recorded too.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-recording-driver' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-recording-driver.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-recording-driver',
+    'title' => 'DoctrineRecordingDriver',
+    'description' => 'Wraps the real driver so every connection it builds records -- or, during an isolated replay, never opens at all.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-recording-middleware' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-recording-middleware.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-recording-middleware',
+    'title' => 'DoctrineRecordingMiddleware',
+    'description' => 'A `Doctrine\\\\DBAL\\\\Driver\\\\Middleware` (DBAL 4\'s own extension seam, installed via `Doctrine\\\\DBAL\\\\Configuration::setMiddlewares([$middleware])` passed to `Doctrine\\\\DBAL\\\\DriverManager::getConnection($params, $config)`) that appends one EffectKind::Db entry per query to whichever EffectLedger ActiveEffectLedger currently holds.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-recording-statement' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-recording-statement.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-recording-statement',
+    'title' => 'DoctrineRecordingStatement',
+    'description' => 'Records one EffectKind::Db entry per `execute()`, following the same shape as RecordingPdoStatement: bound parameters are captured via `bindValue()` (mirroring `Doctrine\\\\DBAL\\\\Logging\\\\Statement`, DBAL\'s own reference middleware for observing a statement), and the real `Result` is snapshotted once into a DoctrineSnapshotResult so the caller\'s own fetch calls keep working after the row set has been read once for the ledger.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/doctrine-snapshot-result' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/doctrine-snapshot-result.md',
+    'path' => 'api/replay/adapter/doctrine/doctrine-snapshot-result',
+    'title' => 'DoctrineSnapshotResult',
+    'description' => 'An in-memory Result snapshot: what `DoctrineRecordingStatement`/ `DoctrineRecordingConnection` hand back to the caller in place of the real, now-consumed `Result` once a query\'s rows have been captured for the ledger, so the caller\'s own fetch loop still works normally.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/index' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/index.md',
+    'path' => 'api/replay/adapter/doctrine/index',
+    'title' => 'Doctrine',
+    'description' => 'The Quiote\\\\Replay\\\\Adapter\\\\Doctrine namespace — 12 documented types.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/ledger-backed-connection' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/ledger-backed-connection.md',
+    'path' => 'api/replay/adapter/doctrine/ledger-backed-connection',
+    'title' => 'LedgerBackedConnection',
+    'description' => 'A DBAL driver connection that answers entirely from a replaying EffectLedger and never opens anything.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/ledger-backed-statement' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/ledger-backed-statement.md',
+    'path' => 'api/replay/adapter/doctrine/ledger-backed-statement',
+    'title' => 'LedgerBackedStatement',
+    'description' => 'The statement LedgerBackedConnection prepares: collects bound values, then answers from the ledger by the same fingerprint the recorder wrote.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/ledger-served-result' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/ledger-served-result.md',
+    'path' => 'api/replay/adapter/doctrine/ledger-served-result',
+    'title' => 'LedgerServedResult',
+    'description' => 'Builds the DoctrineSnapshotResult a replaying statement answers with, from the matching recorded effect.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/replay-doctrine-database' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/replay-doctrine-database.md',
+    'path' => 'api/replay/adapter/doctrine/replay-doctrine-database',
+    'title' => 'ReplayDoctrineDatabase',
+    'description' => 'DoctrineDatabase, with DoctrineRecordingMiddleware installed on every DBAL connection it builds.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/replay-doctrine-dbal-database' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/replay-doctrine-dbal-database.md',
+    'path' => 'api/replay/adapter/doctrine/replay-doctrine-dbal-database',
+    'title' => 'ReplayDoctrineDbalDatabase',
+    'description' => 'DoctrineDbalDatabase, with DoctrineRecordingMiddleware installed on the connection it builds.',
+  ),
+  'quiote-docs://api/replay/adapter/doctrine/replay-doctrine-plugin' => 
+  array (
+    'file' => 'api/replay/adapter/doctrine/replay-doctrine-plugin.md',
+    'path' => 'api/replay/adapter/doctrine/replay-doctrine-plugin',
+    'title' => 'ReplayDoctrinePlugin',
+    'description' => 'Wires Doctrine\'s own DBAL driver-middleware seam into `quioteframework/replay`\'s generic effect-recording seam, through the same plugin mechanism every other Quiote package uses.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/eloquent-effect-source' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/eloquent-effect-source.md',
+    'path' => 'api/replay/adapter/eloquent/eloquent-effect-source',
+    'title' => 'EloquentEffectSource',
+    'description' => 'The EffectSource implementation `Quiote\\\\Replay\\\\Recording\\\\RecorderMiddleware` activates/deactivates around one request.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/eloquent-minimal-event-dispatcher' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/eloquent-minimal-event-dispatcher.md',
+    'path' => 'api/replay/adapter/eloquent/eloquent-minimal-event-dispatcher',
+    'title' => 'EloquentMinimalEventDispatcher',
+    'description' => 'A minimal `Illuminate\\\\Contracts\\\\Events\\\\Dispatcher` implementation, used only as the fallback `EloquentQueryRecorder::attach()` installs on a `Illuminate\\\\Database\\\\Connection` that has no event dispatcher of its own -- which is the case for `Quiote\\\\Database\\\\Adapter\\\\Eloquent\\\\EloquentDatabase`\'s `connect()`, which never calls `Capsule::setEventDispatcher()`.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/eloquent-query-recorder' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/eloquent-query-recorder.md',
+    'path' => 'api/replay/adapter/eloquent/eloquent-query-recorder',
+    'title' => 'EloquentQueryRecorder',
+    'description' => 'Records one EffectKind::Db entry per query on an Eloquent (illuminate/database) connection, via `Connection::listen()` -- the `Illuminate\\\\Database\\\\Events\\\\QueryExecuted` event Eloquent already fires after every query, rather than a PDO/DBAL-style decorator.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/index' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/index.md',
+    'path' => 'api/replay/adapter/eloquent/index',
+    'title' => 'Eloquent',
+    'description' => 'The Quiote\\\\Replay\\\\Adapter\\\\Eloquent namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/replay-eloquent-database' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/replay-eloquent-database.md',
+    'path' => 'api/replay/adapter/eloquent/replay-eloquent-database',
+    'title' => 'ReplayEloquentDatabase',
+    'description' => 'EloquentDatabase, with EloquentQueryRecorder attached to the Illuminate connection it builds.',
+  ),
+  'quiote-docs://api/replay/adapter/eloquent/replay-eloquent-plugin' => 
+  array (
+    'file' => 'api/replay/adapter/eloquent/replay-eloquent-plugin.md',
+    'path' => 'api/replay/adapter/eloquent/replay-eloquent-plugin',
+    'title' => 'ReplayEloquentPlugin',
+    'description' => 'Wires Eloquent\'s own `QueryExecuted` event seam into `quioteframework/replay`\'s generic effect-recording seam, through the same plugin mechanism every other Quiote package uses.',
+  ),
+  'quiote-docs://api/replay/adapter/index' => 
+  array (
+    'file' => 'api/replay/adapter/index.md',
+    'path' => 'api/replay/adapter/index',
+    'title' => 'Adapter',
+    'description' => 'The Quiote\\\\Replay\\\\Adapter namespace — 25 documented types.',
+  ),
+  'quiote-docs://api/replay/adapter/propulsion/index' => 
+  array (
+    'file' => 'api/replay/adapter/propulsion/index.md',
+    'path' => 'api/replay/adapter/propulsion/index',
+    'title' => 'Propulsion',
+    'description' => 'The Quiote\\\\Replay\\\\Adapter\\\\Propulsion namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/replay/adapter/propulsion/ledger-backed-propulsion-pdo' => 
+  array (
+    'file' => 'api/replay/adapter/propulsion/ledger-backed-propulsion-pdo.md',
+    'path' => 'api/replay/adapter/propulsion/ledger-backed-propulsion-pdo',
+    'title' => 'LedgerBackedPropulsionPdo',
+    'description' => 'A Propulsion connection that answers from a replaying EffectLedger and never opens a database.',
+  ),
+  'quiote-docs://api/replay/adapter/propulsion/propulsion-effect-source' => 
+  array (
+    'file' => 'api/replay/adapter/propulsion/propulsion-effect-source.md',
+    'path' => 'api/replay/adapter/propulsion/propulsion-effect-source',
+    'title' => 'PropulsionEffectSource',
+    'description' => 'Propulsion\'s hook into both halves of the replay lifecycle.',
+  ),
+  'quiote-docs://api/replay/adapter/propulsion/propulsion-query-recorder' => 
+  array (
+    'file' => 'api/replay/adapter/propulsion/propulsion-query-recorder.md',
+    'path' => 'api/replay/adapter/propulsion/propulsion-query-recorder',
+    'title' => 'PropulsionQueryRecorder',
+    'description' => 'Records every Propulsion query into whichever request\'s EffectLedger it belongs to, via Propulsion\'s own observer seam (RowCapturingQueryObserver).',
+  ),
+  'quiote-docs://api/replay/adapter/propulsion/replay-propulsion-plugin' => 
+  array (
+    'file' => 'api/replay/adapter/propulsion/replay-propulsion-plugin.md',
+    'path' => 'api/replay/adapter/propulsion/replay-propulsion-plugin',
+    'title' => 'ReplayPropulsionPlugin',
+    'description' => 'Wires Propulsion\'s own query observer seam into `quioteframework/replay`\'s generic effect-recording seam, through the same plugin mechanism every other Quiote package uses.',
+  ),
+  'quiote-docs://api/replay/attribute/index' => 
+  array (
+    'file' => 'api/replay/attribute/index.md',
+    'path' => 'api/replay/attribute/index',
+    'title' => 'Attribute',
+    'description' => 'The Quiote\\\\Replay\\\\Attribute namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/replay/attribute/no-record' => 
+  array (
+    'file' => 'api/replay/attribute/no-record.md',
+    'path' => 'api/replay/attribute/no-record',
+    'title' => 'NoRecord',
+    'description' => 'Marks an action as non-recordable -- for an endpoint handling payment or credentials, where a body\'s sensitive field names are not known in advance and name-based redaction is not enough.',
+  ),
+  'quiote-docs://api/replay/cache/cache-fingerprint' => 
+  array (
+    'file' => 'api/replay/cache/cache-fingerprint.md',
+    'path' => 'api/replay/cache/cache-fingerprint',
+    'title' => 'CacheFingerprint',
+    'description' => 'The fingerprint scheme shared by RecordingCache and StubbedCache: `\\"{op}:{key}\\"` for a single-key operation, a fixed literal for `clear()`.',
+  ),
+  'quiote-docs://api/replay/cache/index' => 
+  array (
+    'file' => 'api/replay/cache/index.md',
+    'path' => 'api/replay/cache/index',
+    'title' => 'Cache',
+    'description' => 'The Quiote\\\\Replay\\\\Cache namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/cache/recording-cache' => 
+  array (
+    'file' => 'api/replay/cache/recording-cache.md',
+    'path' => 'api/replay/cache/recording-cache',
+    'title' => 'RecordingCache',
+    'description' => 'A decorating PSR-16 cache: wraps a real inner `CacheInterface` and appends one EffectKind::Cache entry per call to an injected EffectLedger, returning the real result completely untouched to the caller.',
+  ),
+  'quiote-docs://api/replay/cassette/cassette' => 
+  array (
+    'file' => 'api/replay/cassette/cassette.md',
+    'path' => 'api/replay/cassette/cassette',
+    'title' => 'Cassette',
+    'description' => 'The full record of one request.',
+  ),
+  'quiote-docs://api/replay/cassette/cassette-codec' => 
+  array (
+    'file' => 'api/replay/cassette/cassette-codec.md',
+    'path' => 'api/replay/cassette/cassette-codec',
+    'title' => 'CassetteCodec',
+    'description' => 'Encodes/decodes a Cassette to/from its `.qcast` container: canonical JSON, gzipped by default so bodies and ledgers compress well, with a raw (plain JSON) path for inspection.',
+  ),
+  'quiote-docs://api/replay/cassette/cassette-codec-exception' => 
+  array (
+    'file' => 'api/replay/cassette/cassette-codec-exception.md',
+    'path' => 'api/replay/cassette/cassette-codec-exception',
+    'title' => 'CassetteCodecException',
+    'description' => 'A cassette payload could not be decoded: corrupt/truncated gzip, invalid JSON, a missing required section, or a schema version this codec does not understand.',
+  ),
+  'quiote-docs://api/replay/cassette/cassette-id' => 
+  array (
+    'file' => 'api/replay/cassette/cassette-id.md',
+    'path' => 'api/replay/cassette/cassette-id',
+    'title' => 'CassetteId',
+    'description' => 'A cassette\'s id, and the safe filesystem/object-store key derived from it.',
+  ),
+  'quiote-docs://api/replay/cassette/cassette-projector' => 
+  array (
+    'file' => 'api/replay/cassette/cassette-projector.md',
+    'path' => 'api/replay/cassette/cassette-projector',
+    'title' => 'CassetteProjector',
+    'description' => 'Turns a decoded Cassette into the flat, section-keyed shape both `cassette:show` and any other reader (an MCP capability, a future web view) present: request/response bodies excerpted to length + sha256 by default, and an effect\'s captured rows excerpted to a count, so a 2 MiB cassette or a query returning thousands of rows doesn\'t become that much output by accident.',
+  ),
+  'quiote-docs://api/replay/cassette/db-result' => 
+  array (
+    'file' => 'api/replay/cassette/db-result.md',
+    'path' => 'api/replay/cassette/db-result',
+    'title' => 'DbResult',
+    'description' => 'The one shape an EffectKind::Db effect\'s `result` takes, so a consumer does not have to guess which recorder wrote the cassette it is reading.',
+  ),
+  'quiote-docs://api/replay/cassette/effect' => 
+  array (
+    'file' => 'api/replay/cassette/effect.md',
+    'path' => 'api/replay/cassette/effect',
+    'title' => 'Effect',
+    'description' => 'One entry in a request\'s effect ledger: a single observed side effect (a query, an HTTP call, a cache read, ...), recorded in the order it happened.',
+  ),
+  'quiote-docs://api/replay/cassette/effect-kind' => 
+  array (
+    'file' => 'api/replay/cassette/effect-kind.md',
+    'path' => 'api/replay/cassette/effect-kind',
+    'title' => 'EffectKind',
+    'description' => 'The kind of side effect one Effect ledger entry records.',
+  ),
+  'quiote-docs://api/replay/cassette/index' => 
+  array (
+    'file' => 'api/replay/cassette/index.md',
+    'path' => 'api/replay/cassette/index',
+    'title' => 'Cassette',
+    'description' => 'The Quiote\\\\Replay\\\\Cassette namespace — 9 documented types.',
+  ),
+  'quiote-docs://api/replay/cassette/recorded-at' => 
+  array (
+    'file' => 'api/replay/cassette/recorded-at.md',
+    'path' => 'api/replay/cassette/recorded-at',
+    'title' => 'RecordedAt',
+    'description' => 'Reads a cassette\'s `recorded_at` as an instant.',
+  ),
+  'quiote-docs://api/replay/console/cassette-fetch-command' => 
+  array (
+    'file' => 'api/replay/console/cassette-fetch-command.md',
+    'path' => 'api/replay/console/cassette-fetch-command',
+    'title' => 'CassetteFetchCommand',
+    'description' => '`quiote cassette:fetch <id>` -- the explicit fetch-only verb: resolve $id to a cassette (local cache, then the configured store, then the cassette-index chain) and keep it in the local cache without replaying it.',
+  ),
+  'quiote-docs://api/replay/console/cassette-list-command' => 
+  array (
+    'file' => 'api/replay/console/cassette-list-command.md',
+    'path' => 'api/replay/console/cassette-list-command',
+    'title' => 'CassetteListCommand',
+    'description' => '`cassette:list` -- enumerates the configured store, via whichever ListableCassetteStoreInterface `replay.store` resolves to (see ResolvesCassetteStore) -- the file store\'s own directory listing, or `quioteframework/replay-pdo`\'s table, today; an object-store-backed one would use its own `listObjects()` instead, not this interface.',
+  ),
+  'quiote-docs://api/replay/console/cassette-prune-command' => 
+  array (
+    'file' => 'api/replay/console/cassette-prune-command.md',
+    'path' => 'api/replay/console/cassette-prune-command',
+    'title' => 'CassettePruneCommand',
+    'description' => '`cassette:prune [--older-than=30d] [--keep=500]` -- unnecessary on Azure (a blob lifecycle rule does it without anything running in the cluster), so this exists for the file and PDO stores instead, via whichever ListableCassetteStoreInterface `replay.store` resolves to.',
+  ),
+  'quiote-docs://api/replay/console/cassette-show-command' => 
+  array (
+    'file' => 'api/replay/console/cassette-show-command.md',
+    'path' => 'api/replay/console/cassette-show-command',
+    'title' => 'CassetteShowCommand',
+    'description' => '`cassette:show <id>` -- decodes one cassette and prints the requested projection.',
+  ),
+  'quiote-docs://api/replay/console/collects-cassette-rows' => 
+  array (
+    'file' => 'api/replay/console/collects-cassette-rows.md',
+    'path' => 'api/replay/console/collects-cassette-rows',
+    'title' => 'CollectsCassetteRows',
+    'description' => 'Decodes every cassette a ListableCassetteStoreInterface holds into the small summary shape `cassette:list` and `cassette:prune` both filter and sort in PHP -- shared so the two commands never disagree about what a \\"row\\" is or how an unreadable cassette is reported.',
+  ),
+  'quiote-docs://api/replay/console/index' => 
+  array (
+    'file' => 'api/replay/console/index.md',
+    'path' => 'api/replay/console/index',
+    'title' => 'Console',
+    'description' => 'The Quiote\\\\Replay\\\\Console namespace — 8 documented types.',
+  ),
+  'quiote-docs://api/replay/console/replay-command' => 
+  array (
+    'file' => 'api/replay/console/replay-command.md',
+    'path' => 'api/replay/console/replay-command',
+    'title' => 'ReplayCommand',
+    'description' => '`quiote replay <id>` -- re-runs a recorded cassette and reports drift, and, with `--as-test`, emits a committed regression test from it.',
+  ),
+  'quiote-docs://api/replay/console/resolves-cassette-store' => 
+  array (
+    'file' => 'api/replay/console/resolves-cassette-store.md',
+    'path' => 'api/replay/console/resolves-cassette-store',
+    'title' => 'ResolvesCassetteStore',
+    'description' => 'Resolves whichever CassetteStoreInterface `replay.store` actually names, via the app\'s own DI container -- the same seam `Quiote\\\\Replay\\\\Recording\\\\RecorderMiddleware`\'s factory already resolves it through (`ReplayPlugin::register()`\'s `attributedMiddleware` closure).',
+  ),
+  'quiote-docs://api/replay/console/resolves-cassette-via-indexes' => 
+  array (
+    'file' => 'api/replay/console/resolves-cassette-via-indexes.md',
+    'path' => 'api/replay/console/resolves-cassette-via-indexes',
+    'title' => 'ResolvesCassetteViaIndexes',
+    'description' => 'Resolves a bare cassette id the way `quiote replay`/`quiote cassette:fetch` both promise: the local cache first (no network), then whichever store `replay.store` names, then -- only if still missing -- the contributed CassetteIndexInterface chain using whatever `--key`/`--date`/`--hour` hints were given.',
+  ),
+  'quiote-docs://api/replay/db/index' => 
+  array (
+    'file' => 'api/replay/db/index.md',
+    'path' => 'api/replay/db/index',
+    'title' => 'Db',
+    'description' => 'The Quiote\\\\Replay\\\\Db namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/replay/db/pdo-row-formatting' => 
+  array (
+    'file' => 'api/replay/db/pdo-row-formatting.md',
+    'path' => 'api/replay/db/pdo-row-formatting',
+    'title' => 'PdoRowFormatting',
+    'description' => 'Shared by RecordingPdoStatement and StubbedPdoStatement: both serve a snapshotted result set with no live cursor to delegate to, and both need to reformat a row into whichever `PDO::FETCH_*` mode the caller asked for, entirely in PHP.',
+  ),
+  'quiote-docs://api/replay/db/recording-pdo' => 
+  array (
+    'file' => 'api/replay/db/recording-pdo.md',
+    'path' => 'api/replay/db/recording-pdo',
+    'title' => 'RecordingPdo',
+    'description' => 'A drop-in replacement for `\\\\PDO` (see `Quiote\\\\Database\\\\PdoDatabase::connect()`, which builds `new PDO($dsn, $username, $password, $options)`): connects for real, behaves exactly like a bare `\\\\PDO` to the caller, and additionally appends one EffectKind::Db entry per statement execution to an injected EffectLedger -- `query()`/`prepare()->execute()` through RecordingPdoStatement (installed via `PDO::ATTR_STATEMENT_CLASS`), `exec()` directly, since it has no result set to snapshot.',
+  ),
+  'quiote-docs://api/replay/db/recording-pdo-statement' => 
+  array (
+    'file' => 'api/replay/db/recording-pdo-statement.md',
+    'path' => 'api/replay/db/recording-pdo-statement',
+    'title' => 'RecordingPdoStatement',
+    'description' => 'The statement class RecordingPdo installs via `PDO::ATTR_STATEMENT_CLASS`, so every statement it prepares records one EffectKind::Db effect per RecordingPdoStatement::execute() call.',
+  ),
+  'quiote-docs://api/replay/env/index' => 
+  array (
+    'file' => 'api/replay/env/index.md',
+    'path' => 'api/replay/env/index',
+    'title' => 'Env',
+    'description' => 'The Quiote\\\\Replay\\\\Env namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/replay/env/recording-environment-reader' => 
+  array (
+    'file' => 'api/replay/env/recording-environment-reader.md',
+    'path' => 'api/replay/env/recording-environment-reader',
+    'title' => 'RecordingEnvironmentReader',
+    'description' => 'A decorating environment reader: wraps a real inner EnvironmentReaderInterface and appends one EffectKind::Env entry per `get()` call to an injected EffectLedger, returning the real value completely untouched to the caller.',
+  ),
+  'quiote-docs://api/replay/http/http-fingerprint' => 
+  array (
+    'file' => 'api/replay/http/http-fingerprint.md',
+    'path' => 'api/replay/http/http-fingerprint',
+    'title' => 'HttpFingerprint',
+    'description' => 'The fingerprint scheme shared by RecordingHttpTransport and StubbedHttpTransport: method + normalized URI + a hash of the request body.',
+  ),
+  'quiote-docs://api/replay/http/index' => 
+  array (
+    'file' => 'api/replay/http/index.md',
+    'path' => 'api/replay/http/index',
+    'title' => 'Http',
+    'description' => 'The Quiote\\\\Replay\\\\Http namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/http/recording-http-transport' => 
+  array (
+    'file' => 'api/replay/http/recording-http-transport.md',
+    'path' => 'api/replay/http/recording-http-transport',
+    'title' => 'RecordingHttpTransport',
+    'description' => 'A decorating PSR-18 transport: wraps a real inner `ClientInterface` (typically `Quiote\\\\Http\\\\Client\\\\CurlTransport`, installed as the `$transport` `Quiote\\\\Http\\\\Client\\\\HttpClient` is constructed with) and appends one EffectKind::Http entry per successful call to an injected EffectLedger, returning the real response completely untouched to the caller.',
+  ),
+  'quiote-docs://api/replay/index' => 
+  array (
+    'file' => 'api/replay/index.md',
+    'path' => 'api/replay/index',
+    'title' => 'Replay',
+    'description' => 'The Quiote\\\\Replay namespace — 106 documented types.',
+  ),
+  'quiote-docs://api/replay/index/cassette-index-chain' => 
+  array (
+    'file' => 'api/replay/index/cassette-index-chain.md',
+    'path' => 'api/replay/index/cassette-index-chain',
+    'title' => 'CassetteIndexChain',
+    'description' => 'Tries each CassetteIndexInterface in order and answers the first cassette resolved, the same \\"try each, fall through on decline, aggregate on total failure\\" shape `Quiote\\\\Storage\\\\Azure\\\\ChainedTokenProvider` already uses for token providers.',
+  ),
+  'quiote-docs://api/replay/index/cassette-index-exception' => 
+  array (
+    'file' => 'api/replay/index/cassette-index-exception.md',
+    'path' => 'api/replay/index/cassette-index-exception',
+    'title' => 'CassetteIndexException',
+    'description' => 'Thrown by a CassetteIndexInterface for a genuine failure -- a malformed hint, a broken query, an auth error, or a pointer that resolved to a key whose object has already expired.',
+  ),
+  'quiote-docs://api/replay/index/cassette-index-interface' => 
+  array (
+    'file' => 'api/replay/index/cassette-index-interface.md',
+    'path' => 'api/replay/index/cassette-index-interface',
+    'title' => 'CassetteIndexInterface',
+    'description' => 'Resolves a bare cassette id (plus whatever hints the developer gave on the command line) to a decoded Cassette -- the \\"id from a log line to a cassette on disk\\" chain, tried in order: an explicit `--key`, then `log-analytics`, then a date-hinted `prefix-scan`.',
+  ),
+  'quiote-docs://api/replay/index/cassette-index-registry' => 
+  array (
+    'file' => 'api/replay/index/cassette-index-registry.md',
+    'path' => 'api/replay/index/cassette-index-registry',
+    'title' => 'CassetteIndexRegistry',
+    'description' => 'The ordered list of CassetteIndexInterface factories a driver package (today, only `quioteframework/replay-azure`) contributes -- unlike CassetteStoreRegistry\'s alias-to-class map, resolving a bare id is a *chain* to try in order, not a single named choice, so this registry holds factories, appended in registration order, rather than named aliases.',
+  ),
+  'quiote-docs://api/replay/index/index' => 
+  array (
+    'file' => 'api/replay/index/index.md',
+    'path' => 'api/replay/index/index',
+    'title' => 'Index',
+    'description' => 'The Quiote\\\\Replay\\\\Index namespace — 6 documented types.',
+  ),
+  'quiote-docs://api/replay/index/index-hints' => 
+  array (
+    'file' => 'api/replay/index/index-hints.md',
+    'path' => 'api/replay/index/index-hints',
+    'title' => 'IndexHints',
+    'description' => 'The developer-supplied resolution hints from `quiote cassette:fetch`/`quiote replay --save`: a key pasted straight out of a log line, or a date/hour narrowing a prefix scan.',
+  ),
+  'quiote-docs://api/replay/index/unavailable-index' => 
+  array (
+    'file' => 'api/replay/index/unavailable-index.md',
+    'path' => 'api/replay/index/unavailable-index',
+    'title' => 'UnavailableIndex',
+    'description' => 'Stands in for an index that could not be constructed, so a misconfigured one reports itself through CassetteIndexChain\'s existing failure aggregation instead of aborting the build of every other index -- see CassetteIndexRegistry::build() for the configuration that made that the common case rather than a corner one.',
+  ),
+  'quiote-docs://api/replay/queue/index' => 
+  array (
+    'file' => 'api/replay/queue/index.md',
+    'path' => 'api/replay/queue/index',
+    'title' => 'Queue',
+    'description' => 'The Quiote\\\\Replay\\\\Queue namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/queue/queue-fingerprint' => 
+  array (
+    'file' => 'api/replay/queue/queue-fingerprint.md',
+    'path' => 'api/replay/queue/queue-fingerprint',
+    'title' => 'QueueFingerprint',
+    'description' => 'The fingerprint scheme shared by RecordingQueueDriver and AssertingQueueDriver: `\\"push:{jobClass}:{json of params}\\"`.',
+  ),
+  'quiote-docs://api/replay/queue/recording-queue-driver' => 
+  array (
+    'file' => 'api/replay/queue/recording-queue-driver.md',
+    'path' => 'api/replay/queue/recording-queue-driver',
+    'title' => 'RecordingQueueDriver',
+    'description' => 'A decorating queue driver: wraps a real inner QueueDriverInterface and appends one EffectKind::Queue entry per RecordingQueueDriver::push() to an injected EffectLedger, then returns exactly as the real driver did.',
+  ),
+  'quiote-docs://api/replay/recording/active-effect-ledger' => 
+  array (
+    'file' => 'api/replay/recording/active-effect-ledger.md',
+    'path' => 'api/replay/recording/active-effect-ledger',
+    'title' => 'ActiveEffectLedger',
+    'description' => 'The single currently-active EffectLedger, for a driver whose recorder is a decorator wrapped once around a specific connection (the Doctrine/Eloquent/Cycle shape) rather than a process-scoped observer (Propulsion\'s shape, which needs EffectLedgerRegistry\'s correlation-id map instead -- see that class\'s own docblock).',
+  ),
+  'quiote-docs://api/replay/recording/effect-ledger-registry' => 
+  array (
+    'file' => 'api/replay/recording/effect-ledger-registry.md',
+    'path' => 'api/replay/recording/effect-ledger-registry',
+    'title' => 'EffectLedgerRegistry',
+    'description' => 'Routes a driver observation back to the request it belongs to, by correlation id.',
+  ),
+  'quiote-docs://api/replay/recording/effect-redactor' => 
+  array (
+    'file' => 'api/replay/recording/effect-redactor.md',
+    'path' => 'api/replay/recording/effect-redactor',
+    'title' => 'EffectRedactor',
+    'description' => 'Scrubs an effect\'s `call` and `result` on their way into EffectLedger, so redaction covers the effect ledger and not only the request envelope.',
+  ),
+  'quiote-docs://api/replay/recording/effect-source' => 
+  array (
+    'file' => 'api/replay/recording/effect-source.md',
+    'path' => 'api/replay/recording/effect-source',
+    'title' => 'EffectSource',
+    'description' => 'A driver-specific package\'s hook into RecorderMiddleware\'s recording lifecycle, for an ORM/driver whose own instrumentation seam is process-scoped rather than per-connection -- Propulsion\'s `addQueryObserver()` being the motivating case (see `quioteframework/replay-propulsion`\'s own `PropulsionEffectSource`): a single observer is registered once at boot, and needs telling, for the duration of one request, which correlation id\'s queries belong to which EffectLedger.',
+  ),
+  'quiote-docs://api/replay/recording/effect-source-registry' => 
+  array (
+    'file' => 'api/replay/recording/effect-source-registry.md',
+    'path' => 'api/replay/recording/effect-source-registry',
+    'title' => 'EffectSourceRegistry',
+    'description' => 'Every registered EffectSource, for RecorderMiddleware to activate/deactivate around one request.',
+  ),
+  'quiote-docs://api/replay/recording/index' => 
+  array (
+    'file' => 'api/replay/recording/index.md',
+    'path' => 'api/replay/recording/index',
+    'title' => 'Recording',
+    'description' => 'The Quiote\\\\Replay\\\\Recording namespace — 10 documented types.',
+  ),
+  'quiote-docs://api/replay/recording/recorder-middleware' => 
+  array (
+    'file' => 'api/replay/recording/recorder-middleware.md',
+    'path' => 'api/replay/recording/recorder-middleware',
+    'title' => 'RecorderMiddleware',
+    'description' => 'Captures the request/response/resolved/session/exception detail for a request and writes a Cassette for whichever requests SamplingPolicy keeps.',
+  ),
+  'quiote-docs://api/replay/recording/recording-session' => 
+  array (
+    'file' => 'api/replay/recording/recording-session.md',
+    'path' => 'api/replay/recording/recording-session',
+    'title' => 'RecordingSession',
+    'description' => 'The in-flight buffer for one request: bounded by `replay.max_bytes` and `replay.max_effects`, so a request with an unusually large body or an unusually long effect ledger produces a cassette that says it was truncated rather than growing without bound.',
+  ),
+  'quiote-docs://api/replay/recording/redaction-mode' => 
+  array (
+    'file' => 'api/replay/recording/redaction-mode.md',
+    'path' => 'api/replay/recording/redaction-mode',
+    'title' => 'RedactionMode',
+    'description' => 'How Redactor replaces a value matched against a denylist.',
+  ),
+  'quiote-docs://api/replay/recording/redactor' => 
+  array (
+    'file' => 'api/replay/recording/redactor.md',
+    'path' => 'api/replay/recording/redactor',
+    'title' => 'Redactor',
+    'description' => 'Header/cookie/param/session/body scrubbing.',
+  ),
+  'quiote-docs://api/replay/recording/sampling-policy' => 
+  array (
+    'file' => 'api/replay/recording/sampling-policy.md',
+    'path' => 'api/replay/recording/sampling-policy',
+    'title' => 'SamplingPolicy',
+    'description' => 'Which requests RecorderMiddleware keeps a cassette for.',
+  ),
+  'quiote-docs://api/replay/replay-plugin' => 
+  array (
+    'file' => 'api/replay/replay-plugin.md',
+    'path' => 'api/replay/replay-plugin',
+    'title' => 'ReplayPlugin',
+    'description' => 'Registers the replay configuration defaults, the cassette store, the recorder middleware and the cassette console commands, through the generic plugin seam -- mirroring RateLimitPlugin\'s shape.',
+  ),
+  'quiote-docs://api/replay/replay/asserting-queue-driver' => 
+  array (
+    'file' => 'api/replay/replay/asserting-queue-driver.md',
+    'path' => 'api/replay/replay/asserting-queue-driver',
+    'title' => 'AssertingQueueDriver',
+    'description' => 'The isolated-replay counterpart to RecordingQueueDriver: never pushes to a real backend -- isolated replay has none -- and instead captures every AssertingQueueDriver::push() call so an emitted test can assert against it afterward -- \\"this request enqueued exactly this job.\\',
+  ),
+  'quiote-docs://api/replay/replay/drift-report' => 
+  array (
+    'file' => 'api/replay/replay/drift-report.md',
+    'path' => 'api/replay/replay/drift-report',
+    'title' => 'DriftReport',
+    'description' => 'The result of ResponseDiffer::diff() for one replay.',
+  ),
+  'quiote-docs://api/replay/replay/effect-ledger' => 
+  array (
+    'file' => 'api/replay/replay/effect-ledger.md',
+    'path' => 'api/replay/replay/effect-ledger',
+    'title' => 'EffectLedger',
+    'description' => 'A request\'s effect ledger: written to by appending during recording, read from by matching during replay.',
+  ),
+  'quiote-docs://api/replay/replay/index' => 
+  array (
+    'file' => 'api/replay/replay/index.md',
+    'path' => 'api/replay/replay/index',
+    'title' => 'Replay',
+    'description' => 'The Quiote\\\\Replay\\\\Replay namespace — 21 documented types.',
+  ),
+  'quiote-docs://api/replay/replay/isolated-replay' => 
+  array (
+    'file' => 'api/replay/replay/isolated-replay.md',
+    'path' => 'api/replay/replay/isolated-replay',
+    'title' => 'IsolatedReplay',
+    'description' => 'Runs a cassette against stubs built from its own recorded effects, so nothing the original request did is performed again.',
+  ),
+  'quiote-docs://api/replay/replay/isolated-replay-result' => 
+  array (
+    'file' => 'api/replay/replay/isolated-replay-result.md',
+    'path' => 'api/replay/replay/isolated-replay-result',
+    'title' => 'IsolatedReplayResult',
+    'description' => 'What one IsolatedReplay::run() produced: the response, the response diff, and what the ledger was asked for.',
+  ),
+  'quiote-docs://api/replay/replay/isolates-from-ledger' => 
+  array (
+    'file' => 'api/replay/replay/isolates-from-ledger.md',
+    'path' => 'api/replay/replay/isolates-from-ledger',
+    'title' => 'IsolatesFromLedger',
+    'description' => 'An EffectSource whose driver answers from a replaying EffectLedger instead of reaching its real connection.',
+  ),
+  'quiote-docs://api/replay/replay/ledger-direction' => 
+  array (
+    'file' => 'api/replay/replay/ledger-direction.md',
+    'path' => 'api/replay/replay/ledger-direction',
+    'title' => 'LedgerDirection',
+    'description' => 'Which way an EffectLedger is being used.',
+  ),
+  'quiote-docs://api/replay/replay/ledger-match' => 
+  array (
+    'file' => 'api/replay/replay/ledger-match.md',
+    'path' => 'api/replay/replay/ledger-match',
+    'title' => 'LedgerMatch',
+    'description' => 'What LedgerMatcher found, and how it found it.',
+  ),
+  'quiote-docs://api/replay/replay/ledger-matcher' => 
+  array (
+    'file' => 'api/replay/replay/ledger-matcher.md',
+    'path' => 'api/replay/replay/ledger-matcher',
+    'title' => 'LedgerMatcher',
+    'description' => 'The fingerprint-then-sequence matching algorithm: a replayed call is matched against the first not-yet-consumed effect of the same EffectKind whose fingerprint is identical, so two identical queries recorded back to back are still matched in the order they happened.',
+  ),
+  'quiote-docs://api/replay/replay/replay-engine' => 
+  array (
+    'file' => 'api/replay/replay/replay-engine.md',
+    'path' => 'api/replay/replay/replay-engine',
+    'title' => 'ReplayEngine',
+    'description' => 'Drives one cassette through the pipeline and reports drift, in one of two modes.',
+  ),
+  'quiote-docs://api/replay/replay/replay-exception' => 
+  array (
+    'file' => 'api/replay/replay/replay-exception.md',
+    'path' => 'api/replay/replay/replay-exception',
+    'title' => 'ReplayException',
+    'description' => 'A cassette cannot be replayed as given: no request was captured to replay (recorded under `#[NoRecord]`, or with `replay.capture_body` disabled), or a safety guard in ReplayEngine refused to run it.',
+  ),
+  'quiote-docs://api/replay/replay/replay-mode' => 
+  array (
+    'file' => 'api/replay/replay/replay-mode.md',
+    'path' => 'api/replay/replay/replay-mode',
+    'title' => 'ReplayMode',
+    'description' => 'How ReplayEngine runs a cassette.',
+  ),
+  'quiote-docs://api/replay/replay/replay-result' => 
+  array (
+    'file' => 'api/replay/replay/replay-result.md',
+    'path' => 'api/replay/replay/replay-result',
+    'title' => 'ReplayResult',
+    'description' => 'What one call to ReplayEngine::replay() produced.',
+  ),
+  'quiote-docs://api/replay/replay/request-reconstructor' => 
+  array (
+    'file' => 'api/replay/replay/request-reconstructor.md',
+    'path' => 'api/replay/replay/request-reconstructor',
+    'title' => 'RequestReconstructor',
+    'description' => 'Rebuilds the PSR-7 request a cassette recorded, so ReplayEngine can hand it to the real pipeline.',
+  ),
+  'quiote-docs://api/replay/replay/response-differ' => 
+  array (
+    'file' => 'api/replay/replay/response-differ.md',
+    'path' => 'api/replay/replay/response-differ',
+    'title' => 'ResponseDiffer',
+    'description' => 'Diffs a fresh replay response against a cassette\'s recorded one: drift as a feature -- every difference is reported through Diagnostic, never silently smoothed over.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-cache' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-cache.md',
+    'path' => 'api/replay/replay/stubbed-cache',
+    'title' => 'StubbedCache',
+    'description' => 'The isolated-replay counterpart to RecordingCache: never touches a real cache backend, answering every call from an injected EffectLedger matched on the same CacheFingerprint scheme the recorder used.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-environment-reader' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-environment-reader.md',
+    'path' => 'api/replay/replay/stubbed-environment-reader',
+    'title' => 'StubbedEnvironmentReader',
+    'description' => 'The isolated-replay counterpart to RecordingEnvironmentReader: never reads a real environment variable, answering every call from an injected EffectLedger matched on the bare variable name.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-http-transport' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-http-transport.md',
+    'path' => 'api/replay/replay/stubbed-http-transport',
+    'title' => 'StubbedHttpTransport',
+    'description' => 'The isolated-replay counterpart to RecordingHttpTransport: never opens a socket, never resolves a hostname, never touches the real network under any circumstance -- in isolated mode there is no transport at all.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-pdo' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-pdo.md',
+    'path' => 'api/replay/replay/stubbed-pdo',
+    'title' => 'StubbedPdo',
+    'description' => 'The isolated-replay counterpart to `Quiote\\\\Replay\\\\Db\\\\RecordingPdo`: never calls `parent::__construct()`, so no real connection is ever attempted, and answers every `exec()`/`query()`/`prepare()->execute()` from an injected EffectLedger via StubbedPdoStatement.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-pdo-statement' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-pdo-statement.md',
+    'path' => 'api/replay/replay/stubbed-pdo-statement',
+    'title' => 'StubbedPdoStatement',
+    'description' => 'The isolated-replay counterpart to RecordingPdoStatement: never touches a real connection (never calls `parent::__construct()`), and answers `execute()`/`fetch()`/`fetchAll()`/`rowCount()` entirely from an injected EffectLedger, matching on the same normalized-SQL fingerprint the recorder used.',
+  ),
+  'quiote-docs://api/replay/replay/stubbed-transport-exception' => 
+  array (
+    'file' => 'api/replay/replay/stubbed-transport-exception.md',
+    'path' => 'api/replay/replay/stubbed-transport-exception',
+    'title' => 'StubbedTransportException',
+    'description' => 'What StubbedHttpTransport raises when the ledger has no recorded counterpart for a request.',
+  ),
+  'quiote-docs://api/replay/store/azure/index' => 
+  array (
+    'file' => 'api/replay/store/azure/index.md',
+    'path' => 'api/replay/store/azure/index',
+    'title' => 'Azure',
+    'description' => 'The Quiote\\\\Replay\\\\Store\\\\Azure namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/store/azure/index/index' => 
+  array (
+    'file' => 'api/replay/store/azure/index/index.md',
+    'path' => 'api/replay/store/azure/index/index',
+    'title' => 'Index',
+    'description' => 'The Quiote\\\\Replay\\\\Store\\\\Azure\\\\Index namespace — 1 documented type.',
+  ),
+  'quiote-docs://api/replay/store/azure/index/log-analytics-index' => 
+  array (
+    'file' => 'api/replay/store/azure/index/log-analytics-index.md',
+    'path' => 'api/replay/store/azure/index/log-analytics-index',
+    'title' => 'LogAnalyticsIndex',
+    'description' => 'Upgrades resolution from \\"an id plus a date/hour hint\\" to a bare id with nothing else: queries the workspace for the pointer log line the recorder itself wrote, reads its `cassette_key` straight off that record, and fetches the object at that key.',
+  ),
+  'quiote-docs://api/replay/store/azure/replay-azure-plugin' => 
+  array (
+    'file' => 'api/replay/store/azure/replay-azure-plugin.md',
+    'path' => 'api/replay/store/azure/replay-azure-plugin',
+    'title' => 'ReplayAzurePlugin',
+    'description' => 'Registers the `azure-blob` cassette store alias and its `CassetteStoreInterface` binding, and contributes the three cassette-index strategies -- an explicit key, a Log Analytics lookup, and a date-hinted prefix scan -- that let `quiote cassette:fetch`/`quiote replay --save` resolve a bare id copied out of a log line back to a cassette, in that order: the explicit key always wins when `--key` is given, Log Analytics resolves a bare id with no hint at all, and the prefix scan is the fallback for a developer with blob read but no workspace access.',
+  ),
+  'quiote-docs://api/replay/store/cassette-store-interface' => 
+  array (
+    'file' => 'api/replay/store/cassette-store-interface.md',
+    'path' => 'api/replay/store/cassette-store-interface',
+    'title' => 'CassetteStoreInterface',
+    'description' => 'Where a cassette is written and read back from.',
+  ),
+  'quiote-docs://api/replay/store/cassette-store-registry' => 
+  array (
+    'file' => 'api/replay/store/cassette-store-registry.md',
+    'path' => 'api/replay/store/cassette-store-registry',
+    'title' => 'CassetteStoreRegistry',
+    'description' => 'Process-global registry mapping short store aliases (`file`, `azure-blob`, `s3`, `gcs`, `pdo`) to the CassetteStoreInterface class that implements them, so `replay.store` can say `file` instead of a fully-qualified class name.',
+  ),
+  'quiote-docs://api/replay/store/file-cassette-store' => 
+  array (
+    'file' => 'api/replay/store/file-cassette-store.md',
+    'path' => 'api/replay/store/file-cassette-store',
+    'title' => 'FileCassetteStore',
+    'description' => 'Development-default store: never the right choice in production (an AKS pod\'s filesystem disappears on restart/eviction/scale-down), but a zero-dependency default that makes the feature usable immediately.',
+  ),
+  'quiote-docs://api/replay/store/index' => 
+  array (
+    'file' => 'api/replay/store/index.md',
+    'path' => 'api/replay/store/index',
+    'title' => 'Store',
+    'description' => 'The Quiote\\\\Replay\\\\Store namespace — 12 documented types.',
+  ),
+  'quiote-docs://api/replay/store/listable-cassette-store-interface' => 
+  array (
+    'file' => 'api/replay/store/listable-cassette-store-interface.md',
+    'path' => 'api/replay/store/listable-cassette-store-interface',
+    'title' => 'ListableCassetteStoreInterface',
+    'description' => 'A CassetteStoreInterface whose store can also enumerate what it holds.',
+  ),
+  'quiote-docs://api/replay/store/pdo/index' => 
+  array (
+    'file' => 'api/replay/store/pdo/index.md',
+    'path' => 'api/replay/store/pdo/index',
+    'title' => 'Pdo',
+    'description' => 'The Quiote\\\\Replay\\\\Store\\\\Pdo namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/store/pdo/pdo-cassette-store' => 
+  array (
+    'file' => 'api/replay/store/pdo/pdo-cassette-store.md',
+    'path' => 'api/replay/store/pdo/pdo-cassette-store',
+    'title' => 'PdoCassetteStore',
+    'description' => 'A PDO-backed ListableCassetteStoreInterface: a pod\'s filesystem does not survive a restart/eviction, so a team without an object-store backend keeps cassettes in the database it already has instead.',
+  ),
+  'quiote-docs://api/replay/store/pdo/replay-pdo-plugin' => 
+  array (
+    'file' => 'api/replay/store/pdo/replay-pdo-plugin.md',
+    'path' => 'api/replay/store/pdo/replay-pdo-plugin',
+    'title' => 'ReplayPdoPlugin',
+    'description' => 'Registers the `pdo` cassette store alias and its `CassetteStoreInterface` binding, through the same plugin mechanism every other Quiote package uses.',
+  ),
+  'quiote-docs://api/replay/store/storage/cassette-key-scheme' => 
+  array (
+    'file' => 'api/replay/store/storage/cassette-key-scheme.md',
+    'path' => 'api/replay/store/storage/cassette-key-scheme',
+    'title' => 'CassetteKeyScheme',
+    'description' => 'Derives an object-store key from a cassette id and the hour it was recorded in:',
+  ),
+  'quiote-docs://api/replay/store/storage/index' => 
+  array (
+    'file' => 'api/replay/store/storage/index.md',
+    'path' => 'api/replay/store/storage/index',
+    'title' => 'Storage',
+    'description' => 'The Quiote\\\\Replay\\\\Store\\\\Storage namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/replay/store/storage/index/explicit-key-index' => 
+  array (
+    'file' => 'api/replay/store/storage/index/explicit-key-index.md',
+    'path' => 'api/replay/store/storage/index/explicit-key-index',
+    'title' => 'ExplicitKeyIndex',
+    'description' => 'The zero-dependency, always-works fallback: a key pasted straight out of a pointer log line, fetched from the object store directly.',
+  ),
+  'quiote-docs://api/replay/store/storage/index/index' => 
+  array (
+    'file' => 'api/replay/store/storage/index/index.md',
+    'path' => 'api/replay/store/storage/index/index',
+    'title' => 'Index',
+    'description' => 'The Quiote\\\\Replay\\\\Store\\\\Storage\\\\Index namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/replay/store/storage/index/prefix-scan-index' => 
+  array (
+    'file' => 'api/replay/store/storage/index/prefix-scan-index.md',
+    'path' => 'api/replay/store/storage/index/prefix-scan-index',
+    'title' => 'PrefixScanIndex',
+    'description' => 'Reconstructs a key prefix from a `--date` (and, optionally, `--hour`) hint and enumerates it with `listObjects()`, needing no index service or Log Analytics access -- only blob read, which makes it the right fallback for a developer who has a storage RBAC grant but not a workspace one.',
+  ),
+  'quiote-docs://api/replay/store/storage/object-store-cassette-store' => 
+  array (
+    'file' => 'api/replay/store/storage/object-store-cassette-store.md',
+    'path' => 'api/replay/store/storage/object-store-cassette-store',
+    'title' => 'ObjectStoreCassetteStore',
+    'description' => 'A ListableCassetteStoreInterface over any ListableObjectStoreClientInterface -- Azure Blob, S3 or GCS.',
+  ),
+  'quiote-docs://api/replay/testing/index' => 
+  array (
+    'file' => 'api/replay/testing/index.md',
+    'path' => 'api/replay/testing/index',
+    'title' => 'Testing',
+    'description' => 'The Quiote\\\\Replay\\\\Testing namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/replay/testing/replay-test-case' => 
+  array (
+    'file' => 'api/replay/testing/replay-test-case.md',
+    'path' => 'api/replay/testing/replay-test-case',
+    'title' => 'ReplayTestCase',
+    'description' => 'Base class an emitted `--as-test` test extends: `replay()` reconstructs a cassette\'s request and dispatches it through the same real pipeline HttpTestCase\'s own `get()`/`post()`/etc.',
+  ),
+  'quiote-docs://api/replay/testing/replay-test-emission' => 
+  array (
+    'file' => 'api/replay/testing/replay-test-emission.md',
+    'path' => 'api/replay/testing/replay-test-emission',
+    'title' => 'ReplayTestEmission',
+    'description' => 'Writes a cassette\'s own copy plus a generated ReplayTestCase subclass from it, the \\"commit this as a regression test\\" step behind `quiote replay --as-test`.',
+  ),
+  'quiote-docs://api/replay/testing/test-emitter' => 
+  array (
+    'file' => 'api/replay/testing/test-emitter.md',
+    'path' => 'api/replay/testing/test-emitter',
+    'title' => 'TestEmitter',
+    'description' => 'Turns one Cassette into a `Quiote\\\\Support\\\\Compiler\\\\EmittedArtifact` -- PHP source for a ReplayTestCase subclass.',
   ),
   'quiote-docs://api/request/attribute/constraint/boolean-type' => 
   array (
@@ -4582,7 +5513,7 @@ return array (
     'file' => 'api/security/csrf/index.md',
     'path' => 'api/security/csrf/index',
     'title' => 'Csrf',
-    'description' => 'The Quiote\\\\Security\\\\Csrf namespace — 5 documented types.',
+    'description' => 'The Quiote\\\\Security\\\\Csrf namespace — 6 documented types.',
   ),
   'quiote-docs://api/security/csrf/middleware/csrf-injection-middleware' => 
   array (
@@ -4604,6 +5535,13 @@ return array (
     'path' => 'api/security/csrf/middleware/index',
     'title' => 'Middleware',
     'description' => 'The Quiote\\\\Security\\\\Csrf\\\\Middleware namespace — 2 documented types.',
+  ),
+  'quiote-docs://api/security/csrf/randomness-backed-token-generator' => 
+  array (
+    'file' => 'api/security/csrf/randomness-backed-token-generator.md',
+    'path' => 'api/security/csrf/randomness-backed-token-generator',
+    'title' => 'RandomnessBackedTokenGenerator',
+    'description' => 'A drop-in replacement for Symfony\'s default UriSafeTokenGenerator, generating the same URI-safe base64 shape but through RandomnessInterface instead of a direct `random_bytes()` call -- so a cassette that records the RandomnessInterface reads behind a CSRF token can reproduce that exact token value on replay, and a request whose form POST depends on it does not fail the CSRF check purely because the token could not be regenerated deterministically.',
   ),
   'quiote-docs://api/security/csrf/session-token-storage' => 
   array (
@@ -4638,7 +5576,7 @@ return array (
     'file' => 'api/security/index.md',
     'path' => 'api/security/index',
     'title' => 'Security',
-    'description' => 'The Quiote\\\\Security namespace — 59 documented types.',
+    'description' => 'The Quiote\\\\Security namespace — 60 documented types.',
   ),
   'quiote-docs://api/security/rate-limit/index' => 
   array (
@@ -4862,14 +5800,14 @@ return array (
     'file' => 'api/storage/azure/azure-blob-client.md',
     'path' => 'api/storage/azure/azure-blob-client',
     'title' => 'AzureBlobClient',
-    'description' => 'Minimal Azure Blob Storage REST client using Shared Key authentication — deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST + signing algorithm has proven more maintainable in production).',
+    'description' => 'Minimal Azure Blob Storage REST client, deliberately not built on the official `microsoft/azure-storage-blob` SDK (Microsoft stopped actively developing it; a hand-rolled client against the documented REST API has proven more maintainable in production).',
   ),
   'quiote-docs://api/storage/azure/azure-blob-container-client' => 
   array (
     'file' => 'api/storage/azure/azure-blob-container-client.md',
     'path' => 'api/storage/azure/azure-blob-container-client',
     'title' => 'AzureBlobContainerClient',
-    'description' => 'AzureBlobClient bound to one container, so it satisfies ObjectStoreClientInterface like the S3 and GCS clients do.',
+    'description' => 'AzureBlobClient bound to one container, so it satisfies ListableObjectStoreClientInterface like the S3 and GCS clients do.',
   ),
   'quiote-docs://api/storage/azure/azure-blob-session-factory' => 
   array (
@@ -4884,6 +5822,48 @@ return array (
     'path' => 'api/storage/azure/azure-blob-session-persistence',
     'title' => 'AzureBlobSessionPersistence',
     'description' => 'SessionPersistenceInterface storing one JSON blob per session id (named `<sid>.json`) in a single Azure Blob container.',
+  ),
+  'quiote-docs://api/storage/azure/azure-cli-process-runner' => 
+  array (
+    'file' => 'api/storage/azure/azure-cli-process-runner.md',
+    'path' => 'api/storage/azure/azure-cli-process-runner',
+    'title' => 'AzureCliProcessRunner',
+    'description' => 'Runs one command and returns its standard output, so AzureCliTokenProvider can be exercised in tests without actually shelling out to `az`.',
+  ),
+  'quiote-docs://api/storage/azure/azure-cli-token-provider' => 
+  array (
+    'file' => 'api/storage/azure/azure-cli-token-provider.md',
+    'path' => 'api/storage/azure/azure-cli-token-provider',
+    'title' => 'AzureCliTokenProvider',
+    'description' => 'Reuses whatever identity a developer already authenticated with `az login`, by shelling out to `az account get-access-token`.',
+  ),
+  'quiote-docs://api/storage/azure/azure-credential' => 
+  array (
+    'file' => 'api/storage/azure/azure-credential.md',
+    'path' => 'api/storage/azure/azure-credential',
+    'title' => 'AzureCredential',
+    'description' => 'Produces the `Authorization` header value for one AzureBlobClient request.',
+  ),
+  'quiote-docs://api/storage/azure/azure-credential-factory' => 
+  array (
+    'file' => 'api/storage/azure/azure-credential-factory.md',
+    'path' => 'api/storage/azure/azure-credential-factory',
+    'title' => 'AzureCredentialFactory',
+    'description' => 'Builds the AzureCredential a config `auth` value asks for, so `quioteframework/session-azure` and `quioteframework/filesystem-azure` share one place that knows how to turn `shared_key` / `workload_identity` / `cli` / `chain` into an instance rather than each re-implementing the same branch.',
+  ),
+  'quiote-docs://api/storage/azure/azure-monitor-query-client' => 
+  array (
+    'file' => 'api/storage/azure/azure-monitor-query-client.md',
+    'path' => 'api/storage/azure/azure-monitor-query-client',
+    'title' => 'AzureMonitorQueryClient',
+    'description' => 'Minimal Azure Monitor Query REST client: one KQL query against one Log Analytics workspace, nothing else.',
+  ),
+  'quiote-docs://api/storage/azure/azure-monitor-query-client-interface' => 
+  array (
+    'file' => 'api/storage/azure/azure-monitor-query-client-interface.md',
+    'path' => 'api/storage/azure/azure-monitor-query-client-interface',
+    'title' => 'AzureMonitorQueryClientInterface',
+    'description' => 'A single KQL query against one Log Analytics workspace.',
   ),
   'quiote-docs://api/storage/azure/azure-storage-exception' => 
   array (
@@ -4913,19 +5893,68 @@ return array (
     'title' => 'AzureTableSessionPersistence',
     'description' => 'SessionPersistenceInterface storing one entity per session id in a single Azure Table Storage table — cheaper than AzureBlobSessionPersistence for small key/value-shaped session payloads, with no per-account container to manage.',
   ),
+  'quiote-docs://api/storage/azure/azure-token-provider' => 
+  array (
+    'file' => 'api/storage/azure/azure-token-provider.md',
+    'path' => 'api/storage/azure/azure-token-provider',
+    'title' => 'AzureTokenProvider',
+    'description' => 'Produces an Azure AD access token for whichever resource its implementation was built for, caching and refreshing it however fits the source (a token exchange, a CLI call, a chain of both).',
+  ),
+  'quiote-docs://api/storage/azure/azure-token-provider-factory' => 
+  array (
+    'file' => 'api/storage/azure/azure-token-provider-factory.md',
+    'path' => 'api/storage/azure/azure-token-provider-factory',
+    'title' => 'AzureTokenProviderFactory',
+    'description' => 'Builds a bare AzureTokenProvider for whichever `auth` a config value asks for, scoped to an arbitrary AAD resource -- not only storage.',
+  ),
+  'quiote-docs://api/storage/azure/bearer-credential' => 
+  array (
+    'file' => 'api/storage/azure/bearer-credential.md',
+    'path' => 'api/storage/azure/bearer-credential',
+    'title' => 'BearerCredential',
+    'description' => 'Azure AD authentication: every request carries `Authorization: Bearer {token}`, the token itself coming from an AzureTokenProvider (workload identity, the Azure CLI, or a chain of both).',
+  ),
+  'quiote-docs://api/storage/azure/chained-token-provider' => 
+  array (
+    'file' => 'api/storage/azure/chained-token-provider.md',
+    'path' => 'api/storage/azure/chained-token-provider',
+    'title' => 'ChainedTokenProvider',
+    'description' => 'Tries each provider in order and answers the first token obtained, the way the official Azure SDKs\' `DefaultAzureCredential` chains workload identity, then the CLI, then further sources.',
+  ),
   'quiote-docs://api/storage/azure/index' => 
   array (
     'file' => 'api/storage/azure/index.md',
     'path' => 'api/storage/azure/index',
     'title' => 'Azure',
-    'description' => 'The Quiote\\\\Storage\\\\Azure namespace — 8 documented types.',
+    'description' => 'The Quiote\\\\Storage\\\\Azure namespace — 21 documented types.',
+  ),
+  'quiote-docs://api/storage/azure/proc-open-azure-cli-process-runner' => 
+  array (
+    'file' => 'api/storage/azure/proc-open-azure-cli-process-runner.md',
+    'path' => 'api/storage/azure/proc-open-azure-cli-process-runner',
+    'title' => 'ProcOpenAzureCliProcessRunner',
+    'description' => 'Default AzureCliProcessRunner: runs the command directly via `proc_open()`\'s array form, never through a shell, so there is nothing for the fixed, argument-free `az` invocation to inject into.',
+  ),
+  'quiote-docs://api/storage/azure/shared-key-credential' => 
+  array (
+    'file' => 'api/storage/azure/shared-key-credential.md',
+    'path' => 'api/storage/azure/shared-key-credential',
+    'title' => 'SharedKeyCredential',
+    'description' => 'Shared Key authentication: signs every request with an HMAC-SHA256 over the storage account key, the way AzureBlobClient always used to before AzureCredential existed.',
+  ),
+  'quiote-docs://api/storage/azure/workload-identity-token-provider' => 
+  array (
+    'file' => 'api/storage/azure/workload-identity-token-provider.md',
+    'path' => 'api/storage/azure/workload-identity-token-provider',
+    'title' => 'WorkloadIdentityTokenProvider',
+    'description' => 'Exchanges the projected service account token AKS\'s workload identity webhook mounts into the pod for a Storage-scoped Azure AD access token, via the OAuth2 JWT-bearer client-assertion flow.',
   ),
   'quiote-docs://api/storage/gcs/gcs-client' => 
   array (
     'file' => 'api/storage/gcs/gcs-client.md',
     'path' => 'api/storage/gcs/gcs-client',
     'title' => 'GcsClient',
-    'description' => 'Minimal Google Cloud Storage REST client authenticating with an HMAC key pair (GCS\'s \\"interoperability\\" auth mode, meant for exactly this kind of S3-like tool) rather than a service-account OAuth2/JWT flow — no `google/cloud-storage` dependency, no token exchange round-trip, just the operations a session or filesystem backend needs against the XML API: get, put, delete and head a single object.',
+    'description' => 'Minimal Google Cloud Storage REST client authenticating with an HMAC key pair (GCS\'s \\"interoperability\\" auth mode, meant for exactly this kind of S3-like tool) rather than a service-account OAuth2/JWT flow, no `google/cloud-storage` dependency, no token exchange round-trip, just the operations a session or filesystem backend needs against the XML API: get, put, delete, head and list a bucket.',
   ),
   'quiote-docs://api/storage/gcs/gcs-session-factory' => 
   array (
@@ -4960,7 +5989,21 @@ return array (
     'file' => 'api/storage/index.md',
     'path' => 'api/storage/index',
     'title' => 'Storage',
-    'description' => 'The Quiote\\\\Storage namespace — 19 documented types.',
+    'description' => 'The Quiote\\\\Storage namespace — 35 documented types.',
+  ),
+  'quiote-docs://api/storage/listable-object-store-client-interface' => 
+  array (
+    'file' => 'api/storage/listable-object-store-client-interface.md',
+    'path' => 'api/storage/listable-object-store-client-interface',
+    'title' => 'ListableObjectStoreClientInterface',
+    'description' => 'An ObjectStoreClientInterface whose store can also enumerate what it holds.',
+  ),
+  'quiote-docs://api/storage/object-listing' => 
+  array (
+    'file' => 'api/storage/object-listing.md',
+    'path' => 'api/storage/object-listing',
+    'title' => 'ObjectListing',
+    'description' => 'One page of ListableObjectStoreClientInterface::listObjects().',
   ),
   'quiote-docs://api/storage/object-metadata' => 
   array (
@@ -4983,6 +6026,13 @@ return array (
     'title' => 'ObjectStoreException',
     'description' => 'A failure talking to an object store.',
   ),
+  'quiote-docs://api/storage/object-summary' => 
+  array (
+    'file' => 'api/storage/object-summary.md',
+    'path' => 'api/storage/object-summary',
+    'title' => 'ObjectSummary',
+    'description' => 'One entry in a ObjectListing: the same three metadata fields ObjectMetadata carries for a single object, plus the key they describe, so a listing result and a ObjectStoreClientInterface::head() result read the same way.',
+  ),
   'quiote-docs://api/storage/s3/index' => 
   array (
     'file' => 'api/storage/s3/index.md',
@@ -4995,7 +6045,7 @@ return array (
     'file' => 'api/storage/s3/s3-client.md',
     'path' => 'api/storage/s3/s3-client',
     'title' => 'S3Client',
-    'description' => 'Minimal S3 REST client using AWS Signature Version 4 — deliberately not built on `aws/aws-sdk-php` (a heavy dependency pulling in a client for every AWS service) for the operations a session or filesystem backend needs: get, put, delete and head a single object.',
+    'description' => 'Minimal S3 REST client using AWS Signature Version 4, deliberately not built on `aws/aws-sdk-php` (a heavy dependency pulling in a client for every AWS service) for the operations a session or filesystem backend needs: get, put, delete, head and list.',
   ),
   'quiote-docs://api/storage/s3/s3-session-factory' => 
   array (
@@ -5017,6 +6067,48 @@ return array (
     'path' => 'api/storage/s3/s3-storage-exception',
     'title' => 'S3StorageException',
     'description' => 'A failure talking to S3 storage.',
+  ),
+  'quiote-docs://api/support/clock/clock' => 
+  array (
+    'file' => 'api/support/clock/clock.md',
+    'path' => 'api/support/clock/clock',
+    'title' => 'Clock',
+    'description' => 'Static facade over the process-wide clock, mirroring Config.',
+  ),
+  'quiote-docs://api/support/clock/clock-interface' => 
+  array (
+    'file' => 'api/support/clock/clock-interface.md',
+    'path' => 'api/support/clock/clock-interface',
+    'title' => 'ClockInterface',
+    'description' => 'The one seam every direct time()/microtime()/new DateTime() call site in core is meant to go through instead.',
+  ),
+  'quiote-docs://api/support/clock/frozen-clock' => 
+  array (
+    'file' => 'api/support/clock/frozen-clock.md',
+    'path' => 'api/support/clock/frozen-clock',
+    'title' => 'FrozenClock',
+    'description' => 'A clock that does not move except when told to: every read answers the wall-clock/monotonic values last set, however much real time elapses between two calls.',
+  ),
+  'quiote-docs://api/support/clock/index' => 
+  array (
+    'file' => 'api/support/clock/index.md',
+    'path' => 'api/support/clock/index',
+    'title' => 'Clock',
+    'description' => 'The Quiote\\\\Support\\\\Clock namespace — 5 documented types.',
+  ),
+  'quiote-docs://api/support/clock/offset-clock' => 
+  array (
+    'file' => 'api/support/clock/offset-clock.md',
+    'path' => 'api/support/clock/offset-clock',
+    'title' => 'OffsetClock',
+    'description' => 'A clock that ticks in real time but reports a fixed offset from another clock -- \\"the client\'s clock is ten minutes fast\\", \\"this node\'s clock has * drifted 30 seconds behind the cluster\\".',
+  ),
+  'quiote-docs://api/support/clock/system-clock' => 
+  array (
+    'file' => 'api/support/clock/system-clock.md',
+    'path' => 'api/support/clock/system-clock',
+    'title' => 'SystemClock',
+    'description' => 'The real clock: ClockInterface::now()/ClockInterface::unixTimestamp()/ ClockInterface::microtime() answer from the system wall clock exactly like `new DateTimeImmutable()`/`time()`/`microtime(true)` always did, and ClockInterface::monotonic() from `hrtime(true)`.',
   ),
   'quiote-docs://api/support/compiler/artifact-drift-checker' => 
   array (
@@ -5074,12 +6166,75 @@ return array (
     'title' => 'CorrelationId',
     'description' => 'Resolves a per-request correlation ID: adopt a sane inbound header value if present, else generate a fresh one.',
   ),
+  'quiote-docs://api/support/environment/environment' => 
+  array (
+    'file' => 'api/support/environment/environment.md',
+    'path' => 'api/support/environment/environment',
+    'title' => 'Environment',
+    'description' => 'Static facade over the process-wide environment reader, mirroring Clock and Randomness.',
+  ),
+  'quiote-docs://api/support/environment/environment-reader-interface' => 
+  array (
+    'file' => 'api/support/environment/environment-reader-interface.md',
+    'path' => 'api/support/environment/environment-reader-interface',
+    'title' => 'EnvironmentReaderInterface',
+    'description' => 'The one seam a direct `getenv()` call site on the request path is meant to go through instead, mirroring ClockInterface\'s and RandomnessInterface\'s role for `time()` and `random_bytes()`: production gets SystemEnvironmentReader, a replay engine swaps in a stub answering from a recorded effect ledger.',
+  ),
+  'quiote-docs://api/support/environment/index' => 
+  array (
+    'file' => 'api/support/environment/index.md',
+    'path' => 'api/support/environment/index',
+    'title' => 'Environment',
+    'description' => 'The Quiote\\\\Support\\\\Environment namespace — 3 documented types.',
+  ),
+  'quiote-docs://api/support/environment/system-environment-reader' => 
+  array (
+    'file' => 'api/support/environment/system-environment-reader.md',
+    'path' => 'api/support/environment/system-environment-reader',
+    'title' => 'SystemEnvironmentReader',
+    'description' => 'The real environment: `getenv()` first, then `$_ENV`.',
+  ),
   'quiote-docs://api/support/index' => 
   array (
     'file' => 'api/support/index.md',
     'path' => 'api/support/index',
     'title' => 'Support',
-    'description' => 'The Quiote\\\\Support namespace — 7 documented types.',
+    'description' => 'The Quiote\\\\Support namespace — 19 documented types.',
+  ),
+  'quiote-docs://api/support/random/index' => 
+  array (
+    'file' => 'api/support/random/index.md',
+    'path' => 'api/support/random/index',
+    'title' => 'Random',
+    'description' => 'The Quiote\\\\Support\\\\Random namespace — 4 documented types.',
+  ),
+  'quiote-docs://api/support/random/randomness' => 
+  array (
+    'file' => 'api/support/random/randomness.md',
+    'path' => 'api/support/random/randomness',
+    'title' => 'Randomness',
+    'description' => 'Static facade over the process-wide source of entropy, mirroring Clock.',
+  ),
+  'quiote-docs://api/support/random/randomness-interface' => 
+  array (
+    'file' => 'api/support/random/randomness-interface.md',
+    'path' => 'api/support/random/randomness-interface',
+    'title' => 'RandomnessInterface',
+    'description' => 'The one seam every direct random_bytes()/random_int() call site on the request path is meant to go through instead.',
+  ),
+  'quiote-docs://api/support/random/seeded-randomness' => 
+  array (
+    'file' => 'api/support/random/seeded-randomness.md',
+    'path' => 'api/support/random/seeded-randomness',
+    'title' => 'SeededRandomness',
+    'description' => 'A source of entropy that is not random at all: the same seed always produces the same sequence of SeededRandomness::bytes()/SeededRandomness::int() results, in call order.',
+  ),
+  'quiote-docs://api/support/random/system-randomness' => 
+  array (
+    'file' => 'api/support/random/system-randomness.md',
+    'path' => 'api/support/random/system-randomness',
+    'title' => 'SystemRandomness',
+    'description' => 'The real source of entropy: SystemRandomness::bytes()/SystemRandomness::int() answer from PHP\'s CSPRNG exactly like `random_bytes()`/`random_int()` always did.',
   ),
   'quiote-docs://api/telemetry/attribute-sanitizer' => 
   array (
@@ -6115,7 +7270,7 @@ return array (
     'file' => 'api/validator/json-validator.md',
     'path' => 'api/validator/json-validator',
     'title' => 'JsonValidator',
-    'description' => 'JsonValidator verifies if a parameter contains a value that is valid JSON and optionally exports the decoded value.',
+    'description' => 'JsonValidator verifies if a parameter contains a value that is valid JSON.',
   ),
   'quiote-docs://api/validator/notoperator-validator' => 
   array (
@@ -6418,6 +7573,13 @@ return array (
     'title' => 'Output types and content negotiation',
     'description' => 'How Quiote picks an output format and how one view serves several.',
   ),
+  'quiote-docs://basics/psr-18-client' => 
+  array (
+    'file' => 'basics/psr-18-client.md',
+    'path' => 'basics/psr-18-client',
+    'title' => 'Bring your own PSR-18 client',
+    'description' => 'Binding a Psr\\Http\\Client\\ClientInterface in the container for the packages that need one — the cloud filesystem, session and replay-store backends.',
+  ),
   'quiote-docs://basics/requests-and-responses' => 
   array (
     'file' => 'basics/requests-and-responses.md',
@@ -6522,6 +7684,13 @@ return array (
     'path' => 'getting-started/upgrading-to-4',
     'title' => 'Upgrading to 4.0',
     'description' => '4.0 breaks Context into the collaborators it was standing in for — what changes for application code, and the one thing that fails hard.',
+  ),
+  'quiote-docs://getting-started/upgrading-to-4-2' => 
+  array (
+    'file' => 'getting-started/upgrading-to-4-2.md',
+    'path' => 'getting-started/upgrading-to-4-2',
+    'title' => 'Upgrading to 4.2',
+    'description' => '4.2 moves the filesystem and object-store classes into their own packages — one composer require, no namespace changes.',
   ),
   'quiote-docs://getting-started/your-first-app' => 
   array (

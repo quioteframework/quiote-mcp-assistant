@@ -16,7 +16,7 @@ There is no garbage collection: an object store has no cheap way to enumerate ex
 |---|---|
 | Implements | [`SessionPersistenceInterface`](/api/session/session-persistence-interface/) |
 | Since | `3.2.0` |
-| Source | `Session/ObjectStoreSessionPersistence.php` |
+| Source | `ObjectStoreSessionPersistence.php` |
 
 ## Constructor
 

@@ -28,7 +28,7 @@ Implementors must answer the module, action, request method and output type of t
 | [`getRequestData(): ?ServerRequestInterface`](#getrequestdata) | Returns the PSR-7 server request backing this dispatch. |
 | [`getRequestMethod(): string`](#getrequestmethod) | Returns the request method token the action was dispatched with. |
 | [`getResponse(): WebResponse`](#getresponse) | Returns the response the action and its view write into. |
-| [`getValidationManager(): mixed`](#getvalidationmanager) |  |
+| [`getValidationManager(): ?ValidationManager`](#getvalidationmanager) | Returns the validation manager carrying this dispatch's error state, or null when none is available. |
 | [`getViewModuleName(): ?string`](#getviewmodulename) | Returns the view module recorded by setViewModuleName(), or null when none was set. |
 | [`getViewName(): ?string`](#getviewname) | Returns the view name recorded by setViewName(), or null when none was set. |
 | [`setViewModuleName(?string $module): void`](#setviewmodulename) | Records the module hosting the view to render, overriding the action's own module. |
@@ -94,9 +94,11 @@ Returns [`WebResponse`](/api/response/web-response/)
 
 ### getValidationManager()
 
-`abstract public function getValidationManager(): mixed`
+`abstract public function getValidationManager(): ?ValidationManager`
 
-Returns `mixed`
+Returns the validation manager carrying this dispatch's error state, or null when none is available.
+
+Returns `?`[`ValidationManager`](/api/validator/validation-manager/)
 
 ### getViewModuleName()
 

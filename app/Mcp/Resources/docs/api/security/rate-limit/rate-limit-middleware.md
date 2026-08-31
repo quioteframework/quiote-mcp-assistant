@@ -19,11 +19,12 @@ Runs in the `pre_routing` phase so an over-limit request is rejected before any 
 
 ### __construct()
 
-`public function __construct(StorageInterface $storage): mixed`
+`public function __construct(StorageInterface $storage, ClockInterface $clock = new SystemClock(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$storage` | `StorageInterface` |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
 
 Returns `mixed`
 

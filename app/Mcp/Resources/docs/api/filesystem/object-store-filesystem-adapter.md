@@ -6,7 +6,7 @@ A [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) 
 
 Every keyed object store maps onto a filesystem the same way -- prefix the path to form a key, translate a missing object into a not-found error, and read size and modification time out of the object's metadata. That mapping is provider-independent, so it lives here once and the provider packages supply only their client.
 
-Deliberately not a [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/): an object store reached through single-object calls has no list operation. See that interface for the reasoning.
+Not a [`ListableFilesystemInterface`](/api/filesystem/listable-filesystem-interface/) itself: that needs a store that can enumerate its keys, which not every [`ObjectStoreClientInterface`](/api/storage/object-store-client-interface/) can. [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/) adds it for the ones that can, without every consumer of this class paying for the distinction.
 
 The provider name is carried for error messages only, so a failure says "S3 returned no * Content-Length" rather than something a reader has to trace back to a driver alias.
 
@@ -18,7 +18,7 @@ The provider name is carried for error messages only, so a failure says "S3 retu
 |---|---|
 | Implements | [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) |
 | Since | `3.2.0` |
-| Source | `Filesystem/ObjectStoreFilesystemAdapter.php` |
+| Source | `ObjectStoreFilesystemAdapter.php` |
 
 ## Constructor
 

@@ -51,10 +51,10 @@ Returns `mixed`
 | [`getRequestData(): ?ServerRequestInterface`](#getrequestdata) | Returns the PSR-7 server request backing this dispatch. |
 | [`getRequestMethod(): string`](#getrequestmethod) | Returns the request method token the action was dispatched with. |
 | [`getResponse(): WebResponse`](#getresponse) | Returns the response the action and its view write into. |
-| [`getValidationManager(): ?object`](#getvalidationmanager) | Returns the validation manager shared by this dispatch, or null when none can be resolved. |
+| [`getValidationManager(): ?ValidationManager`](#getvalidationmanager) | Returns the validation manager shared by this dispatch, or null when none can be resolved. |
 | [`getViewModuleName(): ?string`](#getviewmodulename) | Returns the view module recorded by setViewModuleName(), or null when none was set. |
 | [`getViewName(): ?string`](#getviewname) | Returns the view name recorded by setViewName(), or null when none was set. |
-| [`setValidationManager(?object $vm): void`](#setvalidationmanager) | Replace the cached validation manager. |
+| [`setValidationManager(?ValidationManager $vm): void`](#setvalidationmanager) | Replace the cached validation manager. |
 | [`setViewModuleName(?string $module): void`](#setviewmodulename) | Records the module hosting the view to render, overriding the action's own module. |
 | [`setViewName(?string $name): void`](#setviewname) | Records the name of the view to render for this action. |
 
@@ -118,13 +118,13 @@ Returns [`WebResponse`](/api/response/web-response/)
 
 ### getValidationManager()
 
-`public function getValidationManager(): ?object`
+`public function getValidationManager(): ?ValidationManager`
 
 Returns the validation manager shared by this dispatch, or null when none can be resolved.
 
 The first successful lookup goes through the context's container and is cached on this instance, so XML validators, the action's own validate*() methods and error-handling code all observe the same error and export state. A container that cannot supply one — or that throws while trying — yields null rather than propagating, and the lookup is retried on the next call.
 
-Returns `?``object`
+Returns `?`[`ValidationManager`](/api/validator/validation-manager/)
 
 ### getViewModuleName()
 
@@ -144,7 +144,7 @@ Returns `?``string`
 
 ### setValidationManager()
 
-`public function setValidationManager(?object $vm): void`
+`public function setValidationManager(?ValidationManager $vm): void`
 
 Replace the cached validation manager.
 
@@ -152,7 +152,7 @@ Called by ValidationService / ActionTestCase to inject the VM that XML validator
 
 | Parameter | Type | Description |
 |---|---|---|
-| `$vm` | `?``object` |  |
+| `$vm` | `?`[`ValidationManager`](/api/validator/validation-manager/) |  |
 
 ### setViewModuleName()
 

@@ -19,11 +19,12 @@ Responsibilities: - Parse JSON (application/json, +json types) strict by default
 
 ### __construct()
 
-`public function __construct(?bool $strict = null): mixed`
+`public function __construct(?bool $strict = null, EnvironmentReaderInterface $environment = new SystemEnvironmentReader(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$strict` | `?``bool` |  |
+| `$environment` | [`EnvironmentReaderInterface`](/api/support/environment/environment-reader-interface/) |  |
 
 Returns `mixed`
 

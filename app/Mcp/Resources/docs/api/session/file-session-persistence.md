@@ -25,13 +25,15 @@ This class deliberately does not touch ext/session (no session_start(), no $_SES
 
 ### __construct()
 
-`public function __construct(string $directory, array<string, mixed> $parameters = [], SessionCodecInterface $codec = new SessionCodec(…)): mixed`
+`public function __construct(string $directory, array<string, mixed> $parameters = [], SessionCodecInterface $codec = new SessionCodec(…), ClockInterface $clock = new SystemClock(…), RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$directory` | `string` |  |
 | `$parameters` | `array``<``string``, ``mixed``>` |  |
 | `$codec` | [`SessionCodecInterface`](/api/session/session-codec-interface/) |  |
+| `$clock` | [`ClockInterface`](/api/support/clock/clock-interface/) |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

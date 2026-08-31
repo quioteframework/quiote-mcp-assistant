@@ -26,6 +26,7 @@ $closed on a Struct means an unrecognized key is a diagnostic rather than silent
 | `$nullable` | `bool` | _readonly._ |
 | `$required` | `array` | _readonly._ |
 | `$type` | [`SchemaType`](/api/config/schema/schema-type/) | _readonly._ |
+| `$variants` | `array` | _readonly._ |
 
 ## Methods
 
@@ -37,6 +38,7 @@ $closed on a Struct means an unrecognized key is a diagnostic rather than silent
 | [`int(bool $nullable = false): Rule`](#int) | Builds a rule for a real PHP int, or null when $nullable is set. |
 | [`listOf(Rule $item, bool $nullable = false): Rule`](#listof) | Builds a rule for a sequential list whose every element must match $item. |
 | [`mixed(): Rule`](#mixed) | Builds a rule that accepts any value, including null. |
+| [`oneOf(Rule ...$variants): Rule`](#oneof) | Builds a rule for a value that may take any one of $variants' shapes. |
 | [`phpClass(bool $nullable = false): Rule`](#phpclass) | Builds a rule for a non-empty string that is shaped like a PHP class name. |
 | [`string(bool $nullable = false): Rule`](#string) | Builds a rule for a PHP string value, or null when $nullable is set. |
 | [`struct(array<string, Rule> $keys, list<string> $required = [], bool $closed = true, bool $nullable = false): Rule`](#struct) |  |
@@ -117,6 +119,20 @@ Returns [`Rule`](/api/config/schema/rule/)
 Builds a rule that accepts any value, including null.
 
 Nothing below this point is inspected, so it is how an open-ended region of the canonical array -- a free-form parameter bag, for instance -- is marked as deliberately unconstrained rather than left out of the schema. There is no $nullable argument because such a rule is always nullable.
+
+Returns [`Rule`](/api/config/schema/rule/)
+
+### oneOf()
+
+`public static function oneOf(Rule ...$variants): Rule`
+
+Builds a rule for a value that may take any one of $variants' shapes.
+
+For a position that is genuinely alternative-shaped -- a bool that a `%env(...)%` placeholder string stands in for until the compiled artifact is loaded, say -- rather than one whose shape is unknown, which is what [`Rule::mixed()`](/api/config/schema/rule/#mixed) is for. A value matching no variant is reported once, against this position: the variants' own diagnostics would each describe a shape the value was never meant to have.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$variants` | [`Rule`](/api/config/schema/rule/) |  |
 
 Returns [`Rule`](/api/config/schema/rule/)
 

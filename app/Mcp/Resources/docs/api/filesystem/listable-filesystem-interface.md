@@ -15,9 +15,9 @@ Type-hint this where listing is required, and the wiring fails at the point a no
 |  |  |
 |---|---|
 | Implements | [`FilesystemAdapterInterface`](/api/filesystem/filesystem-adapter-interface/) |
-| Implemented by | [`LocalFilesystemAdapter`](/api/filesystem/local-filesystem-adapter/) |
+| Implemented by | [`ListableObjectStoreFilesystemAdapter`](/api/filesystem/listable-object-store-filesystem-adapter/), [`LocalFilesystemAdapter`](/api/filesystem/local-filesystem-adapter/) |
 | Since | `3.2.0` |
-| Source | `Filesystem/ListableFilesystemInterface.php` |
+| Source | `ListableFilesystemInterface.php` |
 
 ## Methods
 

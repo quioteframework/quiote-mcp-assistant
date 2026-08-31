@@ -20,11 +20,12 @@ Simple and non-simple actions alike go through ActionExecutor, and caching opera
 
 ### __construct()
 
-`public function __construct(Controller $controller): mixed`
+`public function __construct(Controller $controller, RandomnessInterface $randomness = new SystemRandomness(…)): mixed`
 
 | Parameter | Type | Description |
 |---|---|---|
 | `$controller` | [`Controller`](/api/controller/controller/) |  |
+| `$randomness` | [`RandomnessInterface`](/api/support/random/randomness-interface/) |  |
 
 Returns `mixed`
 

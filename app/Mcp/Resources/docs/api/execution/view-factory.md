@@ -30,11 +30,11 @@ Returns `mixed`
 
 | Method | Description |
 |---|---|
-| [`create(string $viewModule, string $viewName, string $actionModule, string $actionName, string $outputType, ?WebRequest $request, array<string, mixed> $actionAttributeSnapshot, ?object $validationManager = null): ?View`](#create) | Create and initialize a view. |
+| [`create(string $viewModule, string $viewName, string $actionModule, string $actionName, string $outputType, ?WebRequest $request, array<string, mixed> $actionAttributeSnapshot, ?ValidationManager $validationManager = null): ?View`](#create) | Create and initialize a view. |
 
 ### create()
 
-`public function create(string $viewModule, string $viewName, string $actionModule, string $actionName, string $outputType, ?WebRequest $request, array<string, mixed> $actionAttributeSnapshot, ?object $validationManager = null): ?View`
+`public function create(string $viewModule, string $viewName, string $actionModule, string $actionName, string $outputType, ?WebRequest $request, array<string, mixed> $actionAttributeSnapshot, ?ValidationManager $validationManager = null): ?View`
 
 Create and initialize a view.
 
@@ -49,6 +49,6 @@ Attributes snapshot from action exec
 | `$outputType` | `string` | Output type name (lowercase) |
 | `$request` | `?`[`WebRequest`](/api/request/web-request/) | Request data snapshot |
 | `$actionAttributeSnapshot` | `array``<``string``, ``mixed``>` | Attributes snapshot from action exec |
-| `$validationManager` | `?``object` |  |
+| `$validationManager` | `?`[`ValidationManager`](/api/validator/validation-manager/) |  |
 
 Returns `?`[`View`](/api/view/view/)

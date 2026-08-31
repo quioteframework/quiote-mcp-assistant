@@ -4,7 +4,7 @@
 
 BooleanValidator verifies a parameter is a valid boolean Accepted values are string 0/1, int 0/1, bool true/false, string yes/no, string true/false, string on/off - basically all values that [`Toolkit::literalize()`](/api/util/toolkit/#literalize) will accept.
 
-The value will be casted to the respective boolean unless it's exported. If the export parameter is given, the value will be retained in its original form.
+On success the value is cast to a native bool and written back into the request under the 'export' parameter's name, or under the validator's own argument name when 'export' is not configured.
 
 ## Synopsis
 

@@ -14,7 +14,7 @@ The shared supertype of every provider's own storage exception, so code that wor
 |---|---|
 | Extends | `RuntimeException` |
 | Since | `3.2.0` |
-| Source | `Storage/ObjectStoreException.php` |
+| Source | `ObjectStoreException.php` |
 
 ## Inherited methods
 

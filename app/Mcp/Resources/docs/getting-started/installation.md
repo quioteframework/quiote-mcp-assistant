@@ -25,7 +25,7 @@ Optional extensions that unlock additional functionality:
 
 ## Installing via Composer
 
-Quiote is available on Packagist. The latest stable version is **v4.0.0**.
+Quiote is available on Packagist. The latest stable version is **v4.2.0**.
 
 Follow these steps from your project directory.
 

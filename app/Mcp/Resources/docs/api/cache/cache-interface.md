@@ -11,6 +11,7 @@ Framework-facing cache interface; extends PSR-16 for flexibility.
 |  |  |
 |---|---|
 | Implements | [`CacheInterface`](https://www.php-fig.org/psr/psr-16/) |
+| Implemented by | [`RecordingCache`](/api/replay/cache/recording-cache/), [`StubbedCache`](/api/replay/replay/stubbed-cache/) |
 | Source | `Cache/CacheInterface.php` |
 
 ## Inherited methods

@@ -1,8 +1,8 @@
 # AzureBlobContainerClient
 
-> AzureBlobClient bound to one container, so it satisfies ObjectStoreClientInterface like the S3 and GCS clients do.
+> AzureBlobClient bound to one container, so it satisfies ListableObjectStoreClientInterface like the S3 and GCS clients do.
 
-[`AzureBlobClient`](/api/storage/azure/azure-blob-client/) bound to one container, so it satisfies [`ObjectStoreClientInterface`](/api/storage/object-store-client-interface/) like the S3 and GCS clients do.
+[`AzureBlobClient`](/api/storage/azure/azure-blob-client/) bound to one container, so it satisfies [`ListableObjectStoreClientInterface`](/api/storage/listable-object-store-client-interface/) like the S3 and GCS clients do.
 
 Azure takes the container per call, where S3 and GCS bind the bucket to the client itself. That is the only shape difference between the three, and binding it here is what lets a consumer be written once against the interface instead of once per provider.
 
@@ -10,11 +10,11 @@ The container is created on first write, as [`AzureBlobClient::ensureContainerEx
 
 ## Synopsis
 
-`final class AzureBlobContainerClient implements ObjectStoreClientInterface`
+`final class AzureBlobContainerClient implements ListableObjectStoreClientInterface`
 
 |  |  |
 |---|---|
-| Implements | [`ObjectStoreClientInterface`](/api/storage/object-store-client-interface/) |
+| Implements | [`ListableObjectStoreClientInterface`](/api/storage/listable-object-store-client-interface/) |
 | Since | `3.2.0` |
 | Source | `AzureBlobContainerClient.php` |
 
@@ -40,6 +40,7 @@ Returns `mixed`
 | [`delete(string $key): void`](#delete) | Deletes from the bound container; the container itself is never created for a delete. |
 | [`get(string $key): ?string`](#get) | Reads from the bound container. |
 | [`head(string $key): ?ObjectMetadata`](#head) | Issues an Azure Get Blob Properties request against the bound container, so no body is transferred. |
+| [`listObjects(string $prefix = '', string $delimiter = '', ?string $continuationToken = null, int $maxKeys = 1000): ObjectListing`](#listobjects) | Lists blobs in the bound container. |
 | [`put(string $key, string $body): void`](#put) | The bound container is created on the first write of this instance's lifetime and the result remembered, so later writes cost one request rather than two. |
 
 ### blobClient()
@@ -103,6 +104,29 @@ Issues an Azure Get Blob Properties request against the bound container, so no b
 | `$key` | `string` |  |
 
 Returns `?`[`ObjectMetadata`](/api/storage/object-metadata/)
+
+| Throws | When |
+|---|---|
+| `ObjectStoreException` | On a transport or provider failure. |
+
+### listObjects()
+
+`public function listObjects(string $prefix = '', string $delimiter = '', ?string $continuationToken = null, int $maxKeys = 1000): ObjectListing`
+
+Lists blobs in the bound container.
+
+With $delimiter empty, every matching key comes back as an `ObjectSummary` in [`ObjectListing::$objects`](/api/storage/object-listing/#objects) -- a fully recursive listing. With $delimiter set, a key is only listed that way when $prefix (plus nothing else) reaches it before the first occurrence of $delimiter; everything past that point is collapsed into one entry per distinct prefix-up-to-and-including-the-delimiter in [`ObjectListing::$commonPrefixes`](/api/storage/object-listing/#commonprefixes) instead -- the "one directory level" view every provider's own console uses.
+
+$continuationToken must be null on the first call and, for a truncated result, [`ObjectListing::$nextContinuationToken`](/api/storage/object-listing/#nextcontinuationtoken) verbatim on the next -- it is opaque, provider specific, and never meant to be inspected or constructed by a caller.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$prefix` | `string` |  |
+| `$delimiter` | `string` |  |
+| `$continuationToken` | `?``string` |  |
+| `$maxKeys` | `int` |  |
+
+Returns [`ObjectListing`](/api/storage/object-listing/)
 
 | Throws | When |
 |---|---|

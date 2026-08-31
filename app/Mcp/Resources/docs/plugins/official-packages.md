@@ -10,6 +10,10 @@ All of these packages are **MIT-licensed** (the kernel itself is LGPL-2.1+); an 
 Each package lives in its own `github.com/quioteframework/*` repository and is published to Packagist. Install any one with `composer require quioteframework/<package>`.
 </Aside>
 
+<Aside type="caution" title="Package versions are not framework versions">
+From 4.0.0 onward each package is **versioned independently** of the framework and of every other package: `quioteframework/db-doctrine` at `4.1.0` alongside a framework at `4.2.0` means nothing more than "these two released at different times". A package's own `CHANGELOG.md` is the one to read for what changed in it, and its `require` constraint on `quioteframework/quiote` is what states compatibility.
+</Aside>
+
 ## How enabling works
 
 Almost every package follows the **same two steps**: install the code, then activate it.
@@ -46,6 +50,14 @@ A few packages break the pattern — worth knowing before you go looking for a m
 | `quioteframework/db-doctrine` | Doctrine ORM + DBAL adapters | `doctrine/orm`, `doctrine/dbal` |
 | `quioteframework/db-cycle` | Cycle ORM adapter | `cycle/orm`, `cycle/database` |
 | `quioteframework/db-propulsion` | Propulsion (Propel-style) ORM adapter | `quioteframework/propulsion` |
+| `quioteframework/replay` | Record real requests as cassettes, replay them, emit regression tests | — |
+| `quioteframework/replay-pdo` | Database-backed cassette store | — |
+| `quioteframework/replay-propulsion` | Records Propulsion queries into a cassette's effect ledger | — |
+| `quioteframework/replay-doctrine` | Records Doctrine DBAL queries into a cassette's effect ledger | — |
+| `quioteframework/replay-eloquent` | Records Eloquent queries into a cassette's effect ledger | — |
+| `quioteframework/replay-cycle` | Records Cycle ORM queries into a cassette's effect ledger | — |
+| `quioteframework/replay-storage` | Object-store cassette store over the `storage` contracts | `quioteframework/storage` |
+| `quioteframework/replay-azure` | Azure Blob cassette store + Log Analytics cassette index | `quioteframework/cloud-azure` |
 | `quioteframework/queue` | Background job/queue abstraction, `sync` driver, `queue:work` | — |
 | `quioteframework/queue-db` | DB-backed queue driver + dead-letter store | — |
 | `quioteframework/queue-redis` | Redis-backed reliable queue driver | `predis/predis` (or `ext-redis`) |
@@ -65,7 +77,9 @@ A few packages break the pattern — worth knowing before you go looking for a m
 | `quioteframework/filesystem-azure` | Azure Blob file storage disk | `quioteframework/cloud-azure` |
 | `quioteframework/cloud-s3` | Signed S3 REST client *(transitive)* | — |
 | `quioteframework/cloud-gcs` | Signed GCS REST client *(transitive)* | — |
-| `quioteframework/cloud-azure` | Signed Azure Blob/Table REST clients *(transitive)* | — |
+| `quioteframework/cloud-azure` | Signed Azure Blob/Table/Monitor REST clients *(transitive)* | — |
+| `quioteframework/filesystem` | `FilesystemManager`, the disk drivers and the object-store session base | `quioteframework/storage` |
+| `quioteframework/storage` | The framework-free object-store contracts (`ObjectStoreClientInterface`, `ObjectMetadata`) | — |
 
 ## Security & web
 
@@ -536,11 +550,338 @@ return [
 </ae:configurations>
 ```
 
-Registers the `propulsion` alias for `PropulsionDatabase`. Carries the [`quioteframework/propulsion`](https://github.com/quioteframework/propulsion) runtime — a PHP 8.5, Propel-style ORM with its own code generator (`bin/propulsion model:build`). Unlike the other adapters it owns its own connection factory (a runtime `config` file, no inline DSN or layer mode). See [Databases: Propulsion](/basics/databases/#propulsion).
+Registers the `propulsion` alias for `PropulsionDatabase`. Carries the [`quioteframework/propulsion`](https://github.com/quioteframework/propulsion) runtime — a PHP 8.5, Propel-style ORM with its own code generator (`bin/propulsion model:build`) — accepting `^2.0 || ^3.0`, so the adapter does not force a Propulsion major on you. Unlike the other adapters it owns its own connection factory (a runtime `config` file, no inline DSN or layer mode). See [Databases: Propulsion](/basics/databases/#propulsion).
 
 <Aside type="note" title="PDO stays in the core">
 The raw **PDO** driver (`class="pdo"`) is built into the kernel and always available — no package needed. Only the ORM adapters are extracted.
 </Aside>
+
+## Record, replay & regression tests
+
+`quioteframework/replay` records a real request as a "cassette", replays it — in isolation by default, against stubs built from the cassette's own recorded effects — and can emit it as a committed PHPUnit regression test. The companion packages extend where cassettes are stored and what they capture. Full picture in [Record, replay & regression tests](/advanced/record-replay/) — this section is the install/enable reference.
+
+`replay` itself is tagged `4.1.0`; the seven companion packages are tagged `4.0.0`.
+
+### `quioteframework/replay`
+
+```bash
+composer require quioteframework/replay
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Registers the recorder middleware, the `file` cassette store (the default), and the `cassette:list`/`cassette:show`/`cassette:prune`/`cassette:fetch`/`replay` console commands. `replay.enabled` defaults to `false` and `replay.record` to `never`, so installing and enabling the package alone changes nothing observable. See [Record, replay & regression tests](/advanced/record-replay/).
+
+### `quioteframework/replay-pdo`
+
+Keeps cassettes in the app's own database (PostgreSQL or SQLite — not MySQL) instead of a pod's filesystem, which does not survive a restart. Load order is irrelevant: the package contributes the `pdo` store alias and a factory, and `ReplayPlugin`'s single `CassetteStoreInterface` binding builds whichever alias `replay.store` names. Installing it does not commit the app to a database-backed store.
+
+```bash
+composer require quioteframework/replay-pdo
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Replay\Store\Pdo\ReplayPdoPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Replay\Store\Pdo\ReplayPdoPlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Replay\Store\Pdo\ReplayPdoPlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Then point `replay.store` at `pdo`. See [Record, replay & regression tests: the PDO-backed store](/advanced/record-replay/#the-pdo-backed-store).
+
+### `quioteframework/replay-propulsion`
+
+Records every query Propulsion runs during a request into that request's cassette, so `cassette:show` and an emitted regression test see what the database actually returned — not just the HTTP response.
+
+```bash
+composer require quioteframework/replay-propulsion
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Propulsion\PropulsionPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\Adapter\Propulsion\ReplayPropulsionPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Propulsion\PropulsionPlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+- class: Quiote\Replay\Adapter\Propulsion\ReplayPropulsionPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Propulsion\PropulsionPlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+        <plugin class="Quiote\Replay\Adapter\Propulsion\ReplayPropulsionPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+See [Record, replay & regression tests: recording database effects](/advanced/record-replay/#recording-database-effects).
+
+### `quioteframework/replay-doctrine`
+
+Same idea for Doctrine DBAL/ORM. List `ReplayDoctrinePlugin` **after** [`db-doctrine`'s `DoctrinePlugin`](#quioteframeworkdb-doctrine) — it overrides the `doctrine`/`doctrine_dbal` driver aliases to a recording subclass, and that override needs `DoctrinePlugin`'s own registration to have already happened.
+
+```bash
+composer require quioteframework/replay-doctrine
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Doctrine\DoctrinePlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\Adapter\Doctrine\ReplayDoctrinePlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Doctrine\DoctrinePlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+- class: Quiote\Replay\Adapter\Doctrine\ReplayDoctrinePlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Doctrine\DoctrinePlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+        <plugin class="Quiote\Replay\Adapter\Doctrine\ReplayDoctrinePlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+See [Record, replay & regression tests: recording database effects](/advanced/record-replay/#recording-database-effects).
+
+### `quioteframework/replay-eloquent`
+
+Same idea for Eloquent, via `Illuminate\Database\Events\QueryExecuted`. List `ReplayEloquentPlugin` after [`db-eloquent`'s `EloquentPlugin`](#quioteframeworkdb-eloquent), for the same driver-alias-override reason as `replay-doctrine`.
+
+```bash
+composer require quioteframework/replay-eloquent
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Eloquent\EloquentPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\Adapter\Eloquent\ReplayEloquentPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Eloquent\EloquentPlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+- class: Quiote\Replay\Adapter\Eloquent\ReplayEloquentPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Eloquent\EloquentPlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+        <plugin class="Quiote\Replay\Adapter\Eloquent\ReplayEloquentPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+See [Record, replay & regression tests: recording database effects](/advanced/record-replay/#recording-database-effects).
+
+### `quioteframework/replay-cycle`
+
+Same idea for Cycle ORM, via `Cycle\Database\DatabaseManager::setLogger()`. List `ReplayCyclePlugin` after [`db-cycle`'s `CyclePlugin`](#quioteframeworkdb-cycle), for the same driver-alias-override reason as `replay-doctrine`.
+
+```bash
+composer require quioteframework/replay-cycle
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Database\Adapter\Cycle\CyclePlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\Adapter\Cycle\ReplayCyclePlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Database\Adapter\Cycle\CyclePlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+- class: Quiote\Replay\Adapter\Cycle\ReplayCyclePlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Database\Adapter\Cycle\CyclePlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+        <plugin class="Quiote\Replay\Adapter\Cycle\ReplayCyclePlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+See [Record, replay & regression tests: recording database effects](/advanced/record-replay/#recording-database-effects).
+
+### `quioteframework/replay-storage`
+
+A cassette store over any `Quiote\Storage\ListableObjectStoreClientInterface` — Azure Blob, S3 or GCS — built on the framework-free [`quioteframework/storage`](#quioteframeworkstorage) contracts. Cassettes go to a deterministic, UTC-hour-partitioned key derived from the cassette's own `recorded_at`, so a lifecycle rule prunes them and a "what happened this hour" listing is one prefix away.
+
+```bash
+composer require quioteframework/replay-storage
+```
+
+It ships **no plugin of its own**: it holds `ObjectStoreCassetteStore`, the key scheme, and two of the three cassette-index strategies, for a provider-specific package to assemble. `replay-azure` is the one shipped assembly; point your own plugin's `CassetteStoreRegistry::register()` at these classes to do the same for S3 or GCS. See [Record, replay & regression tests: the object-store-backed store](/advanced/record-replay/#the-object-store-backed-store).
+
+### `quioteframework/replay-azure`
+
+The production target for AKS + Azure Blob + Log Analytics: registers the `azure-blob` cassette store alias, and the three-step **cassette index** — an explicit `--key`, a Log Analytics lookup that resolves a bare id from the recorder's own pointer log line, and a `--date`-hinted prefix scan for a developer with blob read but no workspace access.
+
+```bash
+composer require quioteframework/replay-azure
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\Replay\Store\Azure\ReplayAzurePlugin::class, 'enabled' => true],
+    ['class' => \Quiote\Replay\ReplayPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\Replay\Store\Azure\ReplayAzurePlugin
+  enabled: true
+- class: Quiote\Replay\ReplayPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\Replay\Store\Azure\ReplayAzurePlugin" />
+        <plugin class="Quiote\Replay\ReplayPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Load order is irrelevant here too, and installing the package does not commit the app to Azure: set `replay.store` to `azure-blob` (plus `replay.store.azure.account`/`.container` and an `auth` value) to actually use it. Needs a PSR-18 client bound in the container, the same way `session-azure` does. Full settings in [Record, replay & regression tests](/advanced/record-replay/#the-object-store-backed-store).
 
 ## Background jobs
 
@@ -788,9 +1129,7 @@ Cloud disks for the [file storage abstraction](/basics/filesystem/). The kernel 
 
 Each expects **a `Psr\Http\Client\ClientInterface` bound in the [container](/architecture/container/)** — no vendor SDK is pulled — and each throws at boot naming the missing binding if there isn't one.
 
-:::caution[None of the three can list its contents]
-The underlying REST clients implement get, put, delete and head on a single object, but no list operation — so none of these adapters implements [`ListableFilesystemInterface`](/basics/filesystem/#listing-is-a-separate-contract), and asking for one as a listable disk fails at resolution rather than from inside a call. Everything else, `size()` and `lastModified()` included, works. See [File storage: cloud disks](/basics/filesystem/#cloud-disks), and [Listing from the bucket](/basics/filesystem/#listing-from-the-bucket) for how to build one on `request()`.
-:::
+All three also **list** as of 4.2: each extends `Quiote\Filesystem\ListableObjectStoreFilesystemAdapter`, so each implements [`ListableFilesystemInterface`](/basics/filesystem/#listing-is-a-separate-contract) and `listableDisk('s3')->listContents('reports/')` works. See [File storage: listing a cloud disk](/basics/filesystem/#listing-a-cloud-disk).
 
 ### `quioteframework/filesystem-s3`
 
@@ -806,13 +1145,29 @@ The underlying REST clients implement get, put, delete and head on a single obje
 
 ## Cloud transport packages
 
-Three packages hold the signed REST clients that the `session-*` and `filesystem-*` cloud backends share: **`quioteframework/cloud-s3`** (`Quiote\Storage\S3\S3Client`, SigV4), **`quioteframework/cloud-gcs`** (`Quiote\Storage\Gcs\GcsClient`, HMAC over the S3-compatible interoperability API), and **`quioteframework/cloud-azure`** (`AzureBlobClient` and `AzureTableClient`, Shared-Key).
+Three packages hold the signed REST clients that the `session-*`, `filesystem-*` and `replay-azure` backends share: **`quioteframework/cloud-s3`** (`Quiote\Storage\S3\S3Client`, SigV4), **`quioteframework/cloud-gcs`** (`Quiote\Storage\Gcs\GcsClient`, HMAC over the S3-compatible interoperability API), and **`quioteframework/cloud-azure`** (`AzureBlobClient`, `AzureTableClient` and `AzureMonitorQueryClient`).
 
-Each exposes `get`, `put`, `delete` and `head` on a single object, plus `request()`, which signs an arbitrary request and returns the raw PSR-7 response — enough to build a bucket listing or reach any provider feature the typed methods don't cover. See [Listing from the bucket](/basics/filesystem/#listing-from-the-bucket).
+Each exposes `get`, `put`, `delete` and `head` on a single object, `listObjects()` (4.2 — one normalized, paginated listing across all three providers, see [Listing a cloud disk](/basics/filesystem/#listing-a-cloud-disk)), and `request()`, which signs an arbitrary request and returns the raw PSR-7 response for anything the typed methods don't cover. All of it against the framework-free [`quioteframework/storage`](#quioteframeworkstorage) contracts.
 
 They are transitive dependencies — `session-s3` and `filesystem-s3` both require `cloud-s3`, and so on — so **you never install them directly**. They are listed here so the dependency tree makes sense when you look at it, and because a custom backend of your own can build on them.
 
-Each is a get/put/delete client against a single bucket, container or table, with no vendor SDK dependency, driven by whatever PSR-18 implementation you bind in the container.
+Each is a client against a single bucket, container or table, with no vendor SDK dependency, driven by whatever PSR-18 implementation you bind in the container. None of the three requires the framework any more, as of 4.2 — they are usable from a plain PHP project.
+
+`cloud-azure` authenticates four ways, selected by an `auth` config value its consumers all pass through `AzureCredentialFactory`: `shared_key` (the account key), `workload_identity` (an AAD token from the AKS webhook's environment), `cli` (an existing `az login` session) and `chain` (workload identity, falling back to the CLI). It is tagged `4.1.0` — the blob and table clients are in production, but the AAD credential path has not yet authenticated against real Azure.
+
+### `quioteframework/storage`
+
+The object-store contracts, and nothing else: `ObjectStoreClientInterface`, `ListableObjectStoreClientInterface`, `ObjectMetadata`, `ObjectListing`, `ObjectSummary`, `ObjectStoreException`. Its only dependency is `psr/http-message` — not the framework. It arrives transitively with any `cloud-*`, `filesystem`, or `replay-storage` install; require it directly only when writing your own object-store client against the contract.
+
+### `quioteframework/filesystem`
+
+`FilesystemManager`, the `filesystem.*` config, `FilesystemPlugin`, the `local` disk, the object-store adapter base classes, and `Quiote\Session\ObjectStoreSessionPersistence` (the shared base the object-store session backends extend — it belongs with the adapters it mirrors, not in a `session-*` package). Requires `quioteframework/storage`.
+
+```bash
+composer require quioteframework/filesystem
+```
+
+These classes shipped inside `quioteframework/quiote` through 4.1 and moved out in 4.2 with **every namespace unchanged**. The framework has no `require` on them, so upgrading alone does not install them — see [Upgrading to 4.2](/getting-started/upgrading-to-4-2/#filesystem-and-object-store-classes-moved-into-their-own-packages) for whether that affects you and how it fails if it does. Usage is on [File storage](/basics/filesystem/).
 
 ## Redis backends
 

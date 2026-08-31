@@ -17,17 +17,31 @@ Shared Action -> View -> Template resolution for the triad convention (`Actions/
 
 | Method | Description |
 |---|---|
+| [`actionExecuteMethodsFor(ReflectionClass<TAction> $action): list<ReflectionMethod>`](#actionexecutemethodsfor) | The `execute*()` methods an action can be dispatched to -- `execute()` plus the `execute{Method}()` variants `ActionResolver` looks for. |
 | [`alwaysReturnsContent(ReflectionMethod $method): bool`](#alwaysreturnscontent) | Whether this `execute*()` method's declared return type guarantees it always returns a non-null value on every path -- per `ActionExecutor::renderView()`, a non-null return becomes the response body directly and the template/layer path (`View::renderLayers()`) is never reached, regardless of what the method body does internally (e.g. |
 | [`canonicalViewToken(ModuleActionEntry $entry, string $viewToken): string`](#canonicalviewtoken) | The canonical form of a view token for the given module/action pair. |
 | [`declaresNoTemplate(ReflectionMethod $method): bool`](#declaresnotemplate) | Whether this specific `execute*()` method opts out of the `MISSING_TEMPLATE` check via `@quiote-viewmethod-has-no-template` in its own docblock (inherited from whichever class actually declares it, same as ordinary method resolution). |
 | [`executeMethodsFor(ReflectionClass<object> $view): list<ReflectionMethod>`](#executemethodsfor) | The `execute()`/`execute{OutputType}()` methods a view class declares (own or inherited from an app-level base view), one per output type it handles -- mirrors `ActionExecutor`'s own `'execute' . |
 | [`legacyViewFileFor(ModuleActionEntry $entry, string $canonicalViewToken): string`](#legacyviewfilefor) | The file path of the non-class view for a module/view token pair. |
+| [`literalReturnViewTokens(ReflectionClass<object> $action): list<string>`](#literalreturnviewtokens) | Every view token an action's `execute*()` methods return as a bare string literal, in declaration order and de-duplicated. |
 | [`outputTypeNameFor(ReflectionMethod $method): ?string`](#outputtypenamefor) | The output type name an `execute*()` method is resolved for, or null for the bare `execute()` method, which stands in for whichever output type is otherwise in effect (the app's configured default, absent further context). |
 | [`resolveExistingViewFile(ModuleActionEntry $entry, string $canonicalViewToken, string $namespacePrefix): ?string`](#resolveexistingviewfile) | Existing view class name, or the legacy view file path if only that exists, or null if neither does. |
 | [`resolveViewToken(ReflectionClass<object> $reflection): ?string`](#resolveviewtoken) | The view an action *declares* as its default, for triad/diagnostic purposes -- deliberately narrower than "whatever `getDefaultViewName()` * returns". |
 | [`templateExtensionFor(ReflectionMethod $method, ?Controller $controller): string`](#templateextensionfor) | The template file extension (leading dot included) that a given `execute*()` method's output type renders with, resolved from the app's real, already-initialized output type/renderer configuration when available. |
 | [`templateFileFor(ModuleActionEntry $entry, string $canonicalViewToken, string $extension = '.php'): string`](#templatefilefor) | The template file path a canonical view token renders from. |
 | [`viewClassFor(ModuleActionEntry $entry, string $canonicalViewToken, string $namespacePrefix): string`](#viewclassfor) | The fully qualified view class name the triad convention expects. |
+
+### actionExecuteMethodsFor()
+
+`public function actionExecuteMethodsFor(ReflectionClass<TAction> $action): list<ReflectionMethod>`
+
+The `execute*()` methods an action can be dispatched to -- `execute()` plus the `execute{Method}()` variants `ActionResolver` looks for.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$action` | `ReflectionClass``<``TAction``>` |  |
+
+Returns `list``<``ReflectionMethod``>`
 
 ### alwaysReturnsContent()
 
@@ -100,6 +114,18 @@ Resolved from the module's `quiote.view.path` directive. The path is returned wh
 | `$canonicalViewToken` | `string` |  |
 
 Returns `string`
+
+### literalReturnViewTokens()
+
+`public function literalReturnViewTokens(ReflectionClass<object> $action): list<string>`
+
+Every view token an action's `execute*()` methods return as a bare string literal, in declaration order and de-duplicated.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `$action` | `ReflectionClass``<``object``>` |  |
+
+Returns `list``<``string``>`
 
 ### outputTypeNameFor()
 

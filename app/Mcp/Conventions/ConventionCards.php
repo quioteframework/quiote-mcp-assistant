@@ -95,7 +95,86 @@ final class ConventionCards
                       `routing`, `request`, `response`, `user`, `session`, …) to
                       `{class, params}`. The `session` role selects the session backend and is
                       optional (omit it and the context answers a `NullSessionBag`).
-                    - **`Config/databases.xml`** and **`Config/output_types.xml`** — XML.
+                    - **`Config/databases.xml`** and **`Config/output_types.xml`** — shown here
+                      as XML because that is what a scaffolded app ships, but **every** config
+                      type accepts any of the three formats.
+
+                    **Format is per file, not per project.** `FormatDriverRegistry::locate()`
+                    resolves each config's base name in the order **`.php` → `.yaml`/`.yml` →
+                    `.xml`**, first match wins (`core.config_format` forces one). So
+                    `Config/databases.php` returning a plain array is fully supported and takes
+                    priority over a `databases.xml` sitting beside it — the handler
+                    (`DatabaseConfigHandler`, like every migrated handler) implements
+                    `IArrayConfigHandler` and compiles the array through the same code path as
+                    the XML DOM. `%…%` directives expand in array configs too. Mixing formats
+                    across files in one app is supported and tested.
+
+                    ```php
+                    // Config/databases.php — the array shape mirrors the XML element tree
+                    return [
+                        'default'   => 'main',
+                        'databases' => [
+                            'main' => [
+                                'class'      => 'pdo',           // driver alias or FQCN
+                                'parameters' => ['dsn' => '%core.app_dir%/var/app.sqlite'],
+                            ],
+                        ],
+                    ];
+                    ```
+
+                    **Environment-specific configuration** differs by format, and this is the
+                    one real asymmetry:
+
+                    - **XML** has native filtering: repeat `<ae:configuration environment="…">`
+                      blocks in one file. The attribute is a **regex**, anchored as
+                      `#^(pattern)$#`, space-separated values acting as alternatives — so
+                      `environment="test.*"` matches `test`, `testing`, `test.local`, and
+                      `environment="dev test"` matches either exactly.
+                    - **PHP/YAML arrays have no envelope** — `AbstractArrayFormatDriver` never
+                      applies `$environment`, a documented scope limit rather than a gap.
+                      Branch in the file itself, or point a directive at a per-environment file:
+
+                      ```php
+                      // Config/databases.php
+                      $isTest = str_starts_with(
+                          (string) \Quiote\Config\Config::getNullableString('core.environment'),
+                          'test'
+                      );
+
+                      return [
+                          'default'   => 'main',
+                          'databases' => ['main' => [
+                              'class'      => 'propulsion',
+                              'parameters' => [
+                                  'config'     => $isTest
+                                      ? '%core.app_dir%/Config/propel-test-conf.php'
+                                      : '%core.app_dir%/Config/propel-conf.php',
+                                  'datasource' => 'main',
+                              ],
+                          ]],
+                      ];
+                      ```
+
+                      `core.environment` is readable here because `Quiote::bootstrap()` sets it
+                      read-only *before* any config compiles, and `%core.environment%` expands
+                      inside string values for the file-per-environment variant. Compiled cache
+                      names embed the environment, so each environment caches separately and a
+                      branch never leaks across environments.
+
+                    `parent` and `imports` are the third option, and they resolve *through* the
+                    registry — a `databases.php` can name an XML parent, and both inherit the
+                    active environment. Format and inheritance are orthogonal.
+
+                    **`%env(NAME)%`** (or `%env(NAME, fallback)%`) is a different kind of
+                    directive from `%core.app_dir%`: it resolves at *load* time
+                    (`Quiote\Config\EnvPlaceholder`), not compile time, so a cache baked into a
+                    container image carries the placeholder, not the build machine's value — a
+                    secret never lands in the compiled artifact on disk, and rotating the
+                    variable only needs a restart. A placeholder standing alone as the whole
+                    value is literalized like any other config literal, so
+                    `Config::getBool()`/`getInt()` still work on it. A plugin's `enabled` accepts
+                    the same placeholder. The `HTTP_` namespace is refused outright (CGI/FastCGI
+                    puts every request header there as `HTTP_<NAME>`).
 
                     Read settings at runtime with `Quiote\Config\Config::get('key', $default)`;
                     `Config::has()` / `Config::set($k, $v, $overwrite)`.
@@ -154,8 +233,10 @@ final class ConventionCards
                     - `httpClient($name, $configurator)` — a named HTTP client
                     - `databaseDriver($alias, $adapterClass)` — a DB adapter alias
                     - `developerExceptionRenderer($factory)` — the debug error renderer
+                    - `safeExceptionRenderer($factory)` — its production counterpart
 
-                    That is the **whole** surface. In particular there is no `mcpTool()`/
+                    That is the **whole** contribution surface (plus the `pluginName()` accessor).
+                    In particular there is no `mcpTool()`/
                     `mcpResource()`/`mcpPrompt()` — those wrappers were removed from core by
                     the `quioteframework/mcp` split; register MCP capabilities against
                     `Quiote\Mcp\McpCatalog` instead (see the `mcp` card).
@@ -175,7 +256,7 @@ final class ConventionCards
                     A module may ship its own `%core.module_dir%/<Module>/Config/plugins.xml`,
                     contributing without touching the app-level file.
 
-                    **Ordering is load-bearing:** service contributions are applied
+                    **Ordering matters:** service contributions are applied
                     *register-if-absent*, so whichever plugin binds an id **first** wins. To
                     override a package's default binding, declare your own plugin *before* it.
 
@@ -185,7 +266,11 @@ final class ConventionCards
             'database' => [
                 'title' => 'Database connections',
                 'body' => <<<'MD'
-                    Declare connections in `Config/databases.xml`, naming an adapter by driver
+                    Declare connections in **`Config/databases.{php,yaml,yml,xml}`** — any of the
+                    three formats, resolved `.php` → `.yaml` → `.xml` (see the `config` card for
+                    the array shape and for how to vary a connection per environment; PHP is the
+                    recommended default, and Cycle *requires* it because its parameters include
+                    PHP config objects XML and YAML cannot express). Name an adapter by driver
                     alias; Quiote instantiates and lifecycle-manages it. Set
                     `core.use_database = true` in settings.
 
@@ -228,6 +313,12 @@ final class ConventionCards
                     };
                     ```
 
+                    The two forms differ in how the builder arrives: the `Validate/<Action>.php`
+                    closure above **receives** `ValidatorBuilder $v`, while the on-action hooks
+                    take **no arguments** (`ValidationService` calls
+                    `$action->registerWriteValidators()`) and build it themselves with
+                    `ValidatorBuilder::on($this->getInitContext()->getValidationManager(), $this->getContext())`.
+
                     Validators: `string`, `number`, `boolean`, `email`, `enum`, `regex`, `json`,
                     `isNotEmpty`, `isSet`, `group`, `raw`. Chain `->error()`, `->trim()`,
                     `->export()`, etc. To skip validation entirely, return true from `isSimple()`.
@@ -269,9 +360,8 @@ final class ConventionCards
                     (activate it in `Config/plugins.php`) + `mcp.enabled = true`. Transports:
                     stdio (`mcp:serve`) and Streamable HTTP.
 
-                    Register capabilities **manually** in a plugin's `register()` — there is no
-                    attribute discovery for plain handler classes. Register against the static
-                    `Quiote\Mcp\McpCatalog`, **not** `$registrar`:
+                    Explicit registration in a plugin's `register()` is the default path, and it
+                    goes through the static `Quiote\Mcp\McpCatalog`, **not** `$registrar`:
 
                     ```php
                     use Quiote\Mcp\McpCatalog;
@@ -295,6 +385,17 @@ final class ConventionCards
                     but the `quioteframework/mcp` monorepo split removed them (core can't depend
                     on the now-optional MCP package) without replacements — calling them is a
                     fatal error.
+
+                    **Attribute discovery for plain classes is available, opt-in.** Set
+                    `mcp.discover_attributes = true` and the SDK's own discoverer picks up
+                    `#[McpTool]`/`#[McpResource]`/`#[McpResourceTemplate]`/`#[McpPrompt]` on plain
+                    classes — scoped to each module's `Mcp/` subdirectory
+                    (`{core.module_dir}/{Module}/Mcp/`, plus plugin-contributed module
+                    directories), not the whole app. Narrow the roots with `mcp.module_dirs`.
+                    Results are cached in a file-backed PSR-16 cache (`mcp.discovery_cache`,
+                    default true); run `mcp:warmup` to populate it ahead of the first request.
+                    Discovery and `McpCatalog` registration compose — use discovery for handlers
+                    that live in a module, the catalog for anything assembled at boot.
 
                     Handlers are resolved through the DI container; the handler method's params map
                     from the call arguments by name (resource handlers also receive `uri`). A tool
@@ -339,9 +440,14 @@ final class ConventionCards
 
                     **The slot is optional.** Omit it and the context answers a `NullSessionBag`
                     (reads return the default, writes discarded, `exists()` false) — right for a
-                    console command, queue worker or stateless API. But note: with no session
-                    cookie, `CsrfValidationMiddleware` treats *every* request as CSRF-exempt
-                    while injection still adds the field, so it only looks protected.
+                    console command, queue worker or stateless API. Note the interaction with
+                    CSRF: a sessionless request is exempt from `CsrfValidationMiddleware` (there
+                    is no session for an attacker to ride), **except** when it is a cross-origin
+                    browser request, which is what keeps sessionless login POSTs failing closed.
+                    If the app has no session factory at all, every request takes that path and
+                    CSRF protects nothing — the middleware logs a warning once per process saying
+                    exactly that, so configure a `session` slot or set `core.csrf.enabled = false`
+                    to make the intent explicit.
 
                     **Read/write through the bag** — inject `Quiote\Session\SessionBagInterface`
                     (as of 4.0, `Context` no longer exposes `getSessionBag()`):
@@ -471,9 +577,18 @@ final class ConventionCards
                     ```
 
                     `FilesystemAdapterInterface`: `read`, `write`, `delete`, `exists`, `size`,
-                    `lastModified`, `listContents` (relative paths, **non-recursive**). Errors
-                    are `FilesystemStorageException`, with `FileNotFoundStorageException` for
-                    the missing-file case.
+                    `lastModified` — that is all of it. `listContents()` (relative paths,
+                    **non-recursive**) is a *separate* interface,
+                    `Quiote\Filesystem\ListableFilesystemInterface`, since `disk()` returns the
+                    base contract and declaring `listContents()` there would leave a caller
+                    unable to tell from the type whether it would work. Reach it through
+                    `FilesystemManager::listableDisk($alias)`, which returns the narrowed
+                    interface or throws a `\RuntimeException` naming the disk and driver.
+
+                    Adapter errors are `FilesystemStorageException`, with
+                    `FileNotFoundStorageException` for the missing-file case — but catching that
+                    base type does **not** cover the whole subsystem: `FilesystemManager` throws
+                    plain `\RuntimeException` for an unknown driver or a non-listable disk.
 
                     The core `local` disk resolves every path against a root
                     (`filesystem.disks.local.root`, default `storage/app`), rejects `..` and
@@ -481,8 +596,14 @@ final class ConventionCards
                     `s3`, `gcs`, `azure` (one package + plugin each, each needing a PSR-18
                     client bound).
 
-                    **`listContents()` throws unconditionally on all three cloud disks** — the
-                    clients have no list operation. Keep your own listing in the database.
+                    **All four drivers can list, as of 4.2** — `LocalFilesystemAdapter` since
+                    3.2, and `s3`/`gcs`/`azure` since the cloud clients gained a listing
+                    operation (`Quiote\Storage\ListableObjectStoreClientInterface`, normalizing
+                    S3's continuation token and GCS/Azure's marker into one `ObjectListing`).
+                    Over the flat cloud key spaces, `listContents()` still presents a `/`-
+                    delimited directory view — one level below the path, pagination folded away
+                    into a single sorted list. `listableDisk()` is still the only way to reach
+                    it: `disk()` returns the base contract regardless of driver.
 
                     Out of scope by design: visibility/ACLs, MIME detection, streaming, copy/move,
                     checksums.
@@ -585,7 +706,7 @@ final class ConventionCards
                     - `openapi:generate` — derive an API spec
                     - `queue:work`, `queue:failed:list|retry|forget` (with `quioteframework/queue`)
                     - `schedule:run` (with `quioteframework/scheduler`)
-                    - `mcp:serve` (with `Quiote\Mcp\McpPlugin`)
+                    - `mcp:serve`, `mcp:warmup` (with `Quiote\Mcp\McpPlugin`)
 
                     ```bash
                     vendor/bin/quiote make:module Blog --with-index

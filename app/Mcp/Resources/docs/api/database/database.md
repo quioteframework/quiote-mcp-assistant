@@ -20,7 +20,7 @@ Database is a base abstraction class that allows you to setup any type of databa
 |---|---|---|
 | `$connection` | `mixed` | _protected._ |
 | `$databaseManager` | `mixed` | _protected._ |
-| `$lastUsedAt` | `?``float` | _protected._ Timestamp (microtime(true)) of the last time this connection was confirmed alive -- either by an actual getConnection() use or by a ping() round trip. |
+| `$lastUsedAt` | `?``float` | _protected._ Monotonic reading ([`ClockInterface::monotonic()`](/api/support/clock/clock-interface/#monotonic)) of the last time this connection was confirmed alive -- either by an actual getConnection() use or by a ping() round trip. |
 | `$resource` | `mixed` | _protected._ |
 
 ## Methods

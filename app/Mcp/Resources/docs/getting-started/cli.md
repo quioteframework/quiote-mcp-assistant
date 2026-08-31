@@ -34,7 +34,7 @@ vendor/bin/quiote --version
 | `cache:warmup` | Compile and cache configuration ahead of time so workers start warm | Yes |
 | `openapi:generate` | Derive an OpenAPI document from routes and validators. See [OpenAPI generation](/advanced/openapi/) | Yes |
 
-Plugin-contributed commands — `queue:work` and `queue:failed:*` from [`quioteframework/queue`](/advanced/queues/), `schedule:run` from [`quioteframework/scheduler`](/advanced/scheduling/), `mcp:*` from [`quioteframework/mcp`](/advanced/mcp-server/) — appear in `list` once their package is installed and the plugin enabled.
+Plugin-contributed commands — `queue:work` and `queue:failed:*` from [`quioteframework/queue`](/advanced/queues/), `schedule:run` from [`quioteframework/scheduler`](/advanced/scheduling/), `mcp:*` from [`quioteframework/mcp`](/advanced/mcp-server/), `cassette:list`/`cassette:show`/`cassette:fetch`/`cassette:prune`/`replay` from [`quioteframework/replay`](/advanced/record-replay/) — appear in `list` once their package is installed and the plugin enabled.
 
 ### Application-aware commands
 

@@ -15,7 +15,7 @@ Shared across providers: the three fields and their parsing are HTTP semantics, 
 |  |  |
 |---|---|
 | Since | `3.2.0` |
-| Source | `Storage/ObjectMetadata.php` |
+| Source | `ObjectMetadata.php` |
 
 ## Properties
 
@@ -51,7 +51,7 @@ Returns `mixed`
 
 Reads the typed fields out of a HEAD (or GET) response's headers.
 
-Each field independently becomes null when its header is absent or unusable: a `Content-Length` that is not all digits, an unparseable `Last-Modified`, an empty `ETag`. The ETag's surrounding quotes are stripped. Nothing throws — a response with none of the three headers yields an all-null instance.
+Each field independently becomes null when its header is absent or unusable: a `Content-Length` that is not all digits, an unparseable `Last-Modified`, an empty `ETag`. Nothing throws — a response with none of the three headers yields an all-null instance.
 
 | Parameter | Type | Description |
 |---|---|---|

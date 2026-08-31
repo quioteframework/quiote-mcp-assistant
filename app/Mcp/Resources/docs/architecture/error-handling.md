@@ -110,6 +110,20 @@ final class BrandedErrorRenderer implements ExceptionRenderer
 
 A renderer must be worker-safe: no `echo`, no `exit`, no superglobals — build and return a PSR-7 response. You can also subclass `SafeRenderer` or `WhoopsRenderer` to tweak one behaviour rather than starting from scratch. The `render()` method receives the mapped status and the correlation id, so a branded 500 page can still surface the id for support.
 
+### Registering a renderer from a plugin
+
+There are two slots, one per side of `core.developer_exceptions`, and a [plugin](/architecture/plugins/) fills either:
+
+```php
+$registrar
+    ->safeExceptionRenderer(static fn() => new BrandedErrorRenderer())        // production
+    ->developerExceptionRenderer(static fn() => new MyDeveloperRenderer());   // development
+```
+
+Both are **set-if-absent**: the first registration wins, which is the same override rule every other plugin seam follows. Nothing registered in a slot means `ErrorHandlingMiddleware` falls back to `SafeRenderer` — including for `core.developer_exceptions = true` when the [`whoops`](/plugins/official-packages/#quioteframeworkwhoops) package isn't installed. The factory is only invoked when a renderer is actually needed, so asking whether one exists never constructs it.
+
+The safe slot is new in 4.1; the developer slot has been there since the Whoops renderer was extracted. Core never hard-references a concrete renderer class either way — that's what the registry exists for.
+
 ## Framework exceptions
 
 The base type is `Quiote\Exception\QuioteException` (extends `\Exception`, and supports string error codes such as PDO SQLSTATEs). The framework throws typed subclasses for its own failure modes — among them `ConfigurationException`, `DatabaseException`, `SecurityException`, `ValidatorException`, `ViewException`, `ClassNotFoundException`, `DisabledModuleException`, and `StorageException`. All flow through the same `ErrorHandlingMiddleware`, so catching one in your own code is optional — anything you don't handle becomes a safe response.

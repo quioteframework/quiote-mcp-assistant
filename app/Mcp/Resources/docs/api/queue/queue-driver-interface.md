@@ -12,7 +12,7 @@ The in-process [`SyncQueueDriver`](/api/queue/sync-queue-driver/) implements onl
 
 |  |  |
 |---|---|
-| Implemented by | [`PollableQueueDriverInterface`](/api/queue/pollable-queue-driver-interface/), [`SyncQueueDriver`](/api/queue/sync-queue-driver/) |
+| Implemented by | [`PollableQueueDriverInterface`](/api/queue/pollable-queue-driver-interface/), [`SyncQueueDriver`](/api/queue/sync-queue-driver/), [`RecordingQueueDriver`](/api/replay/queue/recording-queue-driver/), [`AssertingQueueDriver`](/api/replay/replay/asserting-queue-driver/) |
 | Source | `QueueDriverInterface.php` |
 
 ## Methods
