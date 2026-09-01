@@ -5,48 +5,16 @@
     "license": "MIT",
     "require": {
         "php": ">=8.5",
-        "quioteframework/quiote": "^4.0",
+        "quioteframework/quiote": "dev-main",
         "quioteframework/mcp": "^4.0",
         "quioteframework/csrf": "^4.0",
-        "quioteframework/replay": "*",
-        "quioteframework/replay-azure": "*",
-        "quioteframework/replay-storage": "*",
-        "quioteframework/cloud-azure": "*",
-        "quioteframework/storage": "*",
+        "quioteframework/replay": "dev-main",
+        "quioteframework/replay-azure": "dev-main",
+        "quioteframework/replay-storage": "dev-main",
+        "quioteframework/cloud-azure": "dev-main",
+        "quioteframework/storage": "dev-main",
         "mcp/sdk": "^0.7.0"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote/packages/replay",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote/packages/replay-azure",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote/packages/replay-storage",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote/packages/cloud-azure",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "/home/markus/Projects/quiote/packages/storage",
-            "options": { "symlink": true }
-        }
-    ],
     "autoload": {
         "psr-4": {
             "QuioteMcpAssistant\\": "app/"
