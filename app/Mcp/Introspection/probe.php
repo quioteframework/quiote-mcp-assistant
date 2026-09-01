@@ -223,7 +223,6 @@ try {
         'replay_cassette' => \QuioteMcpAssistant\Mcp\Introspection\Capabilities\ReplayCassette::run(
             $contextName,
             (string) ($options['id'] ?? ''),
-            in_array($options['force'] ?? '0', ['1', 'true'], true),
             isset($options['key']) ? (string) $options['key'] : null,
             isset($options['date']) ? (string) $options['date'] : null,
             isset($options['hour']) ? (string) $options['hour'] : null,

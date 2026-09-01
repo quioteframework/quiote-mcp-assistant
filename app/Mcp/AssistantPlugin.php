@@ -597,7 +597,6 @@ final class AssistantPlugin implements PluginInterface
                     'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
                     'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
                     'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
-                    'force' => ['type' => 'boolean', 'description' => 'Reserved for live replay\'s safe-method guard; an isolated replay performs nothing, so it needs nothing here (default false).'],
                 ],
                 'required' => ['id'],
                 'additionalProperties' => false,

@@ -5,13 +5,13 @@ namespace QuioteMcpAssistant\Mcp\Tools;
 
 use QuioteMcpAssistant\Mcp\Introspection\TargetAppIntrospector;
 
-/** `replay_cassette(id, key?, date?, hour?, force?)` -- re-runs a cassette and returns the response diff + drift report. */
+/** `replay_cassette(id, key?, date?, hour?)` -- re-runs a cassette in isolation and returns the response diff + drift report. */
 final class ReplayCassetteTool
 {
     public function __construct(private readonly TargetAppIntrospector $introspector) {}
 
     /** @return array<string, mixed> */
-    public function replay(string $id, ?string $key = null, ?string $date = null, ?string $hour = null, bool $force = false): array
+    public function replay(string $id, ?string $key = null, ?string $date = null, ?string $hour = null): array
     {
         $args = ['id' => $id];
         if ($key !== null) {
@@ -22,9 +22,6 @@ final class ReplayCassetteTool
         }
         if ($hour !== null) {
             $args['hour'] = $hour;
-        }
-        if ($force) {
-            $args['force'] = '1';
         }
 
         return $this->introspector->run('replay_cassette', $args);

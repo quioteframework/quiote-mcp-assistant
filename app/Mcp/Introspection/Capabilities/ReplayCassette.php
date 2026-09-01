@@ -16,11 +16,11 @@ use Quiote\Support\Compiler\Diagnostic;
  *
  * Always {@see ReplayMode::Isolated}, the engine's default: every ledger-backed subsystem answers
  * from the cassette's own recorded effects and nothing is performed, so this needs no
- * `replay.allow_live` and re-runs a recorded POST as readily as a GET. `$force` is forwarded but
- * only ever consulted by the live path's safe-method guard. Whatever the engine does refuse --
- * a cassette with no replayable request, a database that cannot be isolated -- surfaces as the
- * standard `{"error": "..."}` shape, same as any other capability failure, not a special case
- * here.
+ * `replay.allow_live` and re-runs a recorded POST as readily as a GET. The engine's `$force` is
+ * deliberately not exposed: it only ever feeds the live path's safe-method guard. Whatever the
+ * engine does refuse -- a cassette with no replayable request, a database that cannot be isolated
+ * -- surfaces as the standard `{"error": "..."}` shape, same as any other capability failure, not
+ * a special case here.
  */
 final class ReplayCassette
 {
@@ -28,7 +28,6 @@ final class ReplayCassette
     public static function run(
         string $contextName,
         string $id,
-        bool $force = false,
         ?string $key = null,
         ?string $date = null,
         ?string $hour = null,
@@ -40,7 +39,7 @@ final class ReplayCassette
         $replayContextName = is_string($recordedContext) && $recordedContext !== '' ? $recordedContext : $contextName;
 
         $context = Context::getInstance($replayContextName);
-        $result = (new ReplayEngine())->replay($context, $cassette, $force);
+        $result = (new ReplayEngine())->replay($context, $cassette);
 
         return [
             '_schema_version' => 1,
