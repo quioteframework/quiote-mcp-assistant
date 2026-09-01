@@ -306,9 +306,13 @@ $check('list_db_connections() reports adapter + parameter names only, never valu
 
 $listPluginsText = $byId[20]['result']['content'][0]['text'] ?? '';
 $listPluginsData = json_decode($listPluginsText, true);
-$check('list_plugins() reports both registered plugins',
-    count($listPluginsData['plugins'] ?? []) === 2,
-    'count=' . ($listPluginsData['count'] ?? 0));
+// Every entry in app/Config/plugins.php, by name -- an exact count would only
+// have to be bumped again the next time this app takes on another plugin.
+$pluginNames = array_column($listPluginsData['plugins'] ?? [], 'name');
+$expectedPlugins = ['quiote/mcp', 'quioteframework/replay-azure', 'quioteframework/replay', 'quiote/assistant'];
+$check('list_plugins() reports every plugin this app activates',
+    count(array_intersect($expectedPlugins, $pluginNames)) === count($expectedPlugins),
+    'count=' . ($listPluginsData['count'] ?? 0) . ', names=' . implode(',', $pluginNames));
 
 $listModulesText = $byId[21]['result']['content'][0]['text'] ?? '';
 $listModulesData = json_decode($listModulesText, true);
