@@ -274,7 +274,7 @@ writes nothing until you pass `dry_run=false`; none of them ever overwrite an ex
 | `scaffold_action(module, action, verbs?, formats?, dry_run?)` | New action + view + template(s), with a `#[Route]` attribute. `verbs` is one or more of `read`/`write`/`update`/`remove`. `formats` (default `["html"]`) is one or more output types the view should serve, e.g. `["html", "json"]` — each gets its own `execute<Format>()` method; a format not yet declared in `Config/output_types.xml` is reported back as a ready-to-paste snippet. |
 | `scaffold_plugin(name, dry_run?)` | New plugin class. Never auto-registers it in `Config/settings.*` — the response tells you the one line to add. |
 | `scaffold_db_connection(name, driver?, dry_run?)` | New `Config/databases.xml` if one doesn't exist yet, otherwise a ready-to-paste snippet. `driver` is one of `pdo`/`eloquent`/`doctrine`/`doctrine_dbal`/`cycle`. |
-| `run_console(command, args?)` | Runs one of the target app's own console commands, restricted to a non-destructive whitelist (`about`, `routes:list`, `cache:warmup`); unlisted commands or options are refused. |
+| `run_console(command, args?)` | Runs one of the target app's own console commands, restricted to a non-destructive whitelist (`about`, `routes:list`, `plugins:list`, `middleware:list`, `cache:warmup`); unlisted commands or options are refused. |
 
 ### Prompts
 

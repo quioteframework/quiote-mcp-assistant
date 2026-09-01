@@ -46,6 +46,7 @@ A few packages break the pattern — worth knowing before you go looking for a m
 | `quioteframework/mcp` | Expose the app as an MCP server | `mcp/sdk` |
 | `quioteframework/telemetry-otel` | OpenTelemetry tracing + metrics export | `open-telemetry/*` |
 | `quioteframework/telemetry-dashboard` | A terminal OTLP dashboard (`telemetry:dashboard`) | `symfony/tui` |
+| `quioteframework/exception-notifier` | Teams / webhook notifications on caught exceptions | — |
 | `quioteframework/db-eloquent` | Eloquent database adapter | `illuminate/database` |
 | `quioteframework/db-doctrine` | Doctrine ORM + DBAL adapters | `doctrine/orm`, `doctrine/dbal` |
 | `quioteframework/db-cycle` | Cycle ORM adapter | `cycle/orm`, `cycle/database` |
@@ -399,6 +400,121 @@ A standalone terminal UI that receives OTLP and visualizes traces/metrics live �
 composer require quioteframework/telemetry-dashboard
 php bin/quiote telemetry:dashboard
 ```
+
+## Alerting
+
+### `quioteframework/exception-notifier`
+
+Sends a notification — a Microsoft Teams Adaptive Card, a generic JSON webhook, or both — when the framework catches and renders an exception. Listens on `ExceptionCaughtEvent`, the same event `ErrorHandlingMiddleware` already emits for every caught exception (see [Error handling](/architecture/error-handling/)). `Quiote\ExceptionNotifier\ExceptionNotifierPlugin` registers the `teams`/`webhook` channel driver aliases and the listener that fans a caught exception out to them. Opt-in, like `whoops`: `exception_notifier.enabled` defaults to `false` — sending exception details to a channel an app hasn't configured is not a safe default.
+
+```bash
+composer require quioteframework/exception-notifier
+```
+
+#### PHP
+
+```php
+// Config/plugins.php
+return [
+    ['class' => \Quiote\ExceptionNotifier\ExceptionNotifierPlugin::class, 'enabled' => true],
+];
+```
+
+#### YAML
+
+```yaml
+# Config/plugins.yaml
+- class: Quiote\ExceptionNotifier\ExceptionNotifierPlugin
+  enabled: true
+```
+
+#### XML
+
+```xml
+<!-- Config/plugins.xml -->
+<ae:configurations xmlns:ae="http://quiote.dev/quiote/config/global/envelope/1.1"
+                    xmlns="http://quiote.dev/quiote/config/parts/plugins/1.1">
+    <ae:configuration>
+        <plugin class="Quiote\ExceptionNotifier\ExceptionNotifierPlugin" />
+    </ae:configuration>
+</ae:configurations>
+```
+
+Then turn it on and configure at least one channel:
+
+```php
+// Config/settings.php
+return [
+    'exception_notifier.enabled' => true,
+    'exception_notifier.channels' => [
+        ['driver' => 'teams', 'name' => 'teams-ops', 'webhook_url' => 'https://<power-automate-or-teams-webhook-url>'],
+    ],
+];
+```
+
+The same structure in YAML:
+
+```yaml
+# Config/settings.yaml
+exception_notifier:
+  enabled: true
+  channels:
+    - driver: teams
+      name: teams-ops
+      webhook_url: 'https://<power-automate-or-teams-webhook-url>'
+```
+
+| Key | Default | Meaning |
+|---|---|---|
+| `exception_notifier.enabled` | `false` | Master switch. |
+| `exception_notifier.min_status` | `500` | Only notify for exceptions mapped to this HTTP status or higher. |
+| `exception_notifier.throttle_seconds` | `60` | Suppress a repeat notification for the same exception class + message within this window. `0` disables throttling. |
+| `exception_notifier.ignore` | `[]` | Exception class names to never notify for — subclasses included. |
+| `exception_notifier.channels` | `[]` | List of channel configs, each an array with at least `driver` and `webhook_url`. |
+
+The status an exception maps to for `min_status` comes from `ExceptionStatusMapper`, which mirrors `ErrorHandlingMiddleware`'s own mapping so the filter sees the same status a client actually received: `InvalidArgumentException` → 400, `DomainException` → 422, everything else (including your own application exceptions, unless they extend one of those two) → 500. With the `500` default, a plain `RuntimeException` or a custom exception class already clears the bar; only exceptions that map to 400 or 422 need `min_status` lowered to be notified.
+
+#### Channel drivers
+
+**`teams`** posts an Adaptive Card (schema 1.4) to a Teams incoming webhook or Power Automate workflow URL — the format Microsoft currently recommends; the older MessageCard/O365 connector card format is deprecated. The card shows the exception class, its message, a fact set (status, request method + URI, correlation ID if the request carried a `Correlation-Id` or `X-Correlation-ID` header, and a UTC timestamp), and the first five stack trace frames.
+
+**`webhook`** posts a flat JSON body to any URL: `exception_class`, `message`, `status`, `correlation_id`, `request_method`, `request_uri`, `timestamp`, and `trace` (the stack trace, one frame per array entry). It also accepts a `headers` map in its channel config for things like an API key header. It's also the reference implementation to copy when writing a custom channel.
+
+| Channel config key | Applies to | Meaning |
+|---|---|---|
+| `driver` | both | `teams` or `webhook` (or a custom alias — see below). |
+| `webhook_url` | both | Required. Where the notification is posted. |
+| `name` | both | Optional label, used in the underlying HTTP client name and in failure log messages. Defaults to the driver name. |
+| `enabled` | both | Optional, default `true`. Set `false` to disable one channel entry without deleting its config. |
+| `headers` | `webhook` | Optional map of extra HTTP headers to send with the request, e.g. an API key. |
+
+Both drivers go through the shared [HTTP client](/basics/http-client/) stack (`HttpClientFactory`), retrying the POST twice, and treat any non-2xx response as a failure.
+
+#### Failure isolation
+
+If a channel throws — a bad `webhook_url`, a network failure, a non-2xx response — `ExceptionNotificationListener` catches it, logs a warning under the `Quiote.ExceptionNotifier.ExceptionNotificationListener` category (see [Logging](/architecture/logging/)), and moves on to the next configured channel. A broken Teams webhook never stops the `webhook` channel from firing, and a notifier failure never becomes a second, notifier-caused exception.
+
+#### Extending with a custom channel
+
+Implement `NotifierChannelInterface` (a `notify()` method) and `NotifierChannelFactoryInterface` (a static `fromChannelConfig()` factory), then register the class under a driver alias — from your own plugin's `register()`, no change to this package required:
+
+```php
+ExceptionNotifierChannelRegistry::register('slack', SlackNotifierChannel::class);
+```
+
+`ExceptionNotifierChannelRegistry::instantiate()` is what `ExceptionNotificationListener` calls per channel config entry; an unregistered `driver` value, or a class that doesn't implement both interfaces, raises a `RuntimeException` at notify time (caught and logged the same as any other channel failure, not surfaced to the user).
+
+#### Verifying it's working
+
+There's no `exception-notifier:test` console command — confirm delivery by causing one real notification end to end:
+
+1. Point `webhook_url` at something you can watch immediately: a Teams channel you have open, or a throwaway inspector URL (e.g. from webhook.site) for the `webhook` driver.
+2. Temporarily set `exception_notifier.throttle_seconds` to `0` so a repeated test doesn't get suppressed as a duplicate.
+3. Trigger a real caught exception through an actual request — e.g. an action that does `throw new \RuntimeException('exception-notifier test')` — rather than instantiating a channel and calling `notify()` directly, since `ExceptionCaughtEvent` only fires from `ErrorHandlingMiddleware`'s catch path.
+4. Check the destination: the Adaptive Card in Teams, or the JSON body received at the webhook URL.
+5. If nothing arrives, check the application log for `[ExceptionNotifier] channel "<name>" (driver "<driver>") failed to deliver a notification for ...` — channel failures are logged, not thrown, so a silent no-op almost always means a warning is sitting in the log rather than the listener never having run.
+
+Once delivery is confirmed, put `throttle_seconds` back to its intended production value.
 
 ## Database adapters
 

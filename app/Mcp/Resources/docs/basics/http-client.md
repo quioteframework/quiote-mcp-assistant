@@ -78,12 +78,33 @@ See [The DI container](/architecture/container/) for injection. From a [plugin](
 
 ## Transports
 
-A "transport" is any PSR-18 `ClientInterface`. Two are available out of the box:
+A "transport" is any PSR-18 `ClientInterface` — `HttpClient` doesn't talk to a socket itself, it delegates `sendRequest()` to whatever transport it was built with, and layers headers, retry and telemetry on top. Two transports are available out of the box:
 
 - **`CurlTransport`** — the zero-dependency default; builds PSR-7 responses via Nyholm and maps curl connection/timeout failures to the PSR-18 network/request exceptions.
-- **Guzzle** — used automatically if `guzzlehttp/guzzle` is installed (it already implements PSR-18); no adapter needed.
+- **Guzzle** — used automatically if `guzzlehttp/guzzle` is installed (it already implements PSR-18 itself); no adapter needed.
 
-`TransportFactory::default()` returns Guzzle if present, else curl. Override per client with `HttpClientConfig::transport()`, or globally with `HttpClientFactory::setDefaultTransportFactory()`.
+`TransportFactory::default()` decides between them: Guzzle if `GuzzleHttp\Client` exists, otherwise `CurlTransport`. That means **the swap already happens automatically** — running `composer require guzzlehttp/guzzle` is enough on its own to move every client built without an explicit transport onto Guzzle, no code change required. `CurlTransport` exists so the framework carries no HTTP dependency by default; Guzzle buys connection pooling, HTTP/2, a PSR-7 middleware stack and `MockHandler`-based testing, at the cost of pulling in the package.
+
+Retry (`HttpClientConfig::retry()`) lives in `HttpClient` itself, above whichever transport is underneath, so it behaves identically regardless of which one is active — there's no separate retry implementation to keep in sync between the curl and Guzzle paths.
+
+Any other PSR-18 client works too, not just Guzzle — a Symfony HttpClient PSR-18 bridge, a test double, a client that signs requests for a specific API. Override the transport in two places:
+
+**Per named client**, via `HttpClientConfig::transport()`:
+
+```php
+$factory->configure('github', function (HttpClientConfig $c): void {
+    $c->baseUri('https://api.github.com')
+      ->transport(new \GuzzleHttp\Client(['timeout' => 5]));
+});
+```
+
+**Process-wide**, via `HttpClientFactory::setDefaultTransportFactory()` — every client built afterwards without its own `->transport()` call uses it, which is the one already-memoized clients don't retroactively pick up:
+
+```php
+$factory->setDefaultTransportFactory(fn() => new \GuzzleHttp\Client(['timeout' => 5]));
+```
+
+A configured `HttpClientConfig::transport()` always wins over the default factory — `HttpClientFactory::build()` applies the default first, then runs the named client's own configurator over it, so a per-client override is the last word.
 
 ## Trace propagation
 

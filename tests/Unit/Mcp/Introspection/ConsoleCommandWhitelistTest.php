@@ -13,13 +13,35 @@ final class ConsoleCommandWhitelistTest extends TestCase
     #[Test]
     public function commandsListsTheKnownAllowlist(): void
     {
-        self::assertSame(['about', 'routes:list', 'cache:warmup'], ConsoleCommandWhitelist::commands());
+        self::assertSame(
+            ['about', 'routes:list', 'plugins:list', 'middleware:list', 'cache:warmup'],
+            ConsoleCommandWhitelist::commands()
+        );
     }
 
     #[Test]
     public function isAllowedAcceptsWhitelistedCommands(): void
     {
         self::assertTrue(ConsoleCommandWhitelist::isAllowed('routes:list'));
+    }
+
+    #[Test]
+    public function isAllowedAcceptsPluginsAndMiddlewareList(): void
+    {
+        self::assertTrue(ConsoleCommandWhitelist::isAllowed('plugins:list'));
+        self::assertTrue(ConsoleCommandWhitelist::isAllowed('middleware:list'));
+    }
+
+    #[Test]
+    public function toArgvBuildsAFlagOnlyForPluginsAndMiddlewareList(): void
+    {
+        [$argv, $rejected] = ConsoleCommandWhitelist::toArgv('plugins:list', ['json' => true]);
+        self::assertSame(['--json'], $argv);
+        self::assertSame([], $rejected);
+
+        [$argv, $rejected] = ConsoleCommandWhitelist::toArgv('middleware:list', ['json' => true]);
+        self::assertSame(['--json'], $argv);
+        self::assertSame([], $rejected);
     }
 
     #[Test]

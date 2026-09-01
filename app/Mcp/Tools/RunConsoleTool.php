@@ -9,8 +9,8 @@ use QuioteMcpAssistant\Mcp\Introspection\ConsoleRunner;
 /**
  * `run_console(command, args?)` -- a whitelisted, non-destructive subset of
  * the target app's own console commands: `about`, `routes:list`,
- * `cache:warmup`. Never migrations/deletes; unlisted commands and unlisted
- * options are refused, not silently dropped.
+ * `plugins:list`, `middleware:list`, `cache:warmup`. Never migrations/deletes;
+ * unlisted commands and unlisted options are refused, not silently dropped.
  */
 final class RunConsoleTool
 {

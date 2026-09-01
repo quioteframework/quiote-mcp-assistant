@@ -701,7 +701,7 @@ final class ConventionCards
                     - `make:module`, `make:action`, `make:middleware`, `make:job` — scaffold
                       **inside** an existing app; all take `--force`/`-f` and validate names as
                       PHP class-name segments before writing
-                    - `routes:list`, `about` — inspect
+                    - `routes:list`, `plugins:list`, `middleware:list`, `about` — inspect
                     - `routes:compile`, `cache:warmup` — compile caches ahead of time
                     - `openapi:generate` — derive an API spec
                     - `queue:work`, `queue:failed:list|retry|forget` (with `quioteframework/queue`)

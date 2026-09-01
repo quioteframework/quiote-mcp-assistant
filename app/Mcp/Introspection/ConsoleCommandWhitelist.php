@@ -20,6 +20,8 @@ final class ConsoleCommandWhitelist
     private const COMMANDS = [
         'about' => ['flags' => [], 'valued' => []],
         'routes:list' => ['flags' => ['json'], 'valued' => ['context', 'module', 'action', 'sort']],
+        'plugins:list' => ['flags' => ['json'], 'valued' => []],
+        'middleware:list' => ['flags' => ['json'], 'valued' => []],
         'cache:warmup' => ['flags' => ['check'], 'valued' => ['context']],
     ];
 

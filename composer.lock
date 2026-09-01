@@ -1530,12 +1530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/cloud-azure.git",
-                "reference": "ae5c40dd96b367cfc60b6b1b260ffbebf9cec071"
+                "reference": "bd12d59cb88043ebd853f13d1ba49bd50f7b8d9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/cloud-azure/zipball/ae5c40dd96b367cfc60b6b1b260ffbebf9cec071",
-                "reference": "ae5c40dd96b367cfc60b6b1b260ffbebf9cec071",
+                "url": "https://api.github.com/repos/quioteframework/cloud-azure/zipball/bd12d59cb88043ebd853f13d1ba49bd50f7b8d9a",
+                "reference": "bd12d59cb88043ebd853f13d1ba49bd50f7b8d9a",
                 "shasum": ""
             },
             "require": {
@@ -1550,7 +1550,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.2.x-dev"
                 },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/cloud-azure/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
@@ -1582,7 +1582,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/cloud-azure/tree/main"
             },
-            "time": "2026-08-20T09:04:41+00:00"
+            "time": "2026-09-01T06:06:51+00:00"
         },
         {
             "name": "quioteframework/csrf",
@@ -1702,12 +1702,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/quiote.git",
-                "reference": "79d05e024aa851f7edc5b3d6d8edd192ef9ab012"
+                "reference": "b495cbc2a1a782a884a6bcd513c1fc7424d8cb89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/79d05e024aa851f7edc5b3d6d8edd192ef9ab012",
-                "reference": "79d05e024aa851f7edc5b3d6d8edd192ef9ab012",
+                "url": "https://api.github.com/repos/quioteframework/quiote/zipball/b495cbc2a1a782a884a6bcd513c1fc7424d8cb89",
+                "reference": "b495cbc2a1a782a884a6bcd513c1fc7424d8cb89",
                 "shasum": ""
             },
             "require": {
@@ -1858,7 +1858,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.4.x-dev"
                 }
             },
             "autoload": {
@@ -1897,7 +1897,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/quiote/tree/main"
             },
-            "time": "2026-08-31T11:03:45+00:00"
+            "time": "2026-09-01T08:51:50+00:00"
         },
         {
             "name": "quioteframework/replay",
@@ -1905,12 +1905,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/replay.git",
-                "reference": "ea75098e1b0eaff660b090bef98a0a6bec87faf5"
+                "reference": "c53a3b818688dc94e18088646ae7d55eb48a2589"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/replay/zipball/ea75098e1b0eaff660b090bef98a0a6bec87faf5",
-                "reference": "ea75098e1b0eaff660b090bef98a0a6bec87faf5",
+                "url": "https://api.github.com/repos/quioteframework/replay/zipball/c53a3b818688dc94e18088646ae7d55eb48a2589",
+                "reference": "c53a3b818688dc94e18088646ae7d55eb48a2589",
                 "shasum": ""
             },
             "require": {
@@ -1927,7 +1927,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.2.x-dev"
                 },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
@@ -1959,7 +1959,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/replay/tree/main"
             },
-            "time": "2026-08-31T11:03:45+00:00"
+            "time": "2026-09-01T06:06:51+00:00"
         },
         {
             "name": "quioteframework/replay-azure",
@@ -1967,12 +1967,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/replay-azure.git",
-                "reference": "771748fd24f90b33b7c72d3ef71c57a44c2480dd"
+                "reference": "5db1e7bb879c0667532098934c9bc8618c9a5185"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/replay-azure/zipball/771748fd24f90b33b7c72d3ef71c57a44c2480dd",
-                "reference": "771748fd24f90b33b7c72d3ef71c57a44c2480dd",
+                "url": "https://api.github.com/repos/quioteframework/replay-azure/zipball/5db1e7bb879c0667532098934c9bc8618c9a5185",
+                "reference": "5db1e7bb879c0667532098934c9bc8618c9a5185",
                 "shasum": ""
             },
             "require": {
@@ -1986,7 +1986,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.1.x-dev"
                 },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay-azure/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
@@ -2018,7 +2018,7 @@
                 "issues": "https://github.com/quioteframework/quiote/issues",
                 "source": "https://github.com/quioteframework/replay-azure/tree/main"
             },
-            "time": "2026-08-31T11:03:45+00:00"
+            "time": "2026-09-01T06:06:51+00:00"
         },
         {
             "name": "quioteframework/replay-storage",
@@ -2026,12 +2026,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/replay-storage.git",
-                "reference": "5c8a05f5d33459b72b34f1b69a73314223e66b8f"
+                "reference": "4ea0079537fe2901d4710e783294f15013d78afe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/replay-storage/zipball/5c8a05f5d33459b72b34f1b69a73314223e66b8f",
-                "reference": "5c8a05f5d33459b72b34f1b69a73314223e66b8f",
+                "url": "https://api.github.com/repos/quioteframework/replay-storage/zipball/4ea0079537fe2901d4710e783294f15013d78afe",
+                "reference": "4ea0079537fe2901d4710e783294f15013d78afe",
                 "shasum": ""
             },
             "require": {
@@ -2044,7 +2044,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.1.x-dev"
                 },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/replay-storage/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
@@ -2074,9 +2074,9 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/replay-storage/tree/v4.0.0-RC1"
+                "source": "https://github.com/quioteframework/replay-storage/tree/main"
             },
-            "time": "2026-08-19T20:26:41+00:00"
+            "time": "2026-09-01T06:06:51+00:00"
         },
         {
             "name": "quioteframework/storage",
@@ -2084,12 +2084,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/quioteframework/storage.git",
-                "reference": "ceb9f2ed232a36bc74a22a9eaf2fea93a89f1932"
+                "reference": "0f41790cfbb1e7ba6e58eeef0b62df0b8e3bcca1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/quioteframework/storage/zipball/ceb9f2ed232a36bc74a22a9eaf2fea93a89f1932",
-                "reference": "ceb9f2ed232a36bc74a22a9eaf2fea93a89f1932",
+                "url": "https://api.github.com/repos/quioteframework/storage/zipball/0f41790cfbb1e7ba6e58eeef0b62df0b8e3bcca1",
+                "reference": "0f41790cfbb1e7ba6e58eeef0b62df0b8e3bcca1",
                 "shasum": ""
             },
             "require": {
@@ -2100,7 +2100,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.0.x-dev"
+                    "dev-main": "4.1.x-dev"
                 },
                 "quiote-monorepo-note": "Developed in-tree under quioteframework/quiote's packages/storage/; split to this standalone repo via splitsh/lite on tag push. PRs go to the monorepo, not here."
             },
@@ -2129,9 +2129,9 @@
             ],
             "support": {
                 "issues": "https://github.com/quioteframework/quiote/issues",
-                "source": "https://github.com/quioteframework/storage/tree/v4.0.0"
+                "source": "https://github.com/quioteframework/storage/tree/main"
             },
-            "time": "2026-08-20T06:54:22+00:00"
+            "time": "2026-09-01T06:06:51+00:00"
         },
         {
             "name": "relay/relay",
