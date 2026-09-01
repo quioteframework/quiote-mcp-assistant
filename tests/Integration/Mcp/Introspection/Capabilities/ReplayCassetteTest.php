@@ -10,7 +10,6 @@ use Quiote\Config\Config;
 use Quiote\Replay\Cassette\Cassette;
 use Quiote\Replay\Cassette\CassetteCodec;
 use Quiote\Replay\Cassette\CassetteId;
-use Quiote\Replay\Replay\ReplayException;
 use Quiote\Replay\Store\FileCassetteStore;
 use QuioteMcpAssistant\Mcp\Introspection\Capabilities\ReplayCassette;
 use RuntimeException;
@@ -61,20 +60,28 @@ final class ReplayCassetteTest extends TestCase
         $this->seededId = $rawId;
     }
 
+    /**
+     * `replay.allow_live` gates live replay only, and {@see ReplayCassette} never asks for it: an
+     * isolated replay answers every ledger-backed subsystem from the cassette's own recorded
+     * effects and performs nothing, so there is nothing for the setting to protect against.
+     */
     #[Test]
-    public function refusesToRunWhenAllowLiveIsFalse(): void
+    public function replaysInIsolationEvenWhenAllowLiveIsFalse(): void
     {
         Config::set('replay.allow_live', false, true, false);
-        $this->seed('RC-NOTALLOWED');
+        $this->seed('RC-NOTALLOWED', status: 999);
 
-        $this->expectException(ReplayException::class);
-        ReplayCassette::run('web', 'RC-NOTALLOWED');
+        $result = ReplayCassette::run('web', 'RC-NOTALLOWED');
+
+        self::assertSame('RC-NOTALLOWED', $result['id']);
+        self::assertIsInt($result['replayed_status']);
+        self::assertSame(999, $result['recorded_status']);
+        self::assertFalse($result['clean']);
     }
 
     #[Test]
     public function reportsDriftAgainstADeliberatelyWrongRecordedStatus(): void
     {
-        Config::set('replay.allow_live', true, true, false);
         $this->seed('RC-DRIFT', status: 999);
 
         $result = ReplayCassette::run('web', 'RC-DRIFT');
@@ -89,8 +96,6 @@ final class ReplayCassetteTest extends TestCase
     #[Test]
     public function unresolvableIdThrows(): void
     {
-        Config::set('replay.allow_live', true, true, false);
-
         $this->expectException(RuntimeException::class);
         ReplayCassette::run('web', 'does-not-exist-either');
     }

@@ -15,10 +15,10 @@ use QuioteMcpAssistant\Mcp\Introspection\TargetAppIntrospector;
 use QuioteMcpAssistant\Mcp\Tools\ReplayCassetteTool;
 
 /**
- * The target app's own Config/settings.php leaves replay.allow_live at its false default (no live
- * traffic is ever recorded here) -- the subprocess re-bootstraps from that file fresh each time, so
- * this only exercises (and can only exercise) the refusal path; ReplayCassetteTest covers a real
- * replay in-process with allow_live overridden for the test.
+ * Replay is isolated by default -- it performs nothing and is gated on nothing -- so the subprocess
+ * re-bootstrapping the target app's own Config/settings.php fresh each time is enough to run a real
+ * replay end to end: this covers the whole passthrough round-trip, cassette in and drift report out,
+ * plus the `{"error": "..."}` shape a failure inside the subprocess comes back as.
  */
 final class ReplayCassetteToolTest extends TestCase
 {
@@ -41,7 +41,7 @@ final class ReplayCassetteToolTest extends TestCase
     }
 
     #[Test]
-    public function refusalSurfacesAsTheStandardErrorShape(): void
+    public function replaysThroughTheSubprocessAndReturnsTheDriftReport(): void
     {
         $store = new FileCassetteStore(Config::getString('replay.store.path'));
         $cassette = new Cassette(
@@ -62,8 +62,23 @@ final class ReplayCassetteToolTest extends TestCase
         $tool = new ReplayCassetteTool(new TargetAppIntrospector());
         $result = $tool->replay('RCT-AAA');
 
+        self::assertArrayNotHasKey('error', $result);
+        self::assertSame('RCT-AAA', $result['id']);
+        self::assertIsString($result['source']);
+        self::assertSame(200, $result['replayed_status']);
+        self::assertSame(200, $result['recorded_status']);
+        self::assertTrue($result['clean']);
+        self::assertSame([], $result['diagnostics']);
+    }
+
+    #[Test]
+    public function failureInsideTheSubprocessSurfacesAsTheStandardErrorShape(): void
+    {
+        $tool = new ReplayCassetteTool(new TargetAppIntrospector());
+        $result = $tool->replay('RCT-NOSUCHCASSETTE');
+
         self::assertArrayHasKey('error', $result);
         self::assertIsString($result['error']);
-        self::assertStringContainsString('allow_live', $result['error']);
+        self::assertStringContainsString('RCT-NOSUCHCASSETTE', $result['error']);
     }
 }

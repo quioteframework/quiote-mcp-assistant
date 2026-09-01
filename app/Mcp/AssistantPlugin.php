@@ -585,9 +585,11 @@ final class AssistantPlugin implements PluginInterface
             name: 'replay_cassette',
             description: 'Re-runs a recorded cassette against the target app\'s real pipeline and '
                 . 'reports the response diff + drift report -- confirming a production failure '
-                . 'reproduces locally, in isolation. Refuses to run unless the target app has '
-                . 'replay.allow_live=true, and refuses a non-idempotent recorded method (e.g. POST) '
-                . 'unless force=true.',
+                . 'reproduces locally. Always replays in isolation: every ledger-backed subsystem '
+                . 'answers from the cassette\'s own recorded effects and nothing is performed, so '
+                . 'this needs no replay.allow_live and re-runs a recorded POST as readily as a GET. '
+                . 'It does refuse a cassette with no replayable request, or a database that cannot '
+                . 'be isolated.',
             inputSchema: [
                 'type' => 'object',
                 'properties' => [
@@ -595,7 +597,7 @@ final class AssistantPlugin implements PluginInterface
                     'key' => ['type' => 'string', 'description' => 'An exact store key pasted from a pointer log line, bypassing id-based resolution.'],
                     'date' => ['type' => 'string', 'description' => 'A YYYY-MM-DD hint narrowing a prefix scan to one day.'],
                     'hour' => ['type' => 'string', 'description' => 'An 00-23 hint narrowing a prefix scan to one hour of "date".'],
-                    'force' => ['type' => 'boolean', 'description' => 'Allow replaying a non-idempotent (e.g. POST) request (default false).'],
+                    'force' => ['type' => 'boolean', 'description' => 'Reserved for live replay\'s safe-method guard; an isolated replay performs nothing, so it needs nothing here (default false).'],
                 ],
                 'required' => ['id'],
                 'additionalProperties' => false,

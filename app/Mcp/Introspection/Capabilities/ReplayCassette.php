@@ -5,15 +5,22 @@ namespace QuioteMcpAssistant\Mcp\Introspection\Capabilities;
 
 use Quiote\Context;
 use Quiote\Replay\Replay\ReplayEngine;
+use Quiote\Replay\Replay\ReplayMode;
 use Quiote\Support\Compiler\Diagnostic;
 
 /**
  * `replay_cassette(id, ...)` -- resolves the cassette (see {@see CassetteResolution}) and re-runs
  * it against the target app's real pipeline via {@see ReplayEngine}, returning the response diff
  * and drift report. Replays against the cassette's own recorded context when it has one, else
- * `contextName`. `ReplayEngine` itself enforces `replay.allow_live`/the non-idempotent-method
- * guard -- refusing either surfaces as the standard `{"error": "..."}` shape, same as any other
- * capability failure, not a special case here.
+ * `contextName`.
+ *
+ * Always {@see ReplayMode::Isolated}, the engine's default: every ledger-backed subsystem answers
+ * from the cassette's own recorded effects and nothing is performed, so this needs no
+ * `replay.allow_live` and re-runs a recorded POST as readily as a GET. `$force` is forwarded but
+ * only ever consulted by the live path's safe-method guard. Whatever the engine does refuse --
+ * a cassette with no replayable request, a database that cannot be isolated -- surfaces as the
+ * standard `{"error": "..."}` shape, same as any other capability failure, not a special case
+ * here.
  */
 final class ReplayCassette
 {
